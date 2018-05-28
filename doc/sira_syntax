@@ -1,0 +1,105 @@
+# rules:
+#     line comment: #
+#     extentable field: <...>
+#     required field: {...}
+#     optional field: [...]
+#     repeatable field: [sth...]
+#     dynamic field: %...
+#     or operator: |
+#     extent operator: ::=
+#     target function: =>
+
+<cmd> ::= sira [<option>] [<command>]
+
+<option> ::= --help               # print user manual
+           | --man                # print user manual
+
+<command> ::= close {%issue_name | %issue_id}
+            | issue [%issue_name | %issue_id [close]]
+            | ?issue [<search_option>] [<display_option>] [<sort_option>]
+            | login [%user_name]
+            | logout
+
+<search_option> ::= ?{<search_literals>} [<search_option>]
+                  | ??{<search_rule>} [<search_option>]
+
+<search_literals> ::= <search_literal>[<search_literals>]
+
+<search_literal> ::= a            # show all issues
+                   | b            # show bugs
+                   | c            # show recently created issues
+                   | d            # show done issues
+                   | e            # show epics
+                   | i            # show in-progress issues
+                   | O            # show open issues (default)
+                   | o            # show my open issues
+                   | R            # show reported by me issues
+                   | r            # show recently resolved issues
+                   | s            # show stories
+                   | T            # show tasks
+                   | t            # show to-do issues
+                   | u            # show recently updated issues
+                   | v            # show recently viewed issues
+
+<search_rule> ::= all             # show all issues
+                | bug             # show bugs
+                | recent-create   # show recently created issues
+                | done            # show done issues
+                | epic            # show epics
+                | in-progress     # show in-progress issues
+                | open            # show open issues (default)
+                | my-open         # show my open issues
+                | report-me       # show reported by me issues
+                | recent-resolve  # show recently resolved issues
+                | story           # show stroies
+                | task            # show tasks
+                | to-do           # show to-do issues
+                | recent-update   # show recently updated issues
+                | recent-view     # show recently viewed issues
+
+<display_option> ::= -{<display_literals>} [<display_option>]
+                   | --{<display_rule>} [<display_option>]
+
+<display_literals> ::= <display_literal>[<display_literals>]
+
+<display_literal> ::= A           # display all information
+                    | a           # display assignee
+                    | d           # default, including task number and title
+                    | f           # display fix version
+                    | n           # display sprint number
+                    | s           # display status
+                    | T           # display in a table
+                    | t           # display type
+
+<display_rule> ::= all            # display all information
+                 | assignee       # display assignee
+                 | default        # default, including task number and title
+                 | fix-version    # display fix version
+                 | sprint-number  # display sprint number
+                 | status         # display status
+                 | table          # display in a table
+                 | type           # display type
+
+<sort_option> ::= alphabet        # sort alphabetically
+                | asce-issue-id   # sort by increasing issue id
+                | asce-priority   # sort by increasing priority
+                | asce-sprint     # sort by increasing sprint number
+                | chron           # sort chronologically
+                | desc-issue-id   # sort by descending issue id
+                | desc-priority   # sort by descending priority
+                | desc-sprint     # sort by descending sprint number
+                | rev-alphabet    # sort analphabetically
+                | rev-chron       # sort reverse-chronologically
+                | status          # sort by status
+                | a               # = alphabet
+                | ai              # = asce-issue-id
+                | ap              # = asce-priority
+                | as              # = asce-sprint
+                | c               # = chron
+                | di              # = desc-issue-id
+                | dp              # = desc-priority
+                | ds              # = desc-sprint
+                | ra              # = rev-alphabet
+                | rc              # = rev-chron
+                | s               # = status
+                

@@ -16,9 +16,26 @@ class Node:
         self.is_extentable = is_extentable
         self.children = dict()
 
-    def add_child(self, child: Node = None):
-        key = child.keyword
-        if key not in self.children.keys():
-            self.children[key] = child
-        else:
-            raise ValueError("Identity keyword {} under {}".format                               (child.keyword, self.keyword))
+    def add_child(self, child: Node):
+        assert child is not None, "None child is not allowed"
+        existence = child.keyword in self.children.keys()
+        error_msg = "Identity keyword {} under {}".format(child.keyword, 
+                                                           self.keyword)
+        assert not existence, error_msg
+
+        self.children[child.keyword] = child
+        child.parent = self
+        return False
+
+    def del_child(self, child: Node):
+        assert child is not None, "None child is not allowed"
+        existence = child.keyword in self.children.keys()
+        error_msg = "{} does not exist".format(child.keyword)
+        assert existence, error_msg
+
+        self.children.pop(child.keyword)
+        child.parent = None
+        return True
+    
+    def set_tgt(self, func: FunctionType = error_func):
+        pass

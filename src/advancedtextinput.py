@@ -46,7 +46,7 @@ class AdvancedTextInput(TextInput):
         elif internal_action == 'backspace':
             self.do_backspace()
         elif internal_action == 'enter':
-            self.dispatch('on_enter')
+            self.dispatch('on_text_validate')
         elif internal_action == 'escape':
             self.focus = False
         if internal_action != 'escape':

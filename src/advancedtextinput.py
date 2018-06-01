@@ -1,9 +1,9 @@
 from kivy.uix.textinput import TextInput
 
-class MyTextInput(TextInput):
+class AdvancedTextInput(TextInput):
 
     def __init__(self, **kwargs):
-        super(MyTextInput, self).__init__(**kwargs)
+        super(AdvancedTextInput, self).__init__(**kwargs)
 
     def _key_down(self, key, repeat=False):
         displayed_str, internal_str, internal_action, scale = key

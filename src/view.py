@@ -1,13 +1,7 @@
 from kivy.app import App
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
-from mytextinput import MyTextInput
-
-# class commandText(TextInput):
-
-#     def __init__(self, **kwargs):
-#         super(commandText, self).__init__(**kwargs)
-
+from advancedtextinput import AdvancedTextInput
 
 class DemoApp(App):
 
@@ -18,14 +12,12 @@ class DemoApp(App):
         self.controller = controller
 
     def on_command(self, instance):
-        self.controller.processInput(instance.text[instance.text.rindex('>') + 1:])
-
-    # def on_focus(self, instance, value):
-    #     instance.focus = True
+        self.controller.processInput(
+            instance.text[instance.text.rindex('>') + 1:])
 
     def build(self):
 
-        self.commandText = MyTextInput()
+        self.commandText = AdvancedTextInput()
         self.commandText.text = ">"
         # self.commandText.multiline = False
         self.commandText.background_color = [0, 0, 0, 1]

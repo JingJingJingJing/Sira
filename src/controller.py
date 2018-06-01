@@ -1,6 +1,6 @@
 
 
-class DemoController():
+class SiraController():
 
     def __init__(self, view, model):
         self.view = view

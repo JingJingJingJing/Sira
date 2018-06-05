@@ -27,15 +27,15 @@ def cal(command):
         # TODO(xiapeng): deal with args
         return [method+"()",">>>"]
     else:
-        last_token = records[len(records)-1]
+        last_token = records[len(records)-1.value + ":"]
         if(last_token.value in tables):
             if(isinstance(tables[last_token.value],list)):
                 return tables[last_token.value]
             else:
                 keys = []
                 for key in tables[last_token.value]:
-                    keys.append(key)
-                return keys
+                    keys.append(key + ":")
+                    return keys
 
         else:
             return [""]

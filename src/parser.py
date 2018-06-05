@@ -2,7 +2,10 @@ import json
 from token import Token, Token_Type
 
 global tables
+global records
 global separater
+global parma_name
+records = []
 separater = " "
 
 def cal(command):
@@ -11,27 +14,31 @@ def cal(command):
     if(len(tokens) <= 0):
         return [">>>"]
 
-    cmt = tokens[0]     #command type
-    if(len(tokens) > 1):
-        method = ""
-        if(cmt.type == Token_Type.reserved and cmt.value in tables):
-            method = (cmt.value)
-            for token in tokens:
-                if token.value in tables[cmt.value]:
-                    method += ("_"+token.value)
-                if (tokens.index(token) == len(tokens)-1):
-                    if(token.type == Token_Type.identify or token.type == Token_Type.number):
-                         return ["getattr(api,\""+method+"\")("+token.value+")",">>>"]
-                    else:
-                        return ["getattr(api,\""+method+"\")",">>>"]
+    for token in tokens:
+        records.append(token)
+    method = records[0].value
+    for record in records:
+        if(records.index(record) != 0):
+            method += ("_" + record.value)
+    method_exist = hasattr(json,method)
+    if(method_exist):
+        #return [func(),">>>"]
+        records.clear()
+        # TODO(xiapeng): deal with args
+        return [method+"()",">>>"]
     else:
-        if cmt.value == 'login':
-            # username = request_input("name:")
-            # set_pwd_mode()
-            # pwd = request_input("pwd:")
-            # return [login(username,pwd), ">>>"]
-            return ["login(username,pwd)",">>>"]
-            
+        last_token = records[len(records)-1]
+        if(last_token.value in tables):
+            if(isinstance(tables[last_token.value],list)):
+                return tables[last_token.value]
+            else:
+                keys = []
+                for key in tables[last_token.value]:
+                    keys.append(key)
+                return keys
+
+        else:
+            return [""]
 
 def parse(command):
     tokens = list()
@@ -55,4 +62,4 @@ def initial_tables():
     tables = json.load(gs)
 
 initial_tables()
-print(cal("show projesct"))
+print(cal("create"))

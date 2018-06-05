@@ -21,9 +21,14 @@ class SiraApp(App):
         instance.protected_len = len(info[-1])
         return True
 
+    def request_input(self, s:str, instance):
+        instance.insert_text("\n" + s)
+        instance.protected_len = len(s)
+        instance.pending_request = True
+
     def build(self):
         self.commandText = AdvancedTextInput()
-        self.commandText.text = ">"
+        self.commandText.text = ">>>"
         self.commandText.background_color = [0, 0, 0, 1]
         self.commandText.focus = True
         self.commandText.cursor_color = [1, 1, 1, 1]

@@ -8,4 +8,5 @@ class SiraController():
 
     def processInput(self, instance, string):
         # instance.set_pwd_mode()
+        # self.view.request_input("sample:", instance)
         return [string, ">>>"]

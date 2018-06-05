@@ -7,6 +7,7 @@ class SiraController():
         self.model = model
 
     def processInput(self, instance, string):
-        # instance.set_pwd_mode()
+        # self.view.set_pwd_mode(instance)
+        # import pdb; pdb.set_trace()
         # self.view.request_input("sample:", instance)
         return [string, ">>>"]

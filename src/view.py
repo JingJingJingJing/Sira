@@ -2,17 +2,25 @@ from kivy.app import App
 from kivy.uix.textinput import TextInput
 from kivy.uix.boxlayout import BoxLayout
 from advancedtextinput import AdvancedTextInput
+from asyncio import Lock
 
 class SiraApp(App):
 
     def __init__(self, **kwargs):
         super(SiraApp, self).__init__(**kwargs)
+        # self.lock = Lock()
+        self.text_input = ""
 
     def setController(self, controller):
         self.controller = controller
 
     def on_command(self, instance):
         string = instance._lines[instance.last_row][instance.protected_len:]
+        if instance.pending_request:
+            self.text_input = instance.password_cache\
+                if instance.password_mode else string
+            # self.lock.release()
+            return True
         instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
         info = self.controller.processInput(instance, string)
@@ -25,6 +33,12 @@ class SiraApp(App):
         instance.insert_text("\n" + s)
         instance.protected_len = len(s)
         instance.pending_request = True
+        # yield from self.lock
+        # self.lock.acquire()
+        # return self.text_input
+
+    def set_pwd_mode(self, instance):
+        instance.password_mode = True
 
     def build(self):
         self.commandText = AdvancedTextInput()

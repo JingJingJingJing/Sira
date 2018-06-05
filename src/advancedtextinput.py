@@ -12,12 +12,15 @@ class AdvancedTextInput(TextInput):
 
     history_stack = kp.ObjectProperty(None)
 
+    password_mode = kp.BooleanProperty(False)
+
     def __init__(self, **kwargs):
         super(AdvancedTextInput, self).__init__(**kwargs)
         self.history_stack = CommandStack()
         self.last_row = 0
         self.protected_len = 3
         self.pending_request = False
+        self.password_cache = ""
 
     def _key_down(self, key, repeat=False):
         displayed_str, internal_str, internal_action, scale = key
@@ -59,6 +62,8 @@ class AdvancedTextInput(TextInput):
                 if cursor != self.cursor:
                     self.do_backspace(mode='del')
         elif internal_action == 'backspace':
+            if self.password_mode:
+                self.password_cache = self.password_cache[:-1]
             if self._get_cursor_col() > self.protected_len:
                 self.do_backspace()
         elif internal_action == 'enter':
@@ -329,8 +334,15 @@ class AdvancedTextInput(TextInput):
         if self._editable:
             if self._selection:
                 self.delete_selection()
-            self.insert_text(text, False)
+            if self.password_mode:
+                self.password_cache += text
+            else:
+                self.insert_text(text, False) 
         return
 
 
     ### custom functions:
+
+    def on_password_mode(self, value):
+        if value:
+            self.password_cache = ""

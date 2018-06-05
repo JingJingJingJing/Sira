@@ -7,6 +7,5 @@ class SiraController():
         self.model = model
 
     def processInput(self, instance, string):
-        # self.view.historyText.insert_text(string + "\n")
-        instance.insert_text("\n" + string + "\n>")
-        return True
+        # instance.set_pwd_mode()
+        return [string, ">>>"]

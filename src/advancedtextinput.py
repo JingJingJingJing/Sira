@@ -16,10 +16,9 @@ class AdvancedTextInput(TextInput):
         super(AdvancedTextInput, self).__init__(**kwargs)
         self.history_stack = CommandStack()
         self.last_row = 0
+        self.protected_len = 1
 
     def _key_down(self, key, repeat=False):
-        # import pdb; pdb.set_trace()
-
         displayed_str, internal_str, internal_action, scale = key
         if internal_action is None:
             if self._selection:
@@ -49,8 +48,7 @@ class AdvancedTextInput(TextInput):
             else:
                 self.cancel_selection()
         elif self._selection and internal_action in ('del', 'backspace'):
-            if not (self.selection_text == '>' and self._get_cursor_col()
-                    in range(0,2)):
+            if self._get_cursor_col() not in range(0, self.protected_len + 1):
                 self.delete_selection()
         elif internal_action == 'del':
             if self._get_cursor_col() != 0:
@@ -61,7 +59,7 @@ class AdvancedTextInput(TextInput):
                 if cursor != self.cursor:
                     self.do_backspace(mode='del')
         elif internal_action == 'backspace':
-            if self._get_cursor_col() > 1:
+            if self._get_cursor_col() > self.protected_len:
                 self.do_backspace()
         elif internal_action == 'enter':
             self.dispatch('on_text_validate')
@@ -198,7 +196,8 @@ class AdvancedTextInput(TextInput):
         # and update all the graphics.
         if self.focus:
             self._trigger_cursor_reset()
-            if self._get_cursor_row() < self.last_row:
+            if self._get_cursor_row() < self.last_row or \
+                    self._get_cursor_col() < self.protected_len:
                 self._editable = False
             else:
                 self._editable = True
@@ -245,11 +244,10 @@ class AdvancedTextInput(TextInput):
         col, row = self.cursor
         if action == 'cursor_up':
             self.history_stack.step_back()
-            self.cancel_selection()
-            print(self.history_stack.peak())
+            col, row = self.display_command(self.history_stack.peak())
         elif action == 'cursor_down':
             self.history_stack.step_forward()
-            print(self.history_stack.peak())
+            col, row = self.display_command(self.history_stack.peak())
         elif action == 'cursor_left':
             if not self.password and control:
                 col, row = self._move_cursor_word_left()
@@ -285,3 +283,14 @@ class AdvancedTextInput(TextInput):
             row = min(row + pgmove_speed, len(self._lines) - 1)
             col = min(len(self._lines[row]), col)
         self.cursor = (col, row)
+
+    def display_command(self, text):
+        self.cancel_selection()
+        start = self.text.rindex('\n') + self.protected_len + 1
+        print(start)
+        end = len(self.text)
+        self.select_text(start, end)
+        self.delete_selection()
+        self.insert_text(text)
+        col, row = self.cursor
+        return len(self._lines[row]), row

@@ -1,0 +1,5 @@
+{
+    "reserved":["show", "login", "status", "project", "Assignee", "Fix Version"],
+    "login":["username", "password"],
+    "show":["status", "project", "Assignee", "Fix Version"]
+}

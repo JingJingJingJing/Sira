@@ -12,11 +12,16 @@ class SiraApp(App):
         self.controller = controller
 
     def on_command(self, instance):
-        self.controller.processInput(
-            instance.text[instance.text.rindex('>') + 1:])
+        string = instance._lines[instance.last_row][instance.protected_len:]
+        instance.history_stack.push(string)
+        instance.history_stack.reset_traversal()
+        info = self.controller.processInput(instance, string)
+        for s in info:
+            instance.insert_text("\n" + s)
+        instance.protected_len = len(info[-1])
+        return True
 
     def build(self):
-
         self.commandText = AdvancedTextInput()
         self.commandText.text = ">"
         self.commandText.background_color = [0, 0, 0, 1]

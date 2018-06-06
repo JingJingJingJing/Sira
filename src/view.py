@@ -26,7 +26,7 @@ class SiraApp(App):
         instance.history_stack.reset_traversal()
         info = self.controller.processInput(instance, string)
         for s in info:
-            instance.insert_text("\n" + s)
+            instance.insert_text("\n" + str(s))
         instance.protected_len = len(info[-1])
         return True
 

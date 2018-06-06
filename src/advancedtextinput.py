@@ -20,9 +20,13 @@ class AdvancedTextInput(TextInput):
 
     protected_len = kp.NumericProperty(3)
 
+    __events__ = ('on_text_validate', 'on_double_tap', 'on_triple_tap',
+                  'on_quad_touch', 'on_tab')
+
     def __init__(self, **kwargs):
         super(AdvancedTextInput, self).__init__(**kwargs)
         self.history_stack = CommandStack()
+        
 
     def _key_down(self, key, repeat=False):
         displayed_str, internal_str, internal_action, scale = key
@@ -189,7 +193,7 @@ class AdvancedTextInput(TextInput):
             self.focus = False
             return True
         elif key == 9:  # tab
-            self.insert_text(u'\t')
+            self.dispatch('on_tab')
             return True
 
         k = self.interesting_keys.get(key)
@@ -346,4 +350,7 @@ class AdvancedTextInput(TextInput):
 
     def on_password_mode(self, instance, value):
         if value:
-            self.password_cache = ""
+            self.password_cache = ''
+    
+    def on_tab(self):
+        pass

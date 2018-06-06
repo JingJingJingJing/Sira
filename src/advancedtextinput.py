@@ -10,7 +10,7 @@ from kivy.utils import platform
 
 class AdvancedTextInput(TextInput):
 
-    ### Additional instance variables:
+    # Additional instance variables:
 
     history_stack = kp.ObjectProperty(None)
 
@@ -26,7 +26,6 @@ class AdvancedTextInput(TextInput):
     def __init__(self, **kwargs):
         super(AdvancedTextInput, self).__init__(**kwargs)
         self.history_stack = CommandStack()
-        
 
     def _key_down(self, key, repeat=False):
         displayed_str, internal_str, internal_action, scale = key
@@ -342,15 +341,14 @@ class AdvancedTextInput(TextInput):
             if self.password_mode:
                 self.password_cache += text
             else:
-                self.insert_text(text, False) 
+                self.insert_text(text, False)
         return
 
-
-    ### custom functions:
+    # custom functions:
 
     def on_password_mode(self, instance, value):
         if value:
             self.password_cache = ''
-    
+
     def on_tab(self):
         pass

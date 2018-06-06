@@ -19,7 +19,9 @@ def read_cookie():
 """ This function sign a user if un and pw are both correct
     Return 1 on success, 0 on failure """
 
-def login(un, pw):
+def login(lst):
+    un = lst[0]
+    pw = lst[1]
     url = 'http://'+domain+'/rest/auth/1/session'
     data = '{"username":"'+str(un)+'","password":"'+str(pw)+'"}'
     headers = {'Content-Type':'application/json'}
@@ -35,4 +37,3 @@ def login(un, pw):
     print("Error Occured! Status Code:",r.status_code)
     print(r.text)
     return 0
-login("ysg","Yh961130")

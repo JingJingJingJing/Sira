@@ -1,6 +1,0 @@
-{
-    "reserved":["show", "login", "status", "project", "Assignee", "Fix Version", "create"],
-    "login":{"username":["password"]},
-    "show":["status", "project", "Assignee", "Fix Version"],
-    "create":{"summary":{"type":["Assignee"]}}
-}

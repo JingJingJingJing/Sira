@@ -10,5 +10,6 @@ def main():
     view.setController(controller)
     view.run()
 
+
 if __name__ == '__main__':
     main()

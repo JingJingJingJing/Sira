@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<cmd>
+    <keyword name="sira">
+        <keyword name="login">
+            <optional name="user_name" type="dynamic" field="user">
+                <optional name="pwd" type="dynamic" field="user">
+                    <function name="login" para="user pwd"></function>
+                </optional>
+                <interactive field="pwd">Password:</interactive>
+                <function name=""></function>
+            </optional>
+            <interactive field="user">User name:</interactive>
+        </keyword>
+        <keyword name="search">
+            <keyword name="status">
+                <optional name="issueId" type="dynamic" field="issueId">
+                    <function name="search_status" para="issueId"></function>
+                </optional>
+            </keyword>
+            <keyword name="assignee">
+                <optional name="issueId" type="dynamic" field="issueId">
+                    <function name="search_assignee" para="issueId"></function>
+                </optional>
+            </keyword>
+        </keyword>
+        <function name=""></function>
+    </keyword>
+</cmd>

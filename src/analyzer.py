@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import xml.etree.ElementTree as ET
 import login
 
@@ -45,6 +46,7 @@ class Parser():
 
             print(paras)
             self.records.clear()
+            print("after")
             self.position = None
             return [getattr(login, method)(paras),">>>"]
 

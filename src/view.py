@@ -17,7 +17,8 @@ class SiraApp(App):
             string = instance.password_cache
             instance.password_mode = False
         else:
-            string = instance._lines[instance.last_row][instance.protected_len:]
+            string = instance._lines[len(instance._lines) - 1]\
+                [instance.protected_len:]
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
         info = self.controller.processInput(instance, string)

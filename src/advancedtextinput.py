@@ -20,8 +20,6 @@ class AdvancedTextInput(TextInput):
 
     protected_len = kp.NumericProperty(3)
 
-    last_row = kp.NumericProperty(0)
-
     def __init__(self, **kwargs):
         super(AdvancedTextInput, self).__init__(**kwargs)
         self.history_stack = CommandStack()
@@ -72,7 +70,6 @@ class AdvancedTextInput(TextInput):
                 self.do_backspace()
         elif internal_action == 'enter':
             self.dispatch('on_text_validate')
-            self.last_row = self._get_cursor_row()
         elif internal_action == 'escape':
             self.focus = False
         if internal_action != 'escape':
@@ -327,7 +324,7 @@ class AdvancedTextInput(TextInput):
         # and update all the graphics.
         if self.focus:
             self._trigger_cursor_reset()
-            if self._get_cursor_row() < self.last_row or \
+            if self._get_cursor_row() != len(self._lines) - 1 or \
                     self._get_cursor_col() < self.protected_len:
                 self._editable = False
             else:

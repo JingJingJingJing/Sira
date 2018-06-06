@@ -18,6 +18,7 @@ class SiraApp(App):
     def on_command(self, instance):
         if instance.password_mode:
             string = instance.password_cache
+            print(string)
             instance.password_mode = False
         else:
             string = instance._lines[len(instance._lines) - 1]\

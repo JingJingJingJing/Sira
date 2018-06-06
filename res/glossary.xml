@@ -4,10 +4,10 @@
         <keyword name="login">
             <optional name="user_name" type="dynamic" field="user">
                 <optional name="pwd" type="dynamic" field="user">
-                    <function name="login" para="user pwd"></function>
+                    <function object="login" name="login" para="user pwd"></function>
                 </optional>
                 <interactive field="pwd">Password:</interactive>
-                <function name=""></function>
+                <function object="self.view" name="set_pwd_mode"></function>
             </optional>
             <interactive field="user">User name:</interactive>
         </keyword>

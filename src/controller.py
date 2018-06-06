@@ -14,6 +14,8 @@ class SiraController():
 
     def processInput(self, instance, string):
         # instance.set_pwd_mode()
+        # self.view.set_pwd_mode()
+        
         return self.cal(string)
 
     def cal(self, command):
@@ -38,6 +40,7 @@ class SiraController():
                     break
             if(pre_position == self.position):
                 self.records.clear()
+                self.paras.clear()
                 self.position = None
                 return ["error command", ">>>"]
         if(self.position.find("./optional") is not None):
@@ -55,8 +58,11 @@ class SiraController():
             method = self.position.find("./function").attrib['name']
 
             self.records.clear()
+            
             self.position = None
-            return [getattr(login, method)(self.paras),">>>"]
+            result = getattr(eval("login"), method)(self.paras)
+            self.paras.clear()
+            return [result, ">>>"]
 
     def parse(self, command):
         return command.split(self.separater)

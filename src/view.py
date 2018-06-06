@@ -12,6 +12,9 @@ class SiraApp(App):
     def setController(self, controller):
         self.controller = controller
 
+    def on_tab(self, instance):
+        pass
+        
     def on_command(self, instance):
         if instance.password_mode:
             string = instance.password_cache
@@ -39,5 +42,6 @@ class SiraApp(App):
         self.commandText.foreground_color = [1, 1, 1, 1]
         self.commandText.padding = [20, 20, 20, 0]
         self.commandText.bind(on_text_validate=self.on_command)
+        self.commandText.bind(on_tab=self.on_tab)
 
         return self.commandText

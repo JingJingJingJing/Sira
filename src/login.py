@@ -35,4 +35,3 @@ def login(un, pw):
     print("Error Occured! Status Code:",r.status_code)
     print(r.text)
     return 0
-login("ysg","Yh961130")

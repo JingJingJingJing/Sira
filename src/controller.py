@@ -1,5 +1,3 @@
-
-
 class SiraController():
 
     def __init__(self, view, model):
@@ -7,5 +5,7 @@ class SiraController():
         self.model = model
 
     def processInput(self, instance, string):
-        # instance.set_pwd_mode()
+        # self.view.set_pwd_mode(instance)
+        if string == "test":
+            import pdb; pdb.set_trace()
         return [string, ">>>"]

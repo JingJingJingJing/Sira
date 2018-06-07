@@ -55,12 +55,12 @@ class SiraController():
             else:
                 return [""]
         else:
-            method = self.position.find("./function").attrib['name']
+            functag = self.position.find("./function")
 
             self.records.clear()
             
             self.position = None
-            result = getattr(eval("login"), method)(self.paras)
+            result = getattr(eval(functag.attrib['object']), functag.attrib['name'])(self.paras)
             self.paras.clear()
             return [result, ">>>"]
 
@@ -68,7 +68,7 @@ class SiraController():
         return command.split(self.separater)
 
 def main():
-    print(SiraController(None,None).cal("sira login zhengxp"))
+    print(SiraController(None,None).cal("sira login zhengxp ss"))
 
 if __name__ == '__main__':
     main()

@@ -23,6 +23,8 @@
         <function name=""></function>
             <required name="user_name">
                 <required name="pwd">
+            <optional name="user_name" type="dynamic" field="user">
+                <optional name="pwd" type="dynamic" field="user">
                     <function object="login" name="login" para="user pwd"></function>
                 </required>
                 <interactive>Password:</interactive>
@@ -71,8 +73,10 @@
                 <required name="sprint_name">
                     <function object="query" name="query_sprint" para="sprint_name"></function>
                 </required>
+                <optional name="issueId" type="dynamic" field="issueId">
+                    <function name="search_assignee" para="issueId"></function>
+                </optional>
             </keyword>
         </keyword>
->>>>>>> master
     </keyword>
 </cmd>

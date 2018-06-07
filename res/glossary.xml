@@ -2,6 +2,7 @@
 <cmd>
     <keyword name="sira">
         <keyword name="login">
+<<<<<<< HEAD
             <optinal name="user_name" type="dynamic" field="user">
                 <optinal name="pwd" type="dynamic" field="user"></optinal>
                 <interactive field="pwd">Password:</interactive>
@@ -21,5 +22,59 @@
             </keyword>
         </keyword>
         <function name=""></function>
+=======
+            <required name="user_name">
+                <required name="pwd">
+                    <function object="login" name="login" para="user pwd"></function>
+                </required>
+                <interactive>Password:</interactive>
+                <function object="self.view" name="set_pwd_mode"></function>
+            </required>
+            <interactive>User name:</interactive>
+        </keyword>
+        <keyword name="query">
+            <interactive>number project type assignee sprint</interactive>
+            <keyword name="number">
+                <required name="issueId">
+                    <function object="query" name="query_issueId" para="issueId"></function>
+                </required>
+            </keyword>
+            <keyword name="project">
+                <required name="project_name">
+                    <interactive>type assignee sprint</interactive>
+                    <keyword name="type">
+                        <required  name="type">
+                            <function object="query" name="query_project_type" para="project_name type"></function>
+                        </required>
+                    </keyword>
+                    <keyword name="assignee">
+                        <required  name="assignee">
+                            <function object="query" name="query_project_assignee" para="project_name assignee"></function>
+                        </required>
+                    </keyword>
+                    <keyword name="sprint">
+                        <required name="sprint">
+                            <function object="query" name="query_project_sprint" para="project_name sprint"></function>
+                        </required>                        
+                    </keyword>
+                </required>
+            </keyword>
+            <keyword name="type">
+                <required name="type">
+                    <function object="query" name="query_type" para="type"></function>
+                </required>
+            </keyword>
+            <keyword name="assignee">
+                <required name="assignee_name">
+                    <function object="query" name="query_assignee" para="assignee_name"></function>
+                </required>
+            </keyword>
+            <keyword name="sprint">
+                <required name="sprint_name">
+                    <function object="query" name="query_sprint" para="sprint_name"></function>
+                </required>
+            </keyword>
+        </keyword>
+>>>>>>> master
     </keyword>
 </cmd>

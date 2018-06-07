@@ -10,7 +10,7 @@ from kivy.utils import platform
 
 class AdvancedTextInput(TextInput):
 
-    ### Additional instance variables:
+    # Additional instance variables:
 
     history_stack = kp.ObjectProperty(None)
 
@@ -20,13 +20,14 @@ class AdvancedTextInput(TextInput):
 
     protected_len = kp.NumericProperty(3)
 
+    command_mode = kp.BooleanProperty(True)
+
     __events__ = ('on_text_validate', 'on_double_tap', 'on_triple_tap',
                   'on_quad_touch', 'on_tab')
 
     def __init__(self, **kwargs):
         super(AdvancedTextInput, self).__init__(**kwargs)
         self.history_stack = CommandStack()
-        
 
     def _key_down(self, key, repeat=False):
         displayed_str, internal_str, internal_action, scale = key
@@ -74,6 +75,7 @@ class AdvancedTextInput(TextInput):
                 self.do_backspace()
         elif internal_action == 'enter':
             self.dispatch('on_text_validate')
+            # import pdb; pdb.set_trace()
         elif internal_action == 'escape':
             self.focus = False
         if internal_action != 'escape':
@@ -193,7 +195,10 @@ class AdvancedTextInput(TextInput):
             self.focus = False
             return True
         elif key == 9:  # tab
-            self.dispatch('on_tab')
+            if self.command_mode:
+                self.dispatch('on_tab')
+            else:
+                self.insert_text(u"\t")
             return True
 
         k = self.interesting_keys.get(key)
@@ -276,11 +281,15 @@ class AdvancedTextInput(TextInput):
                            (self.line_height + self.line_spacing) - 1)
         col, row = self.cursor
         if action == 'cursor_up':
-            self.history_stack.step_back()
-            col, row = self.display_command(self.history_stack.peak())
+            # enable history search when on command_mode
+            if self.command_mode:
+                self.history_stack.step_back()
+                col, row = self.display_command(self.history_stack.peak())
         elif action == 'cursor_down':
-            self.history_stack.step_forward()
-            col, row = self.display_command(self.history_stack.peak())
+            # enable history search when on command_mode
+            if self.command_mode:
+                self.history_stack.step_forward()
+                col, row = self.display_command(self.history_stack.peak())
         elif action == 'cursor_left':
             if not self.password and control:
                 col, row = self._move_cursor_word_left()
@@ -342,15 +351,14 @@ class AdvancedTextInput(TextInput):
             if self.password_mode:
                 self.password_cache += text
             else:
-                self.insert_text(text, False) 
+                self.insert_text(text, False)
         return
 
-
-    ### custom functions:
+    # custom functions:
 
     def on_password_mode(self, instance, value):
-        if value:
+        if not value:
             self.password_cache = ''
-    
+
     def on_tab(self):
         pass

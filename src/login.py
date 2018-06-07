@@ -3,6 +3,7 @@ from threading import Thread
 domain = '10.176.111.32:8080'
 cookie_path = ''
 return_val = 0
+finish = 0
 def stringtolist(s):
     return s.split(',')
 
@@ -13,7 +14,7 @@ def get_session_info(tup):
 
 def send_request(url, data, headers):
     try:
-        r = r = requests.post(url,headers=headers,data=data,timeout = 2)
+        r = requests.post(url,headers=headers,data=data,timeout = 10)
         if(r.status_code == 200):
             s = stringtolist(r.text)
             cookie = get_session_info((s[0],s[1]))
@@ -28,6 +29,8 @@ def send_request(url, data, headers):
             print(r.text)
     except requests.exceptions.ConnectTimeout as err:
         print(err)
+    global finish
+    finish = 1
 """ This function sign a user if un and pw are both correct
     Return 1 on success, 0 on failure """
 
@@ -39,5 +42,7 @@ def login(lst):
     headers = {'Content-Type':'application/json'}
     thread = Thread(target = send_request, args=(url, data, headers))
     thread.start()
-    thread.join()
+    global finish
+    while not finish:
+        print("in while")
     return return_val

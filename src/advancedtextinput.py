@@ -46,7 +46,7 @@ class AdvancedTextInput(TextInput):
             self._alt_l = True
         elif internal_action == 'alt_R':
             self._alt_r = True
-        elif internal_action.startswith('cursor_'):
+        elif internal_action.startswith('cursor_') and not self.password_mode:
             cc, cr = self.cursor
             self.do_cursor_movement(internal_action,
                                     self._ctrl_l or self._ctrl_r,
@@ -73,6 +73,7 @@ class AdvancedTextInput(TextInput):
                 self.do_backspace()
         elif internal_action == 'enter':
             self.dispatch('on_text_validate')
+            import pdb; pdb.set_trace()
         elif internal_action == 'escape':
             self.focus = False
         if internal_action != 'escape':

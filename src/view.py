@@ -18,6 +18,7 @@ class SiraApp(App):
     def on_command(self, instance):
         if instance.password_mode:
             string = instance.password_cache
+            print(string)
             instance.password_mode = False
         else:
             string = instance._lines[len(instance._lines) - 1]\
@@ -30,8 +31,8 @@ class SiraApp(App):
         instance.protected_len = len(info[-1])
         return True
 
-    def set_pwd_mode(self, instance):
-        instance.password_mode = True
+    def set_pwd_mode(self):
+        self.commandText.password_mode = True
 
     def build(self):
         self.commandText = AdvancedTextInput()

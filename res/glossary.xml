@@ -2,22 +2,25 @@
 <cmd>
     <keyword name="sira">
         <keyword name="login">
-            <optinal name="user_name" type="dynamic" field="user">
-                <optinal name="pwd" type="dynamic" field="user"></optinal>
+            <optional name="user_name" type="dynamic" field="user">
+                <optional name="pwd" type="dynamic" field="user">
+                    <function object="login" name="login" para="user pwd"></function>
+                </optional>
                 <interactive field="pwd">Password:</interactive>
-                <function name="" para="user pwd"></function>
-            </optinal>
+                <function object="self.view" name="set_pwd_mode"></function>
+            </optional>
             <interactive field="user">User name:</interactive>
-            <function name=""></function>
         </keyword>
         <keyword name="search">
             <keyword name="status">
-                <optinal name="issueId" type="dynamic" field="issueId"></optinal>
-                <function name="search_status" para="issueId"></function>
+                <optional name="issueId" type="dynamic" field="issueId">
+                    <function name="search_status" para="issueId"></function>
+                </optional>
             </keyword>
             <keyword name="assignee">
-                <optinal name="issueId" type="dynamic" field="issueId"></optinal>
-                <function name="search_assignee" para="issueId"></function>
+                <optional name="issueId" type="dynamic" field="issueId">
+                    <function name="search_assignee" para="issueId"></function>
+                </optional>
             </keyword>
         </keyword>
         <function name=""></function>

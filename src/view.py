@@ -44,3 +44,6 @@ class SiraApp(App):
     def build(self):
         self.commandText = Builder.load_file("../res/sira.kv")
         return self.commandText
+
+    def build_settings(self, settings):
+        pass

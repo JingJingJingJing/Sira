@@ -10,6 +10,7 @@ from advancedtextinput import AdvancedTextInput
 class SiraApp(App):
 
     info = kp.ListProperty([])
+    # option = kp.ListProperty([])
 
     def __init__(self, **kwargs):
         super(SiraApp, self).__init__(**kwargs)
@@ -33,7 +34,6 @@ class SiraApp(App):
         elif instance.command_mode:
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
-        import pdb; pdb.set_trace()
         self.controller.processInput(instance, string)
         return True
 

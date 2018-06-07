@@ -2,7 +2,6 @@
 <cmd>
     <keyword name="sira">
         <keyword name="login">
-<<<<<<< HEAD
             <optinal name="user_name" type="dynamic" field="user">
                 <optinal name="pwd" type="dynamic" field="user"></optinal>
                 <interactive field="pwd">Password:</interactive>
@@ -22,7 +21,6 @@
             </keyword>
         </keyword>
         <function name=""></function>
-=======
             <required name="user_name">
                 <required name="pwd">
                     <function object="login" name="login" para="user pwd"></function>

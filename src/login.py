@@ -19,19 +19,25 @@ def read_cookie():
 """ This function sign a user if un and pw are both correct
     Return 1 on success, 0 on failure """
 
-def login(un, pw):
+def login(lst):
+    un = lst[0]
+    pw = lst[1]
     url = 'http://'+domain+'/rest/auth/1/session'
     data = '{"username":"'+str(un)+'","password":"'+str(pw)+'"}'
     headers = {'Content-Type':'application/json'}
-    r = requests.post(url,headers=headers,data=data)
-    if(r.status_code == 200):
-        s = stringtolist(r.text)
-        cookie = get_session_info((s[0],s[1]))
-        f = open(cookie_path+"cookie.txt","w")
-        f.write(cookie)
-        f.close
+    try:
+        r = requests.post(url,headers=headers,data=data,timeout = 1)
+        if(r.status_code == 200):
+            s = stringtolist(r.text)
+            cookie = get_session_info((s[0],s[1]))
+            f = open(cookie_path+"cookie.txt","w")
+            f.write(cookie)
+            f.close
+            print(r.text)
+            return 1
+        print("Error Occured! Status Code:",r.status_code)
         print(r.text)
-        return 1
-    print("Error Occured! Status Code:",r.status_code)
-    print(r.text)
+    except requests.exceptions.ConnectTimeout as err:
+        print(err)
     return 0
+login(["admin","admin"])

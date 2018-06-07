@@ -2,17 +2,21 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
+import kivy.properties as kp
 
 from advancedtextinput import AdvancedTextInput
 
 
 class SiraApp(App):
 
+    info = kp.ListProperty([])
+
     def __init__(self, **kwargs):
         super(SiraApp, self).__init__(**kwargs)
 
     def setController(self, controller):
         self.controller = controller
+        self.info = []
 
     def on_tab(self, instance):
         pass
@@ -29,11 +33,15 @@ class SiraApp(App):
         elif instance.command_mode:
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
-        info = self.controller.processInput(instance, string)
-        instance.protected_len = len(info[-1])
-        for s in info:
-            instance.insert_text("\n" + str(s))
+        import pdb; pdb.set_trace()
+        self.controller.processInput(instance, string)
         return True
+
+    def on_info(self, instance, info):
+        self.commandText.do_cursor_movement("cursor_end")
+        self.commandText.protected_len = len(info[-1])
+        for s in info:
+            self.commandText.insert_text("\n" + str(s))
 
     def set_pwd_mode(self):
         self.commandText.password_mode = True

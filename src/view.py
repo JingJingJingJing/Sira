@@ -1,6 +1,8 @@
 from kivy.app import App
-from kivy.uix.textinput import TextInput
+from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
+
 from advancedtextinput import AdvancedTextInput
 
 
@@ -40,14 +42,5 @@ class SiraApp(App):
         self.commandText.command_mode = value
 
     def build(self):
-        self.commandText = AdvancedTextInput()
-        self.commandText.text = ">>>"
-        self.commandText.background_color = [0, 0, 0, 1]
-        self.commandText.focus = True
-        self.commandText.cursor_color = [1, 1, 1, 1]
-        self.commandText.foreground_color = [1, 1, 1, 1]
-        self.commandText.padding = [20, 20, 20, 0]
-        self.commandText.bind(on_text_validate=self.on_command)
-        self.commandText.bind(on_tab=self.on_tab)
-
+        self.commandText = Builder.load_file("../res/sira.kv")
         return self.commandText

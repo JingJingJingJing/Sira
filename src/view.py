@@ -28,9 +28,9 @@ class SiraApp(App):
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
         info = self.controller.processInput(instance, string)
+        instance.protected_len = len(info[-1])
         for s in info:
             instance.insert_text("\n" + str(s))
-        instance.protected_len = len(info[-1])
         return True
 
     def set_pwd_mode(self):

@@ -75,7 +75,7 @@ class AdvancedTextInput(TextInput):
                 self.do_backspace()
         elif internal_action == 'enter':
             self.dispatch('on_text_validate')
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
         elif internal_action == 'escape':
             self.focus = False
         if internal_action != 'escape':

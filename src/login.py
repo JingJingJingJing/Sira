@@ -10,11 +10,6 @@ def get_session_info(tup):
     t2 = tup[1].split('"')
     return t1[5]+'='+ t2[3]
 
-def read_cookie():
-    cookie = ''
-    with open(cookie_path+"cookie.txt","r") as f:
-        cookie = f.read()
-    return cookie
 
 """ This function sign a user if un and pw are both correct
     Return 1 on success, 0 on failure """
@@ -24,6 +19,7 @@ def login(lst):
     pw = lst[1]
     url = 'http://'+domain+'/rest/auth/1/session'
     data = '{"username":"'+str(un)+'","password":"'+str(pw)+'"}'
+
     headers = {'Content-Type':'application/json'}
     r = requests.post(url,headers=headers,data=data)
     if(r.status_code == 200):
@@ -37,3 +33,5 @@ def login(lst):
     print("Error Occured! Status Code:",r.status_code)
     print(r.text)
     return 0
+
+login(["admin","admin"])

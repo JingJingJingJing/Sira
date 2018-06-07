@@ -20,6 +20,8 @@ class AdvancedTextInput(TextInput):
 
     protected_len = kp.NumericProperty(3)
 
+    command_mode = kp.BooleanProperty(True)
+
     __events__ = ('on_text_validate', 'on_double_tap', 'on_triple_tap',
                   'on_quad_touch', 'on_tab')
 
@@ -46,7 +48,7 @@ class AdvancedTextInput(TextInput):
             self._alt_l = True
         elif internal_action == 'alt_R':
             self._alt_r = True
-        elif internal_action.startswith('cursor_') and not self.password_mode:
+        elif internal_action.startswith('cursor_'):
             cc, cr = self.cursor
             self.do_cursor_movement(internal_action,
                                     self._ctrl_l or self._ctrl_r,
@@ -193,7 +195,10 @@ class AdvancedTextInput(TextInput):
             self.focus = False
             return True
         elif key == 9:  # tab
-            self.dispatch('on_tab')
+            if self.command_mode:
+                self.dispatch('on_tab')
+            else:
+                self.insert_text(u"\t")
             return True
 
         k = self.interesting_keys.get(key)
@@ -276,11 +281,15 @@ class AdvancedTextInput(TextInput):
                            (self.line_height + self.line_spacing) - 1)
         col, row = self.cursor
         if action == 'cursor_up':
-            self.history_stack.step_back()
-            col, row = self.display_command(self.history_stack.peak())
+            # enable history search when on command_mode
+            if self.command_mode:
+                self.history_stack.step_back()
+                col, row = self.display_command(self.history_stack.peak())
         elif action == 'cursor_down':
-            self.history_stack.step_forward()
-            col, row = self.display_command(self.history_stack.peak())
+            # enable history search when on command_mode
+            if self.command_mode:
+                self.history_stack.step_forward()
+                col, row = self.display_command(self.history_stack.peak())
         elif action == 'cursor_left':
             if not self.password and control:
                 col, row = self._move_cursor_word_left()
@@ -348,7 +357,7 @@ class AdvancedTextInput(TextInput):
     # custom functions:
 
     def on_password_mode(self, instance, value):
-        if value:
+        if not value:
             self.password_cache = ''
 
     def on_tab(self):

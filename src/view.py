@@ -23,9 +23,8 @@ class SiraApp(App):
             return True
         if instance.password_mode:
             string = instance.password_cache
-            print(string)
             instance.password_mode = False
-        else:
+        elif instance.command_mode:
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
         info = self.controller.processInput(instance, string)
@@ -36,6 +35,9 @@ class SiraApp(App):
 
     def set_pwd_mode(self):
         self.commandText.password_mode = True
+
+    def set_command_mode(self, value):
+        self.commandText.command_mode = value
 
     def build(self):
         self.commandText = AdvancedTextInput()

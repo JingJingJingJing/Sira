@@ -12,10 +12,8 @@ def get_session_info(tup):
     t2 = tup[1].split('"')
     return t1[5]+'='+ t2[3]
 
-
-""" This function sign a user if un and pw are both correct
-    Return 1 on success, 0 on failure """
 def login(lst):
+    print(lst)
     un = lst[0]
     pw = lst[1]
     url = 'http://'+domain+'/rest/auth/1/session'

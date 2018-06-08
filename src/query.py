@@ -2,7 +2,7 @@ import requests
 import json
 from extract import getIssue
 from extract import getField
-
+from extract import dtos
 domain = '10.176.111.32:8080'
 cookie_path = ''
 
@@ -13,68 +13,144 @@ def read_cookie():
     return cookie
 
 """ This function returns all issue assigned to the user 'user' """
-def query_assignee(user):
-    cookie = read_cookie()
-    url = 'http://'+domain+'/rest/api/2/search?jql=assignee='+user
-    headers = {'Content-Type':'application/json','cookie':cookie}
-    r = requests.get(url,headers=headers)
-    if(r.status_code == 200):
-        print("!!!!!!!")
-        print(r.text)
 
-        print("!!!!!!!")
-        print(findKey(r.text))
-        return findKey(r.text)
-    else:
-        print(r.status_code,r.text)
-    # need to extract information from r.text
+def query(data):
 
-def test_assign():
     cookie = read_cookie()
     url = 'http://'+domain+'/rest/api/2/search'
     headers = {'Content-Type':'application/json','cookie':cookie}
-    '''type | number | title | assignee | sprint | status | fixed version | project '''
-    data = '{"jql":"assignee=Hang","startAt":0, "maxResults": 15,"fields":["summary","issuetype","project","fixVersions","assignee","status"]}'
-    r = requests.post(url,headers=headers,data=data)
-    if(r.status_code == 200):
-        print("!!!!!!!")
-        #jdata = json.loads(r.text)
-        #print(r.text)
-        ans = getIssue(r.text, 'TEST-3')
-        if ans is not None:
-            print("       *****")
-            getField(ans,None)
-            print("       *****")
-        print("!!!!!!!")
-    else:
-        print(r.status_code,r.text)
+    try:
+        r = requests.post(url,headers=headers,data=data,timeout = 3)
+        if(r.status_code == 200):
+            j = json.loads(r.text)
+            try:
+                print(j['warningMessages'])
+                return j['warningMessages']
+            except KeyError:
+                pass
+            issue_lst = getIssue(r.text, None)
+            if issue_lst is not None:
+                string = ''
+                for i in issue_lst:
+                    try:
+                        string += dtos(getField(i,None),i['key']) + '\r\n'
+                    except KeyError as err:
+                        return_val = 'given field "{}" not found'.format(err)
+                        return return_val
+                print(string)
+                return string
+            else:
+                return 'Issue not Found'
+        else:
+            print(str(r.status_code) +'\r\n'+ r.text)
+            return str(r.status_code) + r.text 
+    except requests.exceptions.RequestException as err:
+        return err
 
+
+'''
+def query_assignee(lst):
+    if len(lst) == 0:
+        return None
+    user = lst[0]
+    cookie = read_cookie()
+    url = 'http://'+domain+'/rest/api/2/search'
+    headers = {'Content-Type':'application/json','cookie':cookie}
+    data = '{"jql":"assignee='+user+'","startAt":0, "maxResults": 15,"fields":["summary","issuetype","project","fixVersions","assignee","status"]}'
+    try:
+        r = requests.post(url,headers=headers,data=data,timeout = 3)
+        if(r.status_code == 200):
+            j = json.loads(r.text)
+            try:
+                return j['warningMessages']
+            except KeyError:
+                pass
+            issue_lst = getIssue(r.text, None)
+            if issue_lst is not None:
+                string = ''
+                for i in issue_lst:
+                    try:
+                        string += dtos(getField(i,None),i['key']) + '\r\n'
+                    except KeyError as err:
+                        return_val = 'given field "{}" not found'.format(err)
+                        return return_val
+                print(string)
+                return string
+            else:
+                return 'Issue not Found'
+        else:
+            print(str(r.status_code) +'\r\n'+ r.text)
+            return str(r.status_code) + r.text 
+    except requests.exceptions.RequestException as err:
+        return err
+'''
 
 
 
 """ This function will return all information of issue represented by pid """
-def query_project(project):
+'''
+def query_number(lst):
+    if len(lst) == 0:
+        return None
+    issue = lst[0]
     cookie = read_cookie()
-    url = 'http://'+domain+'/rest/api/2/search'
+    url = 'http://'+domain+'/rest/api/2/issue'+issue
     headers = {'Content-Type':'application/json','cookie':cookie}
-    data = '{"jql":"key='+str(project)+'","startAt":0,"maxResults":2,"fields":["id","key"]}'
-    #data = '{"jql":"project=TEST"}'
-    r = requests.post(url,headers=headers,data=data)
-    #print(r)
-    #print(r.status_code)
-    #print(r.text)
-    findKey(r.text)
 
-def query_type(itype):
-    cookie = read_cookie()
-    url = 'http://'+domain+'/rest/api/2/search'
-    headers = {'Content-Type':'application/json','cookie':cookie}
-    data = '{"jql":"issuetype='+str(itype)+'","startAt":0,"maxResults":2,"fields":["id","key"]}'
-    r = requests.post(url,headers=headers,data=data)
+    data = '{"fields":["summary","issuetype","project","fixVersions","assignee","status"]}'
+    try:
+        r = requests.post(url,headers=headers,data=data,timeout = 3)
+        if(r.status_code == 200):
+            j = json.loads(r.text)
+            try:
+                return j['warningMessages']
+            except KeyError:
+                pass
+            issue_lst = getIssue(r.text, None)
+            if issue_lst is not None:
+                string = ''
+                for i in issue_lst:
+                    try:
+                        string += dtos(getField(i,None),i['key']) + '\r\n'
+                    except KeyError as err:
+                        return_val = 'given field "{}" not found'.format(err)
+                        return return_val
+                print(string)
+                return string
+            else:
+                return 'Issue not Found'
+        else:
+            print(str(r.status_code) +'\r\n'+ r.text)
+            return str(r.status_code) + r.text 
+    except requests.exceptions.RequestException as err:
+        return err
+'''
+def query_assignee(lst):
+    if len(lst) == 0:
+        return None
+    user = lst[0]
+    
+    data = '{"jql":"assignee='+user+'","startAt":0, "maxResults": 100,"fields":["summary","issuetype","project","fixVersions","assignee","status"]}'
+    return query(data)
+
+def query_project(lst):
+    if len(lst) == 0:
+        return None
+    project = lst[0]
+    data = '{"jql":"project='+project+'","startAt":0, "maxResults": 100,"fields":["summary","issuetype","project","fixVersions","assignee","status"]}'
+    #data = '{"jql":"project=TEST"}'
+    return query(data)
+    
+
+def query_type(lst):
+    if len(lst) == 0:
+        return None
+    itype = lst[0]
+    data = '{"jql":"issuetype='+itype+'","startAt":0, "maxResults": 100,"fields":["summary","issuetype","project","fixVersions","assignee","status"]}'
     #print(findKey(r.text))
     #print(r.status_code)
     #print(r.text)
-    return findKey(r.text)
+    return query(data)
 
 def mypermission():
     cookie = read_cookie()
@@ -101,7 +177,7 @@ def watcher():
     url = 'http://'+domain+'/rest/api/2/issue/TEST-05/watchers'
     headers = {'Content-Type':'application/json','cookie':cookie}
     r = requests.get(url,headers=headers)
-    print(r.status_code)
+ 
     print(r.text)
 def ltest():
     cookie = read_cookie()
@@ -113,10 +189,13 @@ def ltest():
         print(findKey(r.text))
         return findKey(r.text)
     else:
-        print(r.status_code,r.text)
+        pass
 
 
 def test():
-    test_assign()
+    #query_number(['TEST-03'])
+    query_assignee(['Hg'])
+    query_project(['Sira'])
+    query_type(['Task'])
 
 test()

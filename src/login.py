@@ -2,8 +2,7 @@ import requests
 from threading import Thread
 domain = '10.176.111.32:8080'
 cookie_path = ''
-return_val = 0
-finish = 0
+
 def stringtolist(s):
     return s.split(',')
 
@@ -19,7 +18,7 @@ def login(lst):
     data = '{"username":"'+str(un)+'","password":"'+str(pw)+'"}'
     headers = {'Content-Type':'application/json'}
     try:
-        r = requests.post(url,headers=headers,data=data,timeout = 10)
+        r = requests.post(url,headers=headers,data=data,timeout = 3)
         if(r.status_code == 200):
             s = stringtolist(r.text)
             cookie = get_session_info((s[0],s[1]))
@@ -28,6 +27,7 @@ def login(lst):
             f.close
             print("success")
         return r.text
-    except requests.exceptions.ConnectTimeout as err:
+    except requests.exceptions.RequestException as err:
+        print(err)
         return err
 login(["admin","admin"])

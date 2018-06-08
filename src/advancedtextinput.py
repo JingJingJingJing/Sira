@@ -352,12 +352,20 @@ class AdvancedTextInput(TextInput):
     def keyboard_on_textinput(self, window, text):
         if self._editable:
             if self._selection:
-                self.delete_selection()
+                self.do_cursor_movement("cursor_end")
+                self.cancel_selection()
             if self.password_mode:
                 self.password_cache += text
             else:
                 self.insert_text(text, False)
         return
+
+    def select_all(self):
+        ''' Select all of the text displayed in this TextInput.
+
+        .. versionadded:: 1.4.0
+        '''
+        self.select_text(0, len(self.text))
 
     # custom functions:
 

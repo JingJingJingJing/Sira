@@ -21,6 +21,9 @@ class SiraApp(App):
 
     def on_tab(self, instance):
         pass
+
+    def stop_interaction(self, instance):
+        pass
         
     def on_command(self, instance):
         # import pdb; pdb.set_trace()

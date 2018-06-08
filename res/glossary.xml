@@ -15,7 +15,7 @@
             <interactive>number project type assignee sprint</interactive>
             <keyword name="number">
                 <required name="issueId">
-                    <function object="query" name="query_issueId" para="issueId"/>
+                    <function object="query" name="query_number" para="issueId"/>
                 </required>
             </keyword>
             <keyword name="project">

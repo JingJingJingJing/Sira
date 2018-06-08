@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import threading
 import re
 import login
-import query
+import my_query as query
 
 class SiraController():
 
@@ -84,7 +84,7 @@ class SiraController():
         functag = self.position.find("./function")
         result = getattr(eval(functag.attrib['object']), functag.attrib['name'])(self.paras)
             # set cursor value to username when login successd
-        if(functag.attrib['object'] == "login" and result):
+        if(functag.attrib['object'] == "login" and "errorMessages" not in result):
             self.cursor = self.paras[0] + ">"
         self.view.commandText.readonly = False
         self.view.info = [result, self.cursor]
@@ -92,6 +92,8 @@ class SiraController():
         self.view.set_command_mode(True)
 
     def closeinteractive(self):
+        if(self.position is None or self.position == self.tree):
+            pass
         self.clearcache()
         self.view.set_command_mode(True)
         self.view.commandText.readonly = False

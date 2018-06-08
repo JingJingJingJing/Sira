@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import threading
 import re
 import login
 
@@ -27,7 +28,8 @@ class SiraController():
 
         if(len(tokens) <= 0):
             self.view.set_command_mode(True)
-            return [self.cursor]
+            self.view.info = [self.cursor]
+            return
 
         if(self.position is None):
             self.position = self.tree
@@ -46,7 +48,8 @@ class SiraController():
             if(pre_position == self.position):
                 self.clearcache()
                 self.view.set_command_mode(True)
-                return ["error command", self.cursor]
+                self.view.info = ["error command", self.cursor]
+                return
 
         if(self.position.find("./required") is not None):
             # call function first if exist
@@ -60,26 +63,33 @@ class SiraController():
             interactive = self.position.find("./interactive")
             self.view.set_command_mode(False)
             if(interactive is not None):
-                return [interactive.text]
+                self.view.info = [interactive.text]
             else:
-                return [""]
+                self.view.info = [""]
+            return
         elif(self.position.find("./keyword") is not None):
             interactive = self.position.find("./interactive")
             self.view.set_command_mode(True)
             if(interactive is not None):
-                return [interactive.text, self.interactive_cursor]
+                self.view.info = [interactive.text, self.interactive_cursor]
+                return
             else:
                 self.clearcache()
-                return ["error command", self.cursor]
+                self.view.info = ["error command", self.cursor]
+                return
         else:
-            functag = self.position.find("./function")
-            result = getattr(eval(functag.attrib['object']), functag.attrib['name'])(self.paras)
-            # set cursor value to username when login successd
-            if(functag.attrib['object'] == "login" and result == 1):
-                self.cursor = self.paras[0] + " > "
+            threading.Thread(None,self.execfunc).run()
             self.clearcache()
             self.view.set_command_mode(True)
-            return [result, self.cursor]
+            return
+
+    def execfunc(self):
+        functag = self.position.find("./function")
+        result = getattr(eval(functag.attrib['object']), functag.attrib['name'])(self.paras)
+            # set cursor value to username when login successd
+        if(functag.attrib['object'] == "login" and result == 1):
+            self.cursor = self.paras[0] + " > "
+        self.view.info = [result, self.cursor]
 
     def clearcache(self):
         self.position = None

@@ -113,8 +113,6 @@ class AdvancedTextInput(TextInput):
             #     backspace   delete          _selection is True
             elif (key == 8 or key == 127) and self._selection:
                 self.delete_lastchar()
-            else: 
-                print(key)
             ### changes end here
             return True
 
@@ -400,6 +398,6 @@ class AdvancedTextInput(TextInput):
     
     def delete_lastchar(self):
         self.cancel_selection()
-        self.do_cursor_movement("cursor_end")
+        self.do_cursor_movement("cursor_end", control=True)
         if self._get_cursor_col() > self.protected_len:
             self.do_backspace()

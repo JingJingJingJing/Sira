@@ -1,16 +1,23 @@
 from kivy.app import App
-from kivy.uix.textinput import TextInput
+from kivy.lang import Builder
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
+import kivy.properties as kp
+
 from advancedtextinput import AdvancedTextInput
 
 
 class SiraApp(App):
+
+    info = kp.ListProperty([])
+    # option = kp.ListProperty([])
 
     def __init__(self, **kwargs):
         super(SiraApp, self).__init__(**kwargs)
 
     def setController(self, controller):
         self.controller = controller
+        self.info = []
 
     def on_tab(self, instance):
         pass
@@ -27,11 +34,14 @@ class SiraApp(App):
         elif instance.command_mode:
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
-        info = self.controller.processInput(instance, string)
-        instance.protected_len = len(info[-1])
-        for s in info:
-            instance.insert_text("\n" + str(s))
+        self.controller.processInput(instance, string)
         return True
+
+    def on_info(self, instance, info):
+        self.commandText.do_cursor_movement("cursor_end")
+        self.commandText.protected_len = len(info[-1])
+        for s in info:
+            self.commandText.insert_text("\n" + str(s))
 
     def set_pwd_mode(self):
         self.commandText.password_mode = True
@@ -40,14 +50,8 @@ class SiraApp(App):
         self.commandText.command_mode = value
 
     def build(self):
-        self.commandText = AdvancedTextInput()
-        self.commandText.text = ">>>"
-        self.commandText.background_color = [0, 0, 0, 1]
-        self.commandText.focus = True
-        self.commandText.cursor_color = [1, 1, 1, 1]
-        self.commandText.foreground_color = [1, 1, 1, 1]
-        self.commandText.padding = [20, 20, 20, 0]
-        self.commandText.bind(on_text_validate=self.on_command)
-        self.commandText.bind(on_tab=self.on_tab)
-
+        self.commandText = Builder.load_file("../res/sira.kv")
         return self.commandText
+
+    def build_settings(self, settings):
+        pass

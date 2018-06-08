@@ -215,8 +215,13 @@ class AdvancedTextInput(TextInput):
 
         # If the selection includes protected parts, cancel selection.
         index = -1 if len(self._lines) < 2 else self.text.rindex('\n')
+
+        ### when user selected both protected texts and the command
         if self.selection_from < index + self.protected_len + 1:
             self.cancel_selection()
+            self.do_cursor_movement("cursor_end")
+            if self._get_cursor_col() > self.protected_len:
+                self.do_backspace()
             return
 
         # changes start from here

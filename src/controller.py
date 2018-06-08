@@ -78,9 +78,8 @@ class SiraController():
                 self.view.info = ["error command", self.cursor]
                 return
         else:
-            threading.Thread(None,self.execfunc).run()
-            self.clearcache()
-            self.view.set_command_mode(True)
+            self.view.commandText.readonly = True
+            threading.Thread(None,self.execfunc).start()
             return
 
     def execfunc(self):
@@ -88,8 +87,11 @@ class SiraController():
         result = getattr(eval(functag.attrib['object']), functag.attrib['name'])(self.paras)
             # set cursor value to username when login successd
         if(functag.attrib['object'] == "login" and result == 1):
-            self.cursor = self.paras[0] + " > "
+            self.cursor = self.paras[0] + ">"
         self.view.info = [result, self.cursor]
+        self.clearcache()
+        self.view.set_command_mode(True)
+        self.view.commandText.readonly = False
 
     def clearcache(self):
         self.position = None

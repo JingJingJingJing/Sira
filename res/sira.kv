@@ -1,0 +1,13 @@
+#:kivy 1.10.0
+#:import AdvancedTextInput advancedtextinput.AdvancedTextInput
+
+AdvancedTextInput:
+    id: commandText
+    text: '>>>'
+    background_color: [0, 0, 0, 1]
+    focus: True
+    cursor_color: [1, 1, 1, 1]
+    foreground_color: [1, 1, 1, 1]
+    padding: [20, 20, 20, 20]
+    on_text_validate: app.on_command(self)
+    on_tab: app.on_tab(self)

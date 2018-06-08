@@ -18,7 +18,7 @@ class AdvancedTextInput(TextInput):
 
     password_cache = kp.StringProperty("")
 
-    protected_len = kp.NumericProperty(3)
+    protected_len = kp.NumericProperty(1)
 
     command_mode = kp.BooleanProperty(True)
 
@@ -75,7 +75,6 @@ class AdvancedTextInput(TextInput):
                 self.do_backspace()
         elif internal_action == 'enter':
             self.dispatch('on_text_validate')
-            # import pdb; pdb.set_trace()
         elif internal_action == 'escape':
             self.focus = False
         if internal_action != 'escape':
@@ -352,12 +351,20 @@ class AdvancedTextInput(TextInput):
     def keyboard_on_textinput(self, window, text):
         if self._editable:
             if self._selection:
-                self.delete_selection()
+                self.do_cursor_movement("cursor_end")
+                self.cancel_selection()
             if self.password_mode:
                 self.password_cache += text
             else:
                 self.insert_text(text, False)
         return
+
+    def select_all(self):
+        ''' Select all of the text displayed in this TextInput.
+
+        .. versionadded:: 1.4.0
+        '''
+        self.select_text(0, len(self.text))
 
     # custom functions:
 

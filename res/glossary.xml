@@ -2,33 +2,12 @@
 <cmd>
     <keyword name="sira">
         <keyword name="login">
-            <optinal name="user_name" type="dynamic" field="user">
-                <optinal name="pwd" type="dynamic" field="user"></optinal>
-                <interactive field="pwd">Password:</interactive>
-                <function name="" para="user pwd"></function>
-            </optinal>
-            <interactive field="user">User name:</interactive>
-            <function name=""></function>
-        </keyword>
-        <keyword name="search">
-            <keyword name="status">
-                <optinal name="issueId" type="dynamic" field="issueId"></optinal>
-                <function name="search_status" para="issueId"></function>
-            </keyword>
-            <keyword name="assignee">
-                <optinal name="issueId" type="dynamic" field="issueId"></optinal>
-                <function name="search_assignee" para="issueId"></function>
-            </keyword>
-        </keyword>
-        <function name=""></function>
             <required name="user_name">
                 <required name="pwd">
-            <optional name="user_name" type="dynamic" field="user">
-                <optional name="pwd" type="dynamic" field="user">
-                    <function object="login" name="login" para="user pwd"></function>
+                    <function object="login" name="login" para="user pwd"/>
                 </required>
                 <interactive>Password:</interactive>
-                <function object="self.view" name="set_pwd_mode"></function>
+                <function object="self.view" name="set_pwd_mode"/>
             </required>
             <interactive>User name:</interactive>
         </keyword>
@@ -36,46 +15,43 @@
             <interactive>number project type assignee sprint</interactive>
             <keyword name="number">
                 <required name="issueId">
-                    <function object="query" name="query_issueId" para="issueId"></function>
+                    <function object="query" name="query_issueId" para="issueId"/>
                 </required>
             </keyword>
             <keyword name="project">
                 <required name="project_name">
                     <interactive>type assignee sprint</interactive>
                     <keyword name="type">
-                        <required  name="type">
-                            <function object="query" name="query_project_type" para="project_name type"></function>
+                        <required name="type">
+                            <function object="query" name="query_project_type" para="project_name type"/>
                         </required>
                     </keyword>
                     <keyword name="assignee">
-                        <required  name="assignee">
-                            <function object="query" name="query_project_assignee" para="project_name assignee"></function>
+                        <required name="assignee">
+                            <function object="query" name="query_project_assignee" para="project_name assignee"/>
                         </required>
                     </keyword>
                     <keyword name="sprint">
                         <required name="sprint">
-                            <function object="query" name="query_project_sprint" para="project_name sprint"></function>
-                        </required>                        
+                            <function object="query" name="query_project_sprint" para="project_name sprint"/>
+                        </required>
                     </keyword>
                 </required>
             </keyword>
             <keyword name="type">
                 <required name="type">
-                    <function object="query" name="query_type" para="type"></function>
+                    <function object="query" name="query_type" para="type"/>
                 </required>
             </keyword>
             <keyword name="assignee">
                 <required name="assignee_name">
-                    <function object="query" name="query_assignee" para="assignee_name"></function>
+                    <function object="query" name="query_assignee" para="assignee_name"/>
                 </required>
             </keyword>
             <keyword name="sprint">
                 <required name="sprint_name">
-                    <function object="query" name="query_sprint" para="sprint_name"></function>
+                    <function object="query" name="query_sprint" para="sprint_name"/>
                 </required>
-                <optional name="issueId" type="dynamic" field="issueId">
-                    <function name="search_assignee" para="issueId"></function>
-                </optional>
             </keyword>
         </keyword>
     </keyword>

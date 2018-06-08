@@ -88,7 +88,7 @@ class SiraController():
             # set cursor value to username when login successd
         if(functag.attrib['object'] == "login" and result == 1):
             self.cursor = self.paras[0] + ">"
-        self.view.info = [str(result), self.cursor]
+        self.view.info = ["fdas", self.cursor]
         self.clearcache()
         self.view.set_command_mode(True)
         self.view.commandText.readonly = False

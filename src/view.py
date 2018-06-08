@@ -38,6 +38,7 @@ class SiraApp(App):
         return True
 
     def on_info(self, instance, info):
+        # import pdb; pdb.set_trace()
         self.commandText.do_cursor_movement("cursor_end")
         self.commandText.protected_len = len(info[-1])
         for s in info:

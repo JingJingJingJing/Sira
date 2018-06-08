@@ -20,6 +20,7 @@ def read_cookie():
     Return 1 on success, 0 on failure """
 
 def login(lst):
+    print(lst)
     un = lst[0]
     pw = lst[1]
     url = 'http://'+domain+'/rest/auth/1/session'

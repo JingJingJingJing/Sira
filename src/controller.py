@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 import threading
 import re
 import login
+import query
 
 class SiraController():
 
@@ -18,13 +19,10 @@ class SiraController():
         self.tree = ET.parse("res/glossary.xml").getroot()
 
     def processInput(self, instance, string):
-        # instance.set_pwd_mode()
-        # self.view.set_pwd_mode()
         return self.cal(string)
 
     def cal(self, command):
         tokens = self.separater.split(command.strip())
-        print(tokens)
 
         if(len(tokens) <= 0):
             self.view.set_command_mode(True)
@@ -86,12 +84,18 @@ class SiraController():
         functag = self.position.find("./function")
         result = getattr(eval(functag.attrib['object']), functag.attrib['name'])(self.paras)
             # set cursor value to username when login successd
-        if(functag.attrib['object'] == "login" and result == 1):
+        if(functag.attrib['object'] == "login" and result):
             self.cursor = self.paras[0] + ">"
         self.view.commandText.readonly = False
         self.view.info = [result, self.cursor]
         self.clearcache()
         self.view.set_command_mode(True)
+
+    def closeinteractive(self):
+        self.clearcache()
+        self.view.set_command_mode(True)
+        self.view.commandText.readonly = False
+        self.view.info = ["interactive mode closed", self.cursor]
 
     def clearcache(self):
         self.position = None

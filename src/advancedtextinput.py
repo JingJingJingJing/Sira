@@ -105,7 +105,8 @@ class AdvancedTextInput(TextInput):
                 if is_shortcut and key == ord('c'):
                     ### changes start here
                     self.dispatch("on_ctrl_c")
-                    ### changes end here
+                elif is_shortcut and key == ord('a'):
+                    self.select_all()
             elif key == 27:
                 self.focus = False
             ### changes start here
@@ -178,7 +179,7 @@ class AdvancedTextInput(TextInput):
                     ### changes end here
                 elif key == ord('c'):  # copy selection
                     ### changes start here
-                    self.dispatch("stop_interaction")
+                    self.dispatch("on_ctrl_c")
                     ### changes start here
                 elif key == ord('v'):  # paste selection
                     self.paste()
@@ -374,7 +375,16 @@ class AdvancedTextInput(TextInput):
 
         .. versionadded:: 1.4.0
         '''
-        self.select_text(0, len(self.text))
+        ### changes start here
+        text_end = len(self.text)
+        line_start = text_end - (len(self._lines[-1]) - self.protected_len)
+        if self._selection and self.selection_from == line_start\
+                and self.selection_to == text_end or \
+                len(self._lines[-1]) == self.protected_len:
+            self.select_text(0, text_end)
+        else:
+            self.select_text(line_start, text_end)
+        ### changes end here
 
     ### custom functions:
 

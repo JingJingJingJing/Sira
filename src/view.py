@@ -23,7 +23,8 @@ class SiraApp(App):
         pass
 
     def stop_interaction(self, instance):
-        pass
+        self.controller.closeinteractive()
+        instance.password_mode = False
         
     def on_command(self, instance):
         # import pdb; pdb.set_trace()
@@ -44,7 +45,6 @@ class SiraApp(App):
     def on_info(self, instance, info):
         if self.info == []:
             return
-        print(info)
         self.commandText.do_cursor_movement("cursor_end")
         self.commandText.protected_len = len(info[-1])
         for s in info:

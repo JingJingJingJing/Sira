@@ -23,6 +23,7 @@ class SiraApp(App):
         pass
         
     def on_command(self, instance):
+        # import pdb; pdb.set_trace()
         string = instance._lines[len(instance._lines) - 1]\
                 [instance.protected_len:]
         if string == "exit":
@@ -38,11 +39,14 @@ class SiraApp(App):
         return True
 
     def on_info(self, instance, info):
-        # import pdb; pdb.set_trace()
+        if self.info == []:
+            return
+        print(info)
         self.commandText.do_cursor_movement("cursor_end")
         self.commandText.protected_len = len(info[-1])
         for s in info:
             self.commandText.insert_text("\n" + str(s))
+        self.info = []
 
     def set_pwd_mode(self):
         self.commandText.password_mode = True

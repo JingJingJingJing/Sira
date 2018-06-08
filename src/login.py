@@ -26,6 +26,7 @@ def login(lst):
             f = open(cookie_path+"cookie.txt","w")
             f.write(cookie)
             f.close
+            print("success")
         return r.text
     except requests.exceptions.ConnectTimeout as err:
         return err

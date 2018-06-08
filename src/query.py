@@ -1,5 +1,8 @@
 import requests
 import json
+from extract import getIssue
+from extract import getField
+
 domain = '10.176.111.32:8080'
 cookie_path = ''
 
@@ -30,14 +33,19 @@ def test_assign():
     cookie = read_cookie()
     url = 'http://'+domain+'/rest/api/2/search'
     headers = {'Content-Type':'application/json','cookie':cookie}
-    data = '{"jql":"assignee=Hang","startAt":0, "maxResults": 15,"fields":["summary","status","assignee"]}'
+    '''type | number | title | assignee | sprint | status | fixed version | project '''
+    data = '{"jql":"assignee=Hang","startAt":0, "maxResults": 15,"fields":["summary","issuetype","project","fixVersions","assignee","status"]}'
     r = requests.post(url,headers=headers,data=data)
     if(r.status_code == 200):
         print("!!!!!!!")
-        print(json.loads(r.text))
+        #jdata = json.loads(r.text)
+        #print(r.text)
+        ans = getIssue(r.text, 'TEST-3')
+        if ans is not None:
+            print("       *****")
+            getField(ans,None)
+            print("       *****")
         print("!!!!!!!")
-        print(findKey(r.text))
-        return findKey(r.text)
     else:
         print(r.status_code,r.text)
 

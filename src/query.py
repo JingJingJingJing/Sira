@@ -1,5 +1,5 @@
 import requests
-
+import json
 domain = '10.176.111.32:8080'
 cookie_path = ''
 
@@ -16,11 +16,33 @@ def query_assignee(user):
     headers = {'Content-Type':'application/json','cookie':cookie}
     r = requests.get(url,headers=headers)
     if(r.status_code == 200):
+        print("!!!!!!!")
+        print(r.text)
+
+        print("!!!!!!!")
         print(findKey(r.text))
         return findKey(r.text)
     else:
         print(r.status_code,r.text)
     # need to extract information from r.text
+
+def test_assign():
+    cookie = read_cookie()
+    url = 'http://'+domain+'/rest/api/2/search'
+    headers = {'Content-Type':'application/json','cookie':cookie}
+    data = '{"jql":"assignee=Hang","startAt":0, "maxResults": 15,"fields":["summary","status","assignee"]}'
+    r = requests.post(url,headers=headers,data=data)
+    if(r.status_code == 200):
+        print("!!!!!!!")
+        print(json.loads(r.text))
+        print("!!!!!!!")
+        print(findKey(r.text))
+        return findKey(r.text)
+    else:
+        print(r.status_code,r.text)
+
+
+
 
 """ This function will return all information of issue represented by pid """
 def query_project(project):
@@ -86,3 +108,7 @@ def ltest():
         print(r.status_code,r.text)
 
 
+def test():
+    test_assign()
+
+test()

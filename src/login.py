@@ -25,9 +25,16 @@ def login(lst):
             f = open(cookie_path+"cookie.txt","w")
             f.write(cookie)
             f.close
-            print("success")
-        return r.text
+            f = open("username.txt","w")
+            f.write(un)
+            f.close            
+        return (True,r.text)
     except requests.exceptions.RequestException as err:
         print(err)
-        return err
-login(["admin","admin"])
+        return (False,err)
+
+def getUsername():
+    username = ''
+    with open("username.txt","r") as f:
+        username = f.read()
+    return username

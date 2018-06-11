@@ -2,7 +2,11 @@ import json
 defaultList = ['summary','issuetype','assignee','status','fixVersions','project']
 def getIssue(s, key):
     j = json.loads(s)
-    issue = j['issues']
+    issue = []
+    try:
+        issue = j['issues']
+    except KeyError:
+        pass
     if key is None:
         return issue
     else:
@@ -26,12 +30,10 @@ def defaultField(issue):
     defaultList = ['summary','issuetype','assignee','status','fixVersions','project']
     dic = {}
     for i in defaultList:
-        #print(issue)
         dic.update(getField(issue,i))
     return dic
 
 def dtos(dic,issue):
-    #print(issue)
     string ='Issue {}: '.format(issue)
     for i in dic:
         string += ' {} '.format(dic[i])

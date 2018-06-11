@@ -26,6 +26,7 @@
                 </required>
             </keyword>
             <keyword name="project">
+                <interactive>project:</interactive>
                 <required name="project_name">
                     <interactive>-type -assignee -sprint</interactive>
                     <keyword name="type">

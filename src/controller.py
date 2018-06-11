@@ -22,12 +22,12 @@ class SiraController():
         return self.cal(string)
 
     def cal(self, command):
-        tokens = self.separater.split(command.strip())
-
-        if(len(tokens) <= 0):
+        if(len(command) <= 0):
             self.view.set_command_mode(True)
             self.view.info = [self.cursor]
             return
+
+        tokens = self.separater.split(command.strip())
 
         if(self.position is None):
             self.position = self.tree
@@ -105,8 +105,3 @@ class SiraController():
         self.position = None
         self.paras.clear()
 
-def main():
-    print(SiraController(None,None).cal("sira query number TAN-6148"))
-
-if __name__ == '__main__':
-    main()

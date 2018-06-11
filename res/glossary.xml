@@ -1,5 +1,11 @@
 <?xml version="1.0"?>
 <cmd>
+    <keyword name="exit">
+        <function object="self.view" name="stop" />
+    </keyword>
+    <keyword name="clear">
+        <function object="self.view" name="on_clear()" />
+    </keyword>
     <keyword name="sira">
         <keyword name="login">
             <required name="user_name">

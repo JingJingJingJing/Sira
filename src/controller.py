@@ -82,14 +82,20 @@ class SiraController():
 
     def execfunc(self):
         functag = self.position.find("./function")
-        result = getattr(eval(functag.attrib['object']), functag.attrib['name'])(self.paras)
+        if self.paras:
+            result = getattr(eval(functag.attrib['object']), functag.attrib['name'])(self.paras)
+        else:
+            result = getattr(eval(functag.attrib['object']), functag.attrib['name'])()
             # set cursor value to username when login successd
         if(functag.attrib['object'] == "login" and "errorMessages" not in result):
             self.cursor = self.paras[0] + ">"
         elif(functag.attrib['object'] == "login" and "errorMessages" in result):
             self.cusor = self.normal_cursor
         self.view.commandText.readonly = False
-        self.view.info = [result, self.cursor]
+        if result:
+            self.view.info = [result, self.cursor]
+        else:
+            self.view.info = [self.cursor]
         self.clearcache()
         self.view.set_command_mode(True)
 

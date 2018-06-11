@@ -1,10 +1,10 @@
 import requests
 import json
-from jira import JIRA
+
 from extract import getIssue
 from extract import getField
 from extract import dtos
-from jira.client import GreenHopper
+
 domain = '10.176.111.32:8080'
 cookie_path = ''
 

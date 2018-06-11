@@ -194,12 +194,12 @@ def getBoard():
         return err
     
 def test():
-    query_number(['sira-21'])
+    #query_number(['sira-21'])
     #query_assignee([''])
-    query_assignee(['xp zheng'])
+    #query_assignee(['xp zheng'])
     #query_project(['Sira'])
-    query_type(['epic'])
-    query_sprint(['2'])
+    #query_type(['epic'])
+    #query_sprint(['2'])
     #query_sprint([''])
     #query_project_type(['Sirsdf'])
     pass
@@ -211,7 +211,7 @@ def test():
     
     jira = JIRA(options)
     '''
-test()
+#test()
 #query_project_type(['Sira','bug'])
 #query_project_type(['Sira','task'])
 #query_project_user(['Sira','Hang'])

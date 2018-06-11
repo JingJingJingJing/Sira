@@ -57,6 +57,7 @@ class SiraApp(App):
             moving the cursor.
 
     Event Driven Methods:
+        on_font_size(self, int) -> None
         on_info(self, kivy.uix.widget.Widget(), list()) -> None
         on_option(self, kivy.uix.widget.Widget(), list()) -> None
 
@@ -75,6 +76,7 @@ class SiraApp(App):
 
     def __init__(self, **kwargs):
         super(SiraApp, self).__init__(**kwargs)
+        self.__events__ = ["on_info", "on_option"]
  
     def build(self):
         self.settings_cls = SettingsWithSidebar
@@ -89,14 +91,7 @@ class SiraApp(App):
             filename="res/sira.json")
 
     def on_config_change(self, config, section, key, value):
-        if config == self.config:
-            on_cmd_idtf = lambda value: print(value)
-            on_font_size = lambda value: print(value)
-            switch_dict = {
-                ("Text", "cmd_identifier") : on_cmd_idtf,
-                ("Text", "font_size") : on_font_size
-            }
-            switch_dict[(section, key)](value)
+        pass
 
     def on_clear(self):
         instance = self.commandText
@@ -134,6 +129,9 @@ class SiraApp(App):
     def _stop_interaction(self, instance):
         self.controller.closeinteractive()
         instance.password_mode = False
+
+    def on_font_size(self, value: str):
+        pass
 
     def on_info(self, instance, info):
         if self.info == []:

@@ -28,6 +28,7 @@ class SiraApp(App):
             build_settings(self, kivy.uix.settings.Settings()) -> None
         
         Original:
+            on_clear(self) -> None
             set_command_mode(self, bool) -> None
             set_controller(self, controller.SiraController()) -> None
             set_pwd_mode(self) -> None

@@ -1,8 +1,11 @@
+import json
+import sys
+
 import kivy.properties as kp
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.uix.settings import Settings, SettingsWithSidebar
 from kivy.uix.widget import Widget
-from kivy.uix.settings import Settings
 
 from advancedtextinput import AdvancedTextInput
 
@@ -25,7 +28,9 @@ class SiraApp(App):
     Public Methods:
         Overrided from kivy.app.App:
             build(self) -> kivy.uix.widget.Widget()
+            build_config(self, config) -> None
             build_settings(self, kivy.uix.settings.Settings()) -> None
+            on_config_change(self, config, section, key, value) -> None
         
         Original:
             on_clear(self) -> None
@@ -72,11 +77,26 @@ class SiraApp(App):
         super(SiraApp, self).__init__(**kwargs)
  
     def build(self):
-        self.commandText = Builder.load_file("../res/sira.kv")
+        self.settings_cls = SettingsWithSidebar
+        self.commandText = Builder.load_file("res/sira.kv")
         return self.commandText
 
+    def build_config(self, config):
+        config.read("res/sira.ini")
+
     def build_settings(self, settings):
-        pass
+        settings.add_json_panel("Text Option", self.config,
+            filename="res/sira.json")
+
+    def on_config_change(self, config, section, key, value):
+        if config == self.config:
+            on_cmd_idtf = lambda value: print(value)
+            on_font_size = lambda value: print(value)
+            switch_dict = {
+                ("Text", "cmd_identifier") : on_cmd_idtf,
+                ("Text", "font_size") : on_font_size
+            }
+            switch_dict[(section, key)](value)
 
     def on_clear(self):
         instance = self.commandText

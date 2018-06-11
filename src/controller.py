@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 import threading
 import re
 import login
-import my_query as query
+import query
 
 class SiraController():
 
@@ -86,6 +86,8 @@ class SiraController():
             # set cursor value to username when login successd
         if(functag.attrib['object'] == "login" and "errorMessages" not in result):
             self.cursor = self.paras[0] + ">"
+        elif(functag.attrib['object'] == "login" and "errorMessages" in result):
+            self.cusor = self.normal_cursor
         self.view.commandText.readonly = False
         self.view.info = [result, self.cursor]
         self.clearcache()

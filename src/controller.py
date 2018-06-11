@@ -22,12 +22,12 @@ class SiraController():
         return self.cal(string)
 
     def cal(self, command):
-        tokens = self.separater.split(command.strip())
-
-        if(len(tokens) <= 0):
+        if(len(command) <= 0):
             self.view.set_command_mode(True)
             self.view.info = [self.cursor]
             return
+
+        tokens = self.separater.split(command.strip())
 
         if(self.position is None):
             self.position = self.tree
@@ -84,14 +84,18 @@ class SiraController():
         functag = self.position.find("./function")
         result = getattr(eval(functag.attrib['object']), functag.attrib['name'])(self.paras)
             # set cursor value to username when login successd
-        if(functag.attrib['object'] == "login" and result):
+        if(functag.attrib['object'] == "login" and "errorMessages" not in result):
             self.cursor = self.paras[0] + ">"
+        elif(functag.attrib['object'] == "login" and "errorMessages" in result):
+            self.cusor = self.normal_cursor
         self.view.commandText.readonly = False
         self.view.info = [result, self.cursor]
         self.clearcache()
         self.view.set_command_mode(True)
 
     def closeinteractive(self):
+        if(self.position is None or self.position == self.tree):
+            pass
         self.clearcache()
         self.view.set_command_mode(True)
         self.view.commandText.readonly = False
@@ -101,8 +105,3 @@ class SiraController():
         self.position = None
         self.paras.clear()
 
-def main():
-    print(SiraController(None,None).cal("sira query number TAN-6148"))
-
-if __name__ == '__main__':
-    main()

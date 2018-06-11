@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <cmd>
     <keyword name="exit">
-        <function object="self.view" name="stop" />
+        <function multi-thread="False" object="self.view" name="stop" />
     </keyword>
     <keyword name="clear">
-        <function object="self.view" name="on_clear" />
+        <function multi-thread="False" object="self.view" name="on_clear" />
     </keyword>
     <keyword name="sira">
         <keyword name="login">
             <required name="user_name">
                 <required name="pwd">
-                    <function object="login" name="login" para="user pwd"/>
+                    <function multi-thread="True" object="login" name="login" para="user pwd"/>
                 </required>
                 <interactive>Password:</interactive>
-                <function object="self.view" name="set_pwd_mode"/>
+                <function multi-thread="False" object="self.view" name="set_pwd_mode"/>
             </required>
             <interactive>User name:</interactive>
         </keyword>
@@ -22,7 +22,7 @@
             <keyword name="number">
                 <interactive>issueId/Key:</interactive>
                 <required name="issueId">
-                    <function object="query" name="query_number" para="issueId"/>
+                    <function multi-thread="True" object="query" name="query_number" para="issueId"/>
                 </required>
             </keyword>
             <keyword name="project">
@@ -32,19 +32,19 @@
                     <keyword name="type">
                         <interactive>type:</interactive>
                         <required name="type">
-                            <function object="query" name="query_project_type" para="project_name type"/>
+                            <function multi-thread="True" object="query" name="query_project_type" para="project_name type"/>
                         </required>
                     </keyword>
                     <keyword name="assignee">
                         <interactive>assignee:</interactive>
                         <required name="assignee">
-                            <function object="query" name="query_project_assignee" para="project_name assignee"/>
+                            <function multi-thread="True" object="query" name="query_project_assignee" para="project_name assignee"/>
                         </required>
                     </keyword>
                     <keyword name="sprint">
                         <interactive>sprint:</interactive>
                         <required name="sprint">
-                            <function object="query" name="query_project_sprint" para="project_name sprint"/>
+                            <function multi-thread="True" object="query" name="query_project_sprint" para="project_name sprint"/>
                         </required>
                     </keyword>
                 </required>
@@ -52,19 +52,19 @@
             <keyword name="type">
                 <interactive>type:</interactive>
                 <required name="type">
-                    <function object="query" name="query_type" para="type"/>
+                    <function multi-thread="True" object="query" name="query_type" para="type"/>
                 </required>
             </keyword>
             <keyword name="assignee">
                 <interactive>assignee:</interactive>
                 <required name="assignee_name">
-                    <function object="query" name="query_assignee" para="assignee_name"/>
+                    <function multi-thread="True" object="query" name="query_assignee" para="assignee_name"/>
                 </required>
             </keyword>
             <keyword name="sprint">
                 <interactive>sprint:</interactive>
                 <required name="sprint_name">
-                    <function object="query" name="query_sprint" para="sprint_name"/>
+                    <function multi-thread="True" object="query" name="query_sprint" para="sprint_name"/>
                 </required>
             </keyword>
         </keyword>

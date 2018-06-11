@@ -28,6 +28,7 @@ class SiraApp(App):
             build_settings(self, kivy.uix.settings.Settings()) -> None
         
         Original:
+            on_clear(self) -> None
             set_command_mode(self, bool) -> None
             set_controller(self, controller.SiraController()) -> None
             set_pwd_mode(self) -> None
@@ -77,6 +78,10 @@ class SiraApp(App):
     def build_settings(self, settings):
         pass
 
+    def on_clear(self):
+        instance = self.commandText
+        instance.scroll_y = (len(instance._lines) - 1) * instance.line_height
+
     def set_pwd_mode(self):
         self.commandText.password_mode = True
 
@@ -93,9 +98,6 @@ class SiraApp(App):
     def _on_command(self, instance):
         string = instance._lines[len(instance._lines) - 1]\
                 [instance.protected_len:]
-        if string == "exit":
-            self.stop()
-            return True
         if instance.password_mode:
             string = instance.password_cache
             instance.password_mode = False

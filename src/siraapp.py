@@ -7,7 +7,7 @@ def main():
     view = SiraApp()
     model = SiraMode()
     controller = SiraController(view, model)
-    view.setController(controller)
+    view.set_controller(controller)
     view.run()
 
 

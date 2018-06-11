@@ -1,5 +1,5 @@
 import requests
-from threading import Thread
+import json
 domain = '10.176.111.32:8080'
 cookie_path = ''
 
@@ -28,9 +28,15 @@ def login(lst):
             f = open("username.txt","w")
             f.write(un)
             f.close            
-        return (True,r.text)
+            return(True, "Success")
+        else:
+            j = json.loads(r.text)
+            errlst = j['errorMessages']
+            errors = ''
+            for err in errlst:
+                errors += err+'\r\n'
+            return(False, errors)
     except requests.exceptions.RequestException as err:
-        print(err)
         return (False,err)
 
 def getUsername():

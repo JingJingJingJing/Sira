@@ -23,7 +23,7 @@ class AdvancedTextInput(TextInput):
     command_mode = kp.BooleanProperty(True)
 
     __events__ = ('on_text_validate', 'on_double_tap', 'on_triple_tap',
-                  'on_quad_touch', 'on_tab')
+                  'on_quad_touch', 'on_tab', 'on_ctrl_c')
 
     def __init__(self, **kwargs):
         super(AdvancedTextInput, self).__init__(**kwargs)
@@ -103,9 +103,17 @@ class AdvancedTextInput(TextInput):
             # duplicated but faster testing for non-editable keys
             if text and not is_interesting_key:
                 if is_shortcut and key == ord('c'):
-                    self.copy()
+                    ### changes start here
+                    self.dispatch("on_ctrl_c")
+                elif is_shortcut and key == ord('a'):
+                    self.select_all()
             elif key == 27:
                 self.focus = False
+            ### changes start here
+            #     backspace   delete          _selection is True
+            elif (key == 8 or key == 127) and self._selection:
+                self.delete_lastchar()
+            ### changes end here
             return True
 
         if text and not is_interesting_key:
@@ -164,9 +172,13 @@ class AdvancedTextInput(TextInput):
 
             if is_shortcut:
                 if key == ord('x'):  # cut selection
-                    self._cut(self.selection_text)
+                    ### changes start here
+                    pass
+                    ### changes end here
                 elif key == ord('c'):  # copy selection
-                    self.copy()
+                    ### changes start here
+                    self.dispatch("on_ctrl_c")
+                    ### changes start here
                 elif key == ord('v'):  # paste selection
                     self.paste()
                 elif key == ord('a'):  # select all
@@ -210,20 +222,17 @@ class AdvancedTextInput(TextInput):
         '''
         if self.readonly:
             return
-        # changes start from here
+        ### changes start from here
 
         # If the selection includes protected parts, cancel selection.
         index = -1 if len(self._lines) < 2 else self.text.rindex('\n')
 
         ### when user selected both protected texts and the command
         if self.selection_from < index + self.protected_len + 1:
-            self.cancel_selection()
-            self.do_cursor_movement("cursor_end")
-            if self._get_cursor_col() > self.protected_len:
-                self.do_backspace()
+            self.delete_lastchar()
             return
 
-        # changes start from here
+        ### changes end here
         self._hide_handles(EventLoop.window)
         scrl_x = self.scroll_x
         scrl_y = self.scroll_y
@@ -324,6 +333,72 @@ class AdvancedTextInput(TextInput):
             row = min(row + pgmove_speed, len(self._lines) - 1)
             col = min(len(self._lines[row]), col)
         self.cursor = (col, row)
+    
+    def on_touch_down(self, touch):
+        if self.disabled:
+            return
+
+        touch_pos = touch.pos
+        if not self.collide_point(*touch_pos):
+            return False
+        if super(AdvancedTextInput, self).on_touch_down(touch):
+            return True
+
+        if self.focus:
+            self._trigger_cursor_reset()
+
+        # Check for scroll wheel
+        if 'button' in touch.profile and touch.button.startswith('scroll'):
+            scroll_type = touch.button[6:]
+            if scroll_type == 'down':
+                if self.multiline:
+                    if self.scroll_y <= 0:
+                        return
+                    self.scroll_y -= self.line_height
+                else:
+                    if self.scroll_x <= 0:
+                        return
+                    self.scroll_x -= self.line_height
+            if scroll_type == 'up':
+                if self.multiline:
+                    ### changes in the next two lines
+                    if (self.scroll_y >=
+                            (len(self._lines) - 1) * self.line_height):
+                        return
+                    self.scroll_y += self.line_height
+                else:
+                    if (self.scroll_x + self.width >=
+                            self._lines_rects[-1].texture.size[0]):
+                        return
+                    self.scroll_x += self.line_height
+
+        touch.grab(self)
+        self._touch_count += 1
+        if touch.is_double_tap:
+            self.dispatch('on_double_tap')
+        if touch.is_triple_tap:
+            self.dispatch('on_triple_tap')
+        if self._touch_count == 4:
+            self.dispatch('on_quad_touch')
+
+        self._hide_cut_copy_paste(EventLoop.window)
+        # schedule long touch for paste
+        self._long_touch_pos = touch.pos
+        self._long_touch_ev = Clock.schedule_once(self.long_touch, .5)
+
+        self.cursor = self.get_cursor_from_xy(*touch_pos)
+        if not self._selection_touch:
+            self.cancel_selection()
+            self._selection_touch = touch
+            self._selection_from = self._selection_to = self.cursor_index()
+            self._update_selection()
+
+        # if CutBuffer and 'button' in touch.profile and \
+        #         touch.button == 'middle':
+        #     self.insert_text(CutBuffer.get_cutbuffer())
+        #     return True
+
+        return False
 
     def display_command(self, text):
         self.cancel_selection()
@@ -349,14 +424,15 @@ class AdvancedTextInput(TextInput):
         self._trigger_update_graphics()
 
     def keyboard_on_textinput(self, window, text):
-        if self._editable:
-            if self._selection:
-                self.do_cursor_movement("cursor_end")
-                self.cancel_selection()
-            if self.password_mode:
-                self.password_cache += text
-            else:
-                self.insert_text(text, False)
+        ### changes start here
+        if self._selection:
+            self.cancel_selection()
+        self.do_cursor_movement("cursor_end", control=True)
+        if self.password_mode:
+            self.password_cache += text
+        else:
+            self.insert_text(text, False)
+        ### changes end here
         return
 
     def select_all(self):
@@ -364,9 +440,18 @@ class AdvancedTextInput(TextInput):
 
         .. versionadded:: 1.4.0
         '''
-        self.select_text(0, len(self.text))
+        ### changes start here
+        text_end = len(self.text)
+        line_start = text_end - (len(self._lines[-1]) - self.protected_len)
+        if self._selection and self.selection_from == line_start\
+                and self.selection_to == text_end or \
+                len(self._lines[-1]) == self.protected_len:
+            self.select_text(0, text_end)
+        else:
+            self.select_text(line_start, text_end)
+        ### changes end here
 
-    # custom functions:
+    ### custom functions:
 
     def on_password_mode(self, instance, value):
         if not value:
@@ -374,3 +459,12 @@ class AdvancedTextInput(TextInput):
 
     def on_tab(self):
         pass
+
+    def on_ctrl_c(self):
+        pass
+    
+    def delete_lastchar(self):
+        self.cancel_selection()
+        self.do_cursor_movement("cursor_end", control=True)
+        if self._get_cursor_col() > self.protected_len:
+            self.do_backspace()

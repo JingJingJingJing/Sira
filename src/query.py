@@ -39,7 +39,6 @@ def query(f, data):
                     except KeyError as err:
                         return_val = 'given field "{}" not found'.format(err)
                         return return_val
-                print(string)
                 return string
             else:
                 return 'Issue not Found'
@@ -79,7 +78,7 @@ def query_number(lst):
     try:
         r = requests.get(url,headers=headers,timeout=3)
         if r.status_code != 200:
-            return str(r.status_code) + r.text 
+            return str(r.status_code) + "Failed"
         j = json.loads(r.text)
         try:
             return j['warningMessages']
@@ -143,13 +142,10 @@ def query_project(data,p,t):
                 
                 return 'Issue not Found'
         else:
-            print("else")
-            print(r.status_code)
-            return str(r.status_code) + r.text 
+            return str(r.status_code) + "Failed"
     except requests.exceptions.RequestException as err:
-        print(err)
         return err
-    pass
+
 
 def query_project_type(lst):
     return query_project(lst[0],'issuetype',lst[1])

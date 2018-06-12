@@ -34,7 +34,6 @@ def query(field1, field2, f):
     flag,r = send_request(url, method.Post, headers, None, data)
     if not flag:
         return r
-
     j = json.loads(r.text)
     try:
         return j['warningMessages']

@@ -21,6 +21,7 @@ class SiraApp(App):
         Class-scope Variables:
             info --  kivy.properties.ListProperty (default [])
             [TODO] option -- kivy.properties.ListProperty (default [])
+            username -- kivy.properties.StringPorperty (default ""s)
         
         Method-established Variables:
             commandText -- advancedtextinput.AdvancedTextInput (default None)
@@ -57,8 +58,10 @@ class SiraApp(App):
             moving the cursor.
 
     Event Driven Methods:
+        on_font_size(self, int) -> None
         on_info(self, kivy.uix.widget.Widget(), list()) -> None
         on_option(self, kivy.uix.widget.Widget(), list()) -> None
+        on_username(self, kivy.uix.widget.Widget(), str) -> None
 
     Conventions:
         {
@@ -73,30 +76,30 @@ class SiraApp(App):
 
     # option = kp.ListProperty([])
 
+    username = kp.StringProperty("")
+
     def __init__(self, **kwargs):
         super(SiraApp, self).__init__(**kwargs)
+        self.__events__ = ["on_info", "on_option"]
  
     def build(self):
         self.settings_cls = SettingsWithSidebar
         self.commandText = Builder.load_file("res/sira.kv")
+        username = self.config.get("Text", "username")
+        self.controller.cursor = username + self.controller.normal_cursor
+        self.commandText.protected_len = len(username) + 1
+        self.commandText.text = username + ">"
         return self.commandText
 
     def build_config(self, config):
-        config.read("res/sira.ini")
+        config.read("src/sira.ini")
 
     def build_settings(self, settings):
         settings.add_json_panel("Text Option", self.config,
             filename="res/sira.json")
 
     def on_config_change(self, config, section, key, value):
-        if config == self.config:
-            on_cmd_idtf = lambda value: print(value)
-            on_font_size = lambda value: print(value)
-            switch_dict = {
-                ("Text", "cmd_identifier") : on_cmd_idtf,
-                ("Text", "font_size") : on_font_size
-            }
-            switch_dict[(section, key)](value)
+        pass
 
     def on_clear(self):
         instance = self.commandText
@@ -131,6 +134,9 @@ class SiraApp(App):
         self.controller.closeinteractive()
         instance.password_mode = False
 
+    def on_font_size(self, value: str):
+        pass
+
     def on_info(self, instance, info):
         if self.info == []:
             return
@@ -142,3 +148,7 @@ class SiraApp(App):
 
     def on_option(self, instance, info):
         pass
+
+    def on_username(self, instance, value):
+        self.config.set("Text", "username", value)
+        self.config.write()

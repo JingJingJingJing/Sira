@@ -47,6 +47,7 @@ class SiraController():
             for child in list(self.position):
                 if(child.tag == "keyword" and child.attrib['name'] == token):
                     if((not self.view.username) and (token != "login" and token != "exit" and token != "clear" and token != "sira")):
+                        self.clearcache()
                         self.view.commandText.readonly = False
                         self.view.info = ["Please login first", self.cursor]
                         return

@@ -143,8 +143,5 @@ Thumbs.db
 # project file
 cookie.txt
 .vscode/
-<<<<<<< HEAD
-=======
 username.txt
->>>>>>> master
 src/sira.ini

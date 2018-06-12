@@ -136,7 +136,6 @@ def query_project(data,p,t):
                         return_val = 'given field "{}" not found'.format(err)
                         
                         return return_val
-                print(string)
                 return string
             else:
                 
@@ -189,27 +188,3 @@ def getBoard():
     except requests.exceptions.RequestException as err:
         return err
     
-def test():
-    #query_number(['sira-21'])
-    #query_assignee([''])
-    #query_assignee(['xp zheng'])
-    #query_project(['Sira'])
-    #query_type(['epic'])
-    #query_sprint(['2'])
-    #query_sprint([''])
-    #query_project_type(['Sirsdf'])
-    pass
-    '''
-    options = {
-    'server': 'http://10.176.111.32:8080',
-    'cookies': {'JSESSIONID':'DD537C56B9ABD14EEAA710C6BE539644'}
-    }
-    
-    jira = JIRA(options)
-    '''
-#test()
-#query_project_type(['Sira','bug'])
-#query_project_type(['Sira','task'])
-#query_project_user(['Sira','Hang'])
-#query_project_sprint(['Sira','2'])
-#query_project_user(['Sira','xp Zheng'])

@@ -17,6 +17,9 @@
             </required>
             <interactive>User name:</interactive>
         </keyword>
+        <keyword name="logout">
+            <function multi-thread="False" object="login" name="logout" />
+        </keyword>
         <keyword name="query">
             <interactive>-number -project -type -assignee -sprint</interactive>
             <keyword name="number">

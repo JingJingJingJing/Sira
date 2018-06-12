@@ -3,6 +3,7 @@ import threading
 import re
 import login
 import query
+import time
 
 class SiraController():
 
@@ -87,25 +88,31 @@ class SiraController():
             if(functag.attrib['multi-thread'] == 'True'):
                 threading.Thread(None,self.execfunc).start()
             else:
-                self.execfunc()
+                if(functag.attrib['name'] == "on_clear"):
+                    self.view.commandText.readonly = False
+                    self.view.info = [self.cursor]
+                    self.view.on_clear()
+                else:
+                    self.execfunc()
             return
 
     def execfunc(self):
         functag = self.position.find("./function")
+        funcobj = functag.attrib['object']
         if(self.paras):
-            result = getattr(eval(functag.attrib['object']), functag.attrib['name'])(self.paras)
+            result = getattr(eval(funcobj), functag.attrib['name'])(self.paras)
         else:
-            result = getattr(eval(functag.attrib['object']), functag.attrib['name'])()
+            result = getattr(eval(funcobj), functag.attrib['name'])()
         # set cursor value to username when login successd
-        if(functag.attrib['object'] == "login" and result[0]):
+        if(funcobj == "login" and result[0]):
             self.view.username = self.paras[0]
             self.cursor = self.paras[0] + self.normal_cursor
-        elif(functag.attrib['object'] == "login" and not result[0]):
+        elif((funcobj == "login" and not result[0]) or funcobj == "logout"):
             self.view.username = ""
             self.cursor = self.normal_cursor
         self.view.commandText.readonly = False
         if(result):
-            if(functag.attrib['object'] == "login"):
+            if(funcobj == "login"):
                 self.view.info = [result[1], self.cursor]
             else:
                 self.view.info = [result, self.cursor]

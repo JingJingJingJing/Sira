@@ -2,11 +2,7 @@
     {
         "type": "string",
         "title": "Command Identifier",
-<<<<<<< HEAD
-        "desc": "The string of characters right before commands",
-=======
         "desc": "The string of characters right before your commands",
->>>>>>> master
         "section": "Text",
         "key": "cmd_identifier"
     },

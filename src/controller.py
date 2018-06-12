@@ -19,9 +19,13 @@ class SiraController():
         self.tree = ET.parse("res/glossary.xml").getroot()
 
     def processInput(self, instance, string):
-        return self.cal(string)
+        try:
+            self.cal(string)
+        except Exception:
+            self.view.info = ["error while processing", self.cursor]
 
     def cal(self, command):
+        # return when command is empty in non-interactive mode
         if(len(command) <= 0 and (self.position is None or self.position == self.tree)):
             self.view.set_command_mode(True)
             self.view.info = [self.cursor]
@@ -92,11 +96,13 @@ class SiraController():
             result = getattr(eval(functag.attrib['object']), functag.attrib['name'])(self.paras)
         else:
             result = getattr(eval(functag.attrib['object']), functag.attrib['name'])()
-            # set cursor value to username when login successd
-        if(functag.attrib['object'] == "login" and result[0] == 1):
-            self.cursor = self.paras[0] + self.cursor
-        elif(functag.attrib['object'] == "login" and result[0] == 0):
-            self.cusor = self.normal_cursor
+        # set cursor value to username when login successd
+        if(functag.attrib['object'] == "login" and result[0]):
+            self.view.username = self.paras[0]
+            self.cursor = self.paras[0] + self.normal_cursor
+        elif(functag.attrib['object'] == "login" and not result[0]):
+            self.view.username = ""
+            self.cursor = self.normal_cursor
         self.view.commandText.readonly = False
         if(result):
             if(functag.attrib['object'] == "login"):

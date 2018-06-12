@@ -18,7 +18,7 @@ class AdvancedTextInput(TextInput):
 
     password_cache = kp.StringProperty("")
 
-    protected_len = kp.NumericProperty(1)
+    protected_len = kp.NumericProperty()
 
     command_mode = kp.BooleanProperty(True)
 
@@ -362,7 +362,7 @@ class AdvancedTextInput(TextInput):
             if scroll_type == 'up':
                 if self.multiline:
                     ### changes in the next two lines
-                    if (self.scroll_y >=
+                    if (self.scroll_y + 17 >=
                             (len(self._lines) - 1) * self.line_height):
                         return
                     self.scroll_y += self.line_height
@@ -392,11 +392,10 @@ class AdvancedTextInput(TextInput):
             self._selection_touch = touch
             self._selection_from = self._selection_to = self.cursor_index()
             self._update_selection()
-
-        # if CutBuffer and 'button' in touch.profile and \
-        #         touch.button == 'middle':
-        #     self.insert_text(CutBuffer.get_cutbuffer())
-        #     return True
+        
+        ### added one line here
+        self.cancel_selection()
+        ### deleted four lines here
 
         return False
 

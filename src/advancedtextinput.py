@@ -392,11 +392,10 @@ class AdvancedTextInput(TextInput):
             self._selection_touch = touch
             self._selection_from = self._selection_to = self.cursor_index()
             self._update_selection()
-
-        # if CutBuffer and 'button' in touch.profile and \
-        #         touch.button == 'middle':
-        #     self.insert_text(CutBuffer.get_cutbuffer())
-        #     return True
+        
+        ### added one line here
+        self.cancel_selection()
+        ### deleted four lines here
 
         return False
 

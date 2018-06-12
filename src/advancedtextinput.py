@@ -74,7 +74,8 @@ class AdvancedTextInput(TextInput):
             if self._get_cursor_col() > self.protected_len:
                 self.do_backspace()
         elif internal_action == 'enter':
-            self.dispatch('on_text_validate')
+            if not self.readonly:
+                self.dispatch('on_text_validate')
         elif internal_action == 'escape':
             self.focus = False
         if internal_action != 'escape':
@@ -426,7 +427,8 @@ class AdvancedTextInput(TextInput):
         ### changes start here
         if self._selection:
             self.cancel_selection()
-        self.do_cursor_movement("cursor_end", control=True)
+        if not self._editable:
+            self.do_cursor_movement("cursor_end", control=True)
         if self.password_mode:
             self.password_cache += text
         else:

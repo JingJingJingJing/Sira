@@ -1,6 +1,3 @@
-import json
-import sys
-
 import kivy.properties as kp
 from kivy.app import App
 from kivy.lang import Builder
@@ -16,13 +13,13 @@ class SiraApp(App):
 
     extends:
         kivy.app.App
-    
+
     Instance Variables:
         Class-scope Variables:
             info --  kivy.properties.ListProperty (default [])
             [TODO] option -- kivy.properties.ListProperty (default [])
             username -- kivy.properties.StringPorperty (default ""s)
-        
+
         Method-established Variables:
             commandText -- advancedtextinput.AdvancedTextInput (default None)
 
@@ -32,7 +29,7 @@ class SiraApp(App):
             build_config(self, config) -> None
             build_settings(self, kivy.uix.settings.Settings()) -> None
             on_config_change(self, config, section, key, value) -> None
-        
+
         Original:
             on_clear(self) -> None
             set_command_mode(self, bool) -> None
@@ -69,26 +66,26 @@ class SiraApp(App):
             && option = []
         }
     """
-    
+
     info = kp.ListProperty([])
     """
     """
 
     # option = kp.ListProperty([])
 
-    username = kp.StringProperty("")
+    username = kp.StringProperty(None)
 
     def __init__(self, **kwargs):
         super(SiraApp, self).__init__(**kwargs)
         self.__events__ = ["on_info", "on_option"]
- 
+
     def build(self):
         self.settings_cls = SettingsWithSidebar
         self.commandText = Builder.load_file("res/sira.kv")
-        username = self.config.get("Text", "username")
-        self.controller.cursor = username + self.controller.normal_cursor
-        self.commandText.protected_len = len(username) + 1
-        self.commandText.text = username + ">"
+        self.username = self.config.get("Text", "username")
+        self.controller.cursor = self.username + self.controller.normal_cursor
+        self.commandText.protected_len = len(self.username) + 1
+        self.commandText.text = self.username + ">"
         return self.commandText
 
     def build_config(self, config):
@@ -96,7 +93,7 @@ class SiraApp(App):
 
     def build_settings(self, settings):
         settings.add_json_panel("Text Option", self.config,
-            filename="res/sira.json")
+                                filename="res/sira.json")
 
     def on_config_change(self, config, section, key, value):
         pass
@@ -117,10 +114,10 @@ class SiraApp(App):
 
     def _on_tab(self, instance):
         pass
-        
+
     def _on_command(self, instance):
-        string = instance._lines[len(instance._lines) - 1]\
-                [instance.protected_len:]
+        string = instance._lines[len(
+            instance._lines) - 1][instance.protected_len:]
         if instance.password_mode:
             string = instance.password_cache
             instance.password_mode = False
@@ -131,8 +128,9 @@ class SiraApp(App):
         return True
 
     def _stop_interaction(self, instance):
-        self.controller.closeinteractive()
-        instance.password_mode = False
+        if not self.commandText.command_mode:
+            self.controller.closeinteractive()
+            instance.password_mode = False
 
     def on_font_size(self, value: str):
         pass
@@ -140,7 +138,7 @@ class SiraApp(App):
     def on_info(self, instance, info):
         if self.info == []:
             return
-        self.commandText.do_cursor_movement("cursor_end")
+        self.commandText.do_cursor_movement("cursor_end", control=True)
         self.commandText.protected_len = len(info[-1])
         for s in info:
             self.commandText.insert_text("\n" + str(s))

@@ -3,6 +3,7 @@ import threading
 import re
 import login
 import query
+import time
 
 class SiraController():
 
@@ -31,6 +32,11 @@ class SiraController():
             self.view.info = [self.cursor]
             return
 
+        if(command.startswith("sira login") and self.view.username):
+            self.view.commandText.readonly = False
+            self.view.info = ["already logged in as "+self.view.username, self.cursor]
+            return
+
         tokens = self.separater.split(command.strip())
 
         if(self.position is None):
@@ -40,6 +46,11 @@ class SiraController():
             pre_position = self.position
             for child in list(self.position):
                 if(child.tag == "keyword" and child.attrib['name'] == token):
+                    if((not self.view.username) and (token != "login" and token != "exit" and token != "clear" and token != "sira")):
+                        self.clearcache()
+                        self.view.commandText.readonly = False
+                        self.view.info = ["Please login first", self.cursor]
+                        return
                     self.position = child
                     break
                 elif (child.tag == "optional" or child.tag == "required"):
@@ -87,25 +98,32 @@ class SiraController():
             if(functag.attrib['multi-thread'] == 'True'):
                 threading.Thread(None,self.execfunc).start()
             else:
-                self.execfunc()
+                if(functag.attrib['name'] == "on_clear"):
+                    self.view.commandText.readonly = False
+                    self.view.info = [self.cursor]
+                    self.view.on_clear()
+                    self.clearcache()
+                else:
+                    self.execfunc()
             return
 
     def execfunc(self):
         functag = self.position.find("./function")
+        funcobj = functag.attrib['object']
         if(self.paras):
-            result = getattr(eval(functag.attrib['object']), functag.attrib['name'])(self.paras)
+            result = getattr(eval(funcobj), functag.attrib['name'])(self.paras)
         else:
-            result = getattr(eval(functag.attrib['object']), functag.attrib['name'])()
+            result = getattr(eval(funcobj), functag.attrib['name'])()
         # set cursor value to username when login successd
-        if(functag.attrib['object'] == "login" and result[0]):
+        if(functag.attrib['name'] == "login" and result[0]):
             self.view.username = self.paras[0]
             self.cursor = self.paras[0] + self.normal_cursor
-        elif(functag.attrib['object'] == "login" and not result[0]):
+        elif((functag.attrib['name'] == "login" and not result[0]) or functag.attrib['name'] == "logout"):
             self.view.username = ""
             self.cursor = self.normal_cursor
         self.view.commandText.readonly = False
         if(result):
-            if(functag.attrib['object'] == "login"):
+            if(funcobj == "login"):
                 self.view.info = [result[1], self.cursor]
             else:
                 self.view.info = [result, self.cursor]

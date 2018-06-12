@@ -74,7 +74,8 @@ class AdvancedTextInput(TextInput):
             if self._get_cursor_col() > self.protected_len:
                 self.do_backspace()
         elif internal_action == 'enter':
-            self.dispatch('on_text_validate')
+            if not self.readonly:
+                self.dispatch('on_text_validate')
         elif internal_action == 'escape':
             self.focus = False
         if internal_action != 'escape':

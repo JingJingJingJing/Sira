@@ -19,10 +19,10 @@ class SiraController():
         self.tree = ET.parse("res/glossary.xml").getroot()
 
     def processInput(self, instance, string):
-        #try:
-        self.cal(string)
-        #except Exception:
-            #self.view.info = ["error while processing", self.cursor]
+        try:
+            self.cal(string)
+        except Exception:
+            self.view.info = ["error while processing", self.cursor]
 
     def cal(self, command):
         # return when command is empty in non-interactive mode
@@ -102,7 +102,7 @@ class SiraController():
             self.cursor = self.paras[0] + self.normal_cursor
         elif(functag.attrib['object'] == "login" and not result[0]):
             self.view.username = ""
-            self.cusor = self.normal_cursor
+            self.cursor = self.normal_cursor
         self.view.commandText.readonly = False
         if(result):
             if(functag.attrib['object'] == "login"):

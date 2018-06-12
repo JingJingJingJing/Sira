@@ -131,8 +131,9 @@ class SiraApp(App):
         return True
 
     def _stop_interaction(self, instance):
-        self.controller.closeinteractive()
-        instance.password_mode = False
+        if not self.commandText.command_mode:
+            self.controller.closeinteractive()
+            instance.password_mode = False
 
     def on_font_size(self, value: str):
         pass

@@ -123,26 +123,12 @@ def finduser(user):
     headers = {'Content-Type':'application/json','cookie':cookie}
     params={'username':user}
     f,r = send_request(url, method.Get, headers, params, None)
-    print(f)
     if not f:
-        return (False,r)
+        return (False, r)
     j = json.loads(r.text)
     try:
-        r = requests.get(url,headers=headers,timeout=3)
-        if r.status_code != 200:
-            return (False,str(r.status_code) + r.text)
-        j = json.loads(r.text)
-        try:
-            return (False,j['warningMessages'])
-        except KeyError:
-            pass
-        try:
-            string = dtos(getField(j,None),j['key'])
-            print(string)
-            return (True,string)
-        except KeyError as err:
-            return_val = 'given field "{}" not found'.format(err)
-            return (False,return_val)
-    except requests.exceptions.RequestException as err:
-        return (False,err)
-    
+        return (True,j[0]['key'])
+    except KeyError:
+        return (False,'No user found!')
+    except IndexError:
+        return (False,'No user found!')

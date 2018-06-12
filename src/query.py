@@ -93,6 +93,7 @@ def query_assignee(lst):
         return data
 
 def query_type(lst):
+    print(lst)
     return query('issuetype ='+ lst[0],'',0)
 
 def query_project_type(lst):

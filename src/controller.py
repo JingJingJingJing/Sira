@@ -46,6 +46,10 @@ class SiraController():
             pre_position = self.position
             for child in list(self.position):
                 if(child.tag == "keyword" and child.attrib['name'] == token):
+                    if((not self.view.username) and (token != "login" and token != "exit" and token != "clear" and token != "sira")):
+                        self.view.commandText.readonly = False
+                        self.view.info = ["Please login first", self.cursor]
+                        return
                     self.position = child
                     break
                 elif (child.tag == "optional" or child.tag == "required"):

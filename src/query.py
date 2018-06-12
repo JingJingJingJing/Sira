@@ -52,7 +52,6 @@ def query(field1, field2, f):
             except KeyError as err:
                 return_val = 'given field "{}" not found'.format(err)
                 return return_val
-        print(string)
         return string
     else:
         return 'Issue not Found'
@@ -125,24 +124,26 @@ def finduser(user):
     headers = {'Content-Type':'application/json','cookie':cookie}
     params={'username':user}
     f,r = send_request(url, method.Get, headers, params, None)
+    print(f)
     if not f:
-        return r
+        return (False,r)
     j = json.loads(r.text)
     try:
         r = requests.get(url,headers=headers,timeout=3)
         if r.status_code != 200:
-            return str(r.status_code) + r.text 
+            return (False,str(r.status_code) + r.text)
         j = json.loads(r.text)
         try:
-            return j['warningMessages']
+            return (False,j['warningMessages'])
         except KeyError:
             pass
         try:
-            string = dtos(getField(j,None),j['key']) + '\r\n'
-            return string
+            string = dtos(getField(j,None),j['key'])
+            print(string)
+            return (True,string)
         except KeyError as err:
             return_val = 'given field "{}" not found'.format(err)
-            return return_val
+            return (False,return_val)
     except requests.exceptions.RequestException as err:
-        return err
+        return (False,err)
     

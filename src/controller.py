@@ -32,6 +32,11 @@ class SiraController():
             self.view.info = [self.cursor]
             return
 
+        if(command.startswith("sira login") and self.view.username):
+            self.view.commandText.readonly = False
+            self.view.info = ["already logged in as "+self.view.username, self.cursor]
+            return
+
         tokens = self.separater.split(command.strip())
 
         if(self.position is None):
@@ -92,6 +97,7 @@ class SiraController():
                     self.view.commandText.readonly = False
                     self.view.info = [self.cursor]
                     self.view.on_clear()
+                    self.clearcache()
                 else:
                     self.execfunc()
             return
@@ -104,10 +110,10 @@ class SiraController():
         else:
             result = getattr(eval(funcobj), functag.attrib['name'])()
         # set cursor value to username when login successd
-        if(funcobj == "login" and result[0]):
+        if(functag.attrib['name'] == "login" and result[0]):
             self.view.username = self.paras[0]
             self.cursor = self.paras[0] + self.normal_cursor
-        elif((funcobj == "login" and not result[0]) or funcobj == "logout"):
+        elif((functag.attrib['name'] == "login" and not result[0]) or functag.attrib['name'] == "logout"):
             self.view.username = ""
             self.cursor = self.normal_cursor
         self.view.commandText.readonly = False

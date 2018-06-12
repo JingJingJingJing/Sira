@@ -82,10 +82,10 @@ class SiraApp(App):
     def build(self):
         self.settings_cls = SettingsWithSidebar
         self.commandText = Builder.load_file("res/sira.kv")
-        username = self.config.get("Text", "username")
-        self.controller.cursor = username + self.controller.normal_cursor
-        self.commandText.protected_len = len(username) + 1
-        self.commandText.text = username + ">"
+        self.username = self.config.get("Text", "username")
+        self.controller.cursor = self.username + self.controller.normal_cursor
+        self.commandText.protected_len = len(self.username) + 1
+        self.commandText.text = self.username + ">"
         return self.commandText
 
     def build_config(self, config):
@@ -118,10 +118,6 @@ class SiraApp(App):
     def _on_command(self, instance):
         string = instance._lines[len(
             instance._lines) - 1][instance.protected_len:]
-        if string == "clear":
-            self.info = [">"]
-            self.on_clear()
-            return
         if instance.password_mode:
             string = instance.password_cache
             instance.password_mode = False

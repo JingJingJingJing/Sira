@@ -120,10 +120,6 @@ class SiraApp(App):
     def _on_command(self, instance):
         string = instance._lines[len(instance._lines) - 1]\
                 [instance.protected_len:]
-        if string == "clear":
-            self.info = [">"]
-            self.on_clear()
-            return
         if instance.password_mode:
             string = instance.password_cache
             instance.password_mode = False

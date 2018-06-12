@@ -86,6 +86,7 @@ class SiraApp(App):
         self.settings_cls = SettingsWithSidebar
         self.commandText = Builder.load_file("res/sira.kv")
         username = self.config.get("Text", "username")
+        self.controller.cursor = username + self.controller.normal_cursor
         self.commandText.protected_len = len(username) + 1
         self.commandText.text = username + ">"
         return self.commandText

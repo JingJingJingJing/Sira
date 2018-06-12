@@ -1,11 +1,9 @@
-import json
-import sys
-
 import kivy.properties as kp
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.settings import Settings, SettingsWithSidebar
 from kivy.uix.widget import Widget
+from kivy.utils import boundary
 
 from advancedtextinput import AdvancedTextInput
 
@@ -25,6 +23,7 @@ class SiraApp(App):
         
         Method-established Variables:
             commandText -- advancedtextinput.AdvancedTextInput (default None)
+            config_func_dict -- dict((str, str) : callable)
 
     Public Methods:
         Overrided from kivy.app.App:
@@ -42,6 +41,8 @@ class SiraApp(App):
 
     Private Methods:
         __init__(self, **kwargs) -> None
+        _on_cmd_idf(self, str) -> None
+        _on_font_size(self, str) -> None
         _on_tab(self, kivy.uix.widget.Widget()) -> None
         _on_command(self, kivy.uix.widget.Widget()) -> None
         _stop_interaction(self, kivy.uix.widget.Widget()) -> None
@@ -58,7 +59,6 @@ class SiraApp(App):
             moving the cursor.
 
     Event Driven Methods:
-        on_font_size(self, int) -> None
         on_info(self, kivy.uix.widget.Widget(), list()) -> None
         on_option(self, kivy.uix.widget.Widget(), list()) -> None
         on_username(self, kivy.uix.widget.Widget(), str) -> None
@@ -69,7 +69,7 @@ class SiraApp(App):
             && option = []
         }
     """
-    
+  
     info = kp.ListProperty([])
     """
     """
@@ -80,7 +80,13 @@ class SiraApp(App):
 
     def __init__(self, **kwargs):
         super(SiraApp, self).__init__(**kwargs)
-        self.__events__ = ["on_info", "on_option"]
+        self.__events__ = ["on_info", "on_option", "on_username"]
+        # Element Constraint: {(section, key): func}
+        self.config_func_dict = {
+            ("Text", "cmd_identifier") : self._on_cmd_idf,
+            ("Text", "font_size") : self._on_font_size
+        }
+        
  
     def build(self):
         self.settings_cls = SettingsWithSidebar
@@ -99,7 +105,8 @@ class SiraApp(App):
             filename="res/sira.json")
 
     def on_config_change(self, config, section, key, value):
-        pass
+        if config == self.config:
+            self.config_func_dict[(section, key)](value)
 
     def on_clear(self):
         instance = self.commandText
@@ -114,6 +121,13 @@ class SiraApp(App):
     def set_controller(self, controller):
         self.controller = controller
         self.info = []
+
+    def _on_cmd_idf(self, value):
+        self.controller.normal_cursor = value
+
+    def _on_font_size(self, value):
+        value = boundary(int(value), 1, 40)
+        self.commandText.font_size = value
 
     def _on_tab(self, instance):
         pass
@@ -133,9 +147,6 @@ class SiraApp(App):
     def _stop_interaction(self, instance):
         self.controller.closeinteractive()
         instance.password_mode = False
-
-    def on_font_size(self, value: str):
-        pass
 
     def on_info(self, instance, info):
         if self.info == []:

@@ -21,6 +21,7 @@ class SiraApp(App):
         Class-scope Variables:
             info --  kivy.properties.ListProperty (default [])
             [TODO] option -- kivy.properties.ListProperty (default [])
+            username -- kivy.properties.StringPorperty (default ""s)
         
         Method-established Variables:
             commandText -- advancedtextinput.AdvancedTextInput (default None)
@@ -60,6 +61,7 @@ class SiraApp(App):
         on_font_size(self, int) -> None
         on_info(self, kivy.uix.widget.Widget(), list()) -> None
         on_option(self, kivy.uix.widget.Widget(), list()) -> None
+        on_username(self, kivy.uix.widget.Widget(), str) -> None
 
     Conventions:
         {
@@ -74,6 +76,8 @@ class SiraApp(App):
 
     # option = kp.ListProperty([])
 
+    username = kp.StringProperty("")
+
     def __init__(self, **kwargs):
         super(SiraApp, self).__init__(**kwargs)
         self.__events__ = ["on_info", "on_option"]
@@ -81,10 +85,13 @@ class SiraApp(App):
     def build(self):
         self.settings_cls = SettingsWithSidebar
         self.commandText = Builder.load_file("res/sira.kv")
+        username = self.config.get("Text", "username")
+        self.commandText.protected_len = len(username) + 1
+        self.commandText.text = username + ">"
         return self.commandText
 
     def build_config(self, config):
-        config.read("res/sira.ini")
+        config.read("src/sira.ini")
 
     def build_settings(self, settings):
         settings.add_json_panel("Text Option", self.config,
@@ -144,3 +151,7 @@ class SiraApp(App):
 
     def on_option(self, instance, info):
         pass
+
+    def on_username(self, instance, value):
+        self.config.set("Text", "username", value)
+        self.config.write()

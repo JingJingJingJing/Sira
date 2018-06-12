@@ -18,7 +18,7 @@ class AdvancedTextInput(TextInput):
 
     password_cache = kp.StringProperty("")
 
-    protected_len = kp.NumericProperty(1)
+    protected_len = kp.NumericProperty()
 
     command_mode = kp.BooleanProperty(True)
 

@@ -1,23 +1,9 @@
 import requests
+import json
+import logging
+from enum import Enum
 domain = '10.176.111.32:8080'
 cookie_path = ''
-
-def stringtolist(s):
-    return s.split(',')
-
-def get_session_info(tup):
-    t1 = tup[0].split('"')
-    t2 = tup[1].split('"')
-    return t1[5]+'='+ t2[3]
-
-def read_cookie():
-    cookie = ''
-    with open(cookie_path+"cookie.txt","r") as f:
-        cookie = f.read()
-    return cookie
-
-""" This function sign a user if un and pw are both correct
-    Return 1 on success, 0 on failure """
 
 def login(lst):
     un = lst[0]
@@ -25,15 +11,39 @@ def login(lst):
     url = 'http://'+domain+'/rest/auth/1/session'
     data = '{"username":"'+str(un)+'","password":"'+str(pw)+'"}'
     headers = {'Content-Type':'application/json'}
-    r = requests.post(url,headers=headers,data=data)
-    if(r.status_code == 200):
-        s = stringtolist(r.text)
-        cookie = get_session_info((s[0],s[1]))
-        f = open(cookie_path+"cookie.txt","w")
-        f.write(cookie)
-        f.close
-        print(r.text)
-        return 1
-    print("Error Occured! Status Code:",r.status_code)
-    print(r.text)
-    return 0
+    flag,r = send_request(url, method.Post, headers, None, data)
+    if not flag:
+        return (False,r)
+    j = json.loads(r.text)
+    try:
+        cookie = j['session']['name'] + '=' + j['session']['value']
+    except KeyError:
+        return (False, 'session info not found!')
+    f = open(cookie_path+"cookie.txt","w")
+    f.write(cookie)
+    f.close
+    return(True, "Success")
+
+def logout():
+    f = open(cookie_path+"cookie.txt","w")
+    f.write('')
+    f.close
+
+def send_request(url, method, headers, params, data):
+    r = requests.Response
+    try:
+        if method is method.Get:
+            r = requests.get(url,headers=headers,params=params,timeout=5)
+        else:
+            r = requests.post(url,headers=headers,data=data,timeout = 5)
+        try:
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            return(False, err)
+        return (True,r)
+    except requests.exceptions.RequestException as err:
+        return (False,err)
+
+class method(Enum):
+    Get = 0
+    Post = 1

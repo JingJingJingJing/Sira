@@ -1,0 +1,16 @@
+[
+    {
+        "type": "string",
+        "title": "Command Identifier",
+        "desc": "The string of characters right before your commands",
+        "section": "Text",
+        "key": "cmd_identifier"
+    },
+    {
+        "type": "numeric",
+        "title": "Font Size",
+        "desc": "Choose the font size",
+        "section": "Text",
+        "key": "font_size"
+    }
+]

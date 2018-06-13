@@ -1,6 +1,4 @@
-import json
 import logging
-
 import requests
 
 domain = '10.176.111.32:8080'
@@ -11,7 +9,7 @@ logging.basicConfig(
     filename='user.log',
     format=logformat,
     datefmt='%d-%m-%Y:%H:%M:%S',
-    level=logging.ERROR)
+    level=logging.INFO)
 
 
 def login(lst):
@@ -40,6 +38,7 @@ def login(lst):
         f = open(cookie_path + "cookie.txt", "w")
         f.write(cookie)
         f.close
+        logging.info('login success as '+lst[0])
         return (True, "Success")
     except requests.exceptions.RequestException as err:
         logging.error(err)
@@ -51,3 +50,4 @@ def logout():
     f.write('')
     f.close
     logging.info("Successfully logged out")
+login(['admin','admin'])

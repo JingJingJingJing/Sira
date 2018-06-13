@@ -30,8 +30,8 @@ def send_request(url, method, headers, params, data):
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
             logging.error(err)
-            print('Request denied!\r\nerror code:' + str(r.status_code) +
-                  '\r\n' + str(_codes[r.status_code][0]))
+            # print('Request denied!\r\nerror code:' + str(r.status_code) +
+                #   '\r\n' + str(_codes[r.status_code][0]))
             return (False,
                     'Request denied!\r\nerror code:' + str(r.status_code))
         logging.info(r)

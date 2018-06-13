@@ -30,7 +30,7 @@ def login(lst):
                 False,
                 "Login failed! Please make sure that your username and password are correct!"
             )
-        j = json.loads(r.text)
+        j = r.json()
         try:
             cookie = j['session']['name'] + '=' + j['session']['value']
         except KeyError:

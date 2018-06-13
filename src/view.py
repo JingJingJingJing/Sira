@@ -7,6 +7,12 @@ from kivy.utils import boundary
 
 from advancedtextinput import AdvancedTextInput
 
+###
+def overrides(interface_class):
+    def overrider(method):
+        assert(method.__name__ in dir(interface_class))
+        return method
+    return overrider
 
 class SiraApp(App):
 
@@ -17,9 +23,11 @@ class SiraApp(App):
 
     Instance Variables:
         Class-scope Variables:
-            info --  kivy.properties.ListProperty (default [])
+            header -- kivy.properties.StringPorperty (default None)
+            info -- kivy.properties.ListProperty (default [])
             [TODO] option -- kivy.properties.ListProperty (default [])
-            username -- kivy.properties.StringPorperty (default ""s)
+            protected_text -- kivy.properties.StringPorperty (default None)
+            username -- kivy.properties.StringPorperty (default None)
 
         Method-established Variables:
             commandText -- advancedtextinput.AdvancedTextInput (default None)
@@ -34,6 +42,7 @@ class SiraApp(App):
 
         Original:
             on_clear(self) -> None
+            print_header(self) -> None
             set_command_mode(self, bool) -> None
             set_controller(self, controller.SiraController()) -> None
             set_pwd_mode(self) -> None
@@ -46,6 +55,7 @@ class SiraApp(App):
         [TODO] _on_tab(self, kivy.uix.widget.Widget()) -> None
         _on_command(self, kivy.uix.widget.Widget()) -> None
         _stop_interaction(self, kivy.uix.widget.Widget()) -> None
+        _reset_header(self, str, str) -> None
 
     Events:
         `on_info`
@@ -57,33 +67,76 @@ class SiraApp(App):
             Fired when option is changed. This will print everything, one
             element per line, in the {@code info} to the command window without
             moving the cursor.
+        
+        `on_username`
+            Fired when username is changed. This will change and write the
+            sira.ini (Section: Text, Key: username) based on its value, and call
+            _reset_header() to preserve [convention #1.1].
 
     Event Driven Methods:
         on_info(self, kivy.uix.widget.Widget(), list()) -> None
         on_option(self, kivy.uix.widget.Widget(), list()) -> None
         on_username(self, kivy.uix.widget.Widget(), str) -> None
 
-    Conventions:
-        {
-               info = []
-            && option = []
+    """
+
+    header = kp.StringProperty(None)
+    """Kivy string property to store the command header.
+
+    [convention #1]: {
+        (self.header = (self.username
+            + self.config.get("Text", "cmd_identifier")))
         }
+    
+    [callback]: None
     """
   
     info = kp.ListProperty([])
-    """
+    """Kivy list property to store buffered results. When info changes,
+    function on_info will be dispatched, and self.commandText will print
+    every element in info on seperate lines.
+
+    [convention #2]: {
+            (for line in self.info: isinstance(line, str))
+        &&  (self.info = []) after self.on_info
+    }
+
+    [callback]: on_info
     """
 
     # option = kp.ListProperty([])
 
-    username = kp.StringProperty(None)
-
-    ###
-    header = kp.StringProperty(None)
     protected_text = kp.StringProperty(None)
-    ###
+    """Kivy string property to store the protected_text of the current
+    command line.
 
-    def __init__(self, **kwargs):
+    [convention #3]: {
+        (self.protected_text = self.commandText._lines[-1])
+    }
+
+    [callback]: self.commandText.protected_len (from res/sira.kv)
+    """
+
+    username = kp.StringProperty(None)
+    """Kivy string property to store username.
+
+    [convention #4]: {
+            [convention #1.1]
+        &&  (self.username = "") iff [no user is logged in]
+    }
+
+    [callback]: on_username
+    """
+
+    @overrides(App)
+    def __init__(self, **kwargs) -> None:
+        """Constructor of SiraApp.
+        
+        [requires]: None
+        [ensures]: isinstance(self.__events__, list),
+                   isinstance(self.config_func_dict)
+        [calls]: super(SiraApp, self).__init__
+        """
         super(SiraApp, self).__init__(**kwargs)
         self.__events__ = ["on_info", "on_option", "on_username"]
         # Element Constraint: {(section, key): func}
@@ -117,6 +170,10 @@ class SiraApp(App):
         instance = self.commandText
         instance.scroll_y = (len(instance._lines) - 1) * instance.line_height
 
+    def print_header(self):
+        self.commandText.insert_text("\n" + self.header)
+        self.protected_text = self.header
+
     def set_pwd_mode(self):
         self.commandText.password_mode = True
 
@@ -148,6 +205,9 @@ class SiraApp(App):
         self.controller.processInput(instance, string)
         return True
 
+    def _reset_header(self, username, identifier):
+        self.header = username + identifier
+
     def _stop_interaction(self, instance):
         if not self.commandText.command_mode:
             self.controller.closeinteractive()
@@ -169,12 +229,3 @@ class SiraApp(App):
         self.config.set("Text", "username", value)
         self.config.write()
         self._reset_header(value, self.config.get("Text", "cmd_identifier"))
-
-    ###
-    def print_header(self):
-        self.commandText.insert_text("\n" + self.header)
-        self.protected_text = self.header
-       
-    def _reset_header(self, username, identifier):
-        self.header = username + identifier
-    ###

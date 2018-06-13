@@ -1,9 +1,16 @@
-import requests
-import json
 import logging
-from enum import Enum
+import requests
+
 domain = '10.176.111.32:8080'
 cookie_path = ''
+
+logformat = '%(asctime)s,%(msecs)d %(levelname)-8s\r\n [%(filename)s:%(lineno)d] %(message)s\r\n'
+logging.basicConfig(
+    filename='user.log',
+    format=logformat,
+    datefmt='%d-%m-%Y:%H:%M:%S',
+    level=logging.INFO)
+
 
 def login(lst):
     un = lst[0]
@@ -24,26 +31,10 @@ def login(lst):
     f.close
     return(True, "Success")
 
+
 def logout():
-    f = open(cookie_path+"cookie.txt","w")
+    f = open(cookie_path + "cookie.txt", "w")
     f.write('')
     f.close
-
-def send_request(url, method, headers, params, data):
-    r = requests.Response
-    try:
-        if method is method.Get:
-            r = requests.get(url,headers=headers,params=params,timeout=5)
-        else:
-            r = requests.post(url,headers=headers,data=data,timeout = 5)
-        try:
-            r.raise_for_status()
-        except requests.exceptions.HTTPError as err:
-            return(False, err)
-        return (True,r)
-    except requests.exceptions.RequestException as err:
-        return (False,err)
-
-class method(Enum):
-    Get = 0
-    Post = 1
+    logging.info("Successfully logged out")
+login(['admin','admin'])

@@ -5,6 +5,7 @@ def getIssue(s, key):
     issue = []
     try:
         issue = j['issues']
+        # print(issue)
     except KeyError:
         pass
     if key is None:
@@ -33,8 +34,43 @@ def defaultField(issue):
         dic.update(getField(issue,i))
     return dic
 
-def dtos(dic,issue):
-    string ='Issue {}: '.format(issue)
+
+def dtos(dic, issue):
+    string = ('{}'.format(issue)).ljust(12, ' ') + '|  '
     for i in dic:
-        string += ' {} '.format(dic[i])
+        # string += format(' {} '.format(dic[i]),' >20')
+        if i is not 'summary':
+            string += ('{}'.format(dic[i])).ljust(12, ' ') + '|  '
+        else:
+            string += ('{}'.format(dic[i]))
     return string
+
+
+def getString(s):
+    global defaultList
+    string = ''
+    j = json.loads(s)
+    try:
+        return j['warningMessages']
+    except KeyError:
+        pass
+    issue_lst = getIssue(s, None)
+    if len(issue_lst) > 0:
+        for i in defaultHeader:
+            string += '{}'.format(i).ljust(15, ' ')
+        string += '\r\n'
+        for i in range(0, len(issue_lst)):
+            try:
+                if i == len(issue_lst) - 1:
+                    string += dtos(
+                        getField(issue_lst[i], None), issue_lst[i]['key'])
+                else:
+                    string += dtos(
+                        getField(issue_lst[i], None),
+                        issue_lst[i]['key']) + '\r\n'
+            except KeyError as err:
+                return_val = 'given field "{}" not found'.format(err)
+                return return_val
+        return string
+    else:
+        return 'Issue not Found'

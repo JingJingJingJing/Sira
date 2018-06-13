@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import requests
 import json
 
@@ -6,6 +7,18 @@ from extract import getField
 from extract import dtos
 from login import method
 from login import send_request
+=======
+import json
+import logging
+from enum import Enum
+
+import requests
+from requests.status_codes import _codes
+
+from extract import dtos, getField, getIssue, getString
+from login import login
+
+>>>>>>> Stashed changes
 domain = '10.176.111.32:8080'
 cookie_path = ''
 
@@ -18,6 +31,61 @@ def read_cookie():
 """ This function returns all issue assigned to the user 'user' """
 
 
+<<<<<<< Updated upstream
+=======
+def send_request(url, method, headers, params, data):
+    r = requests.Response
+    try:
+        if method is method.Get:
+            r = requests.get(url, headers=headers, params=params, timeout=5)
+        else:
+            r = requests.post(url, headers=headers, data=data, timeout=5)
+        try:
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            logging.error(err)
+            # print('Request denied!\r\nerror code:' + str(r.status_code) +
+                #   '\r\n' + str(_codes[r.status_code][0]))
+            return (False,
+                    'Request denied!\r\nerror code:' + str(r.status_code))
+        logging.info(r)
+        return (True, r)
+    except requests.exceptions.RequestException as err:
+        logging.error(err)
+        return (
+            False,
+            'Internet error\r\nTry:\r\n\tChecking the network cables, modem, and route\r\n\tReconnecting to Wi-Fi\r\n\tRunning Network Diagnostics'
+        )
+
+
+def finduser(user):
+    if user == '':
+        return (False, 'No user found!')
+    cookie = ''
+    try:
+        cookie = read_cookie()
+    except FileNotFoundError as err:
+        logging.error(err)
+        return (False, "Please log in first")
+    url = 'http://' + domain + '/rest/api/2/user/search'
+    headers = {'Content-Type': 'application/json', 'cookie': cookie}
+    params = {'username': user}
+    f, r = send_request(url, method.Get, headers, params, None)
+    if not f:
+        logging.error(r)
+        return (False, r)
+    j = json.loads(r.text)
+    try:
+        return (True, j[0]['key'])
+    except KeyError as err:
+        logging.error(err)
+        return (False, 'No user found!')
+    except IndexError as err:
+        logging.error(err)
+        return (False, 'No user found!')
+
+
+>>>>>>> Stashed changes
 def query(field1, field2, f):
     cookie = ''
     try:
@@ -34,6 +102,7 @@ def query(field1, field2, f):
     flag,r = send_request(url, method.Post, headers, None, data)
     if not flag:
         return r
+<<<<<<< Updated upstream
     j = json.loads(r.text)
     try:
         return j['warningMessages']
@@ -54,6 +123,11 @@ def query(field1, field2, f):
         return string
     else:
         return 'Issue not Found'
+=======
+    string = getString(r.text)
+    logging.error(string)
+    return string
+>>>>>>> Stashed changes
 
 
 """ This function will return all information of issue represented by pid """
@@ -107,6 +181,7 @@ def query_project_assignee(lst):
         return data
 
 def query_project_sprint(lst):
+<<<<<<< Updated upstream
     return query('project ='+lst[0],'sprint ='+lst[1],1)
     
 
@@ -133,3 +208,38 @@ def finduser(user):
         return (False,'No user found!')
     except IndexError:
         return (False,'No user found!')
+=======
+    return query('project =' + lst[0], 'sprint =' + lst[1], 1)
+
+
+class method(Enum):
+    Get = 0
+    Post = 1
+
+
+def test():
+    login(["ysg", "Yh961130"])
+    query_number(['sira-21'])
+    query_assignee([''])
+    query_assignee(['xp zheng'])
+    query_type(['story'])
+    query_sprint(['2'])
+    query_project_type(['Sira', 'bug'])
+    pass
+    '''
+    options = {
+    'server': 'http://10.176.111.32:8080',
+    'cookies': {'JSESSIONID':'DD537C56B9ABD14EEAA710C6BE539644'}
+    }
+    
+    jira = JIRA(options)
+    '''
+
+
+test()
+query_project_type(['Sira', 'bug'])
+query_project_type(['Sira', 'task'])
+query_project_assignee(['Sira', 'Hang'])
+query_project_sprint(['Sira', '2'])
+query_project_assignee(['Sira', 'xp Zheng'])
+>>>>>>> Stashed changes

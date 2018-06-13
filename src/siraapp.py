@@ -1,4 +1,4 @@
-from controller import SiraController
+from fake_controller import SiraController
 from model import SiraMode
 from view import SiraApp
 

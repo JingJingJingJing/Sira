@@ -43,7 +43,7 @@ class SiraApp(App):
         __init__(self, **kwargs) -> None
         _on_cmd_idf(self, str) -> None
         _on_font_size(self, str) -> None
-        _on_tab(self, kivy.uix.widget.Widget()) -> None
+        [TODO] _on_tab(self, kivy.uix.widget.Widget()) -> None
         _on_command(self, kivy.uix.widget.Widget()) -> None
         _stop_interaction(self, kivy.uix.widget.Widget()) -> None
 
@@ -69,11 +69,7 @@ class SiraApp(App):
             && option = []
         }
     """
-<<<<<<< HEAD
   
-=======
-
->>>>>>> master
     info = kp.ListProperty([])
     """
     """
@@ -82,9 +78,13 @@ class SiraApp(App):
 
     username = kp.StringProperty(None)
 
+    ###
+    header = kp.StringProperty(None)
+    protected_text = kp.StringProperty(None)
+    ###
+
     def __init__(self, **kwargs):
         super(SiraApp, self).__init__(**kwargs)
-<<<<<<< HEAD
         self.__events__ = ["on_info", "on_option", "on_username"]
         # Element Constraint: {(section, key): func}
         self.config_func_dict = {
@@ -93,17 +93,13 @@ class SiraApp(App):
         }
         
  
-=======
-        self.__events__ = ["on_info", "on_option"]
-
->>>>>>> master
     def build(self):
         self.settings_cls = SettingsWithSidebar
-        self.commandText = Builder.load_file("res/sira.kv")
         self.username = self.config.get("Text", "username")
-        self.controller.cursor = self.username + self.controller.normal_cursor
-        self.commandText.protected_len = len(self.username) + 1
-        self.commandText.text = self.username + ">"
+        self._reset_header(self.username,
+            self.config.get("Text", "cmd_identifier"))
+        self.protected_text = self.header
+        self.commandText = Builder.load_file("res/sira.kv")
         return self.commandText
 
     def build_config(self, config):
@@ -132,11 +128,10 @@ class SiraApp(App):
         self.info = []
 
     def _on_cmd_idf(self, value):
-        self.controller.normal_cursor = value
+        self._reset_header(self.username, value)
 
     def _on_font_size(self, value):
-        value = boundary(int(value), 1, 40)
-        self.commandText.font_size = value
+        self.commandText.font_size = int(value)
 
     def _on_tab(self, instance):
         pass
@@ -162,7 +157,7 @@ class SiraApp(App):
         if self.info == []:
             return
         self.commandText.do_cursor_movement("cursor_end", control=True)
-        self.commandText.protected_len = len(info[-1])
+        self.protected_text = info[-1]
         for s in info:
             self.commandText.insert_text("\n" + str(s))
         self.info = []
@@ -173,3 +168,13 @@ class SiraApp(App):
     def on_username(self, instance, value):
         self.config.set("Text", "username", value)
         self.config.write()
+        self._reset_header(value, self.config.get("Text", "cmd_identifier"))
+
+    ###
+    def print_header(self):
+        self.commandText.insert_text("\n" + self.header)
+        self.protected_text = self.header
+       
+    def _reset_header(self, username, identifier):
+        self.header = username + identifier
+    ###

@@ -4,7 +4,7 @@
 AdvancedTextInput:
     id: commandText
     text: app.config.get("Text", "username") + app.config.get("Text", "cmd_identifier")
-    protected_len: len(self.text)
+    protected_len: len(app.protected_text)
     background_color: [0, 0, 0, 1]
     focus: True
     font_size: app.config.get("Text", "font_size")

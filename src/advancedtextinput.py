@@ -100,7 +100,7 @@ class AdvancedTextInput(TextInput):
                                         self).keyboard_on_key_down(window, keycode, text, modifiers):
             return True
 
-        if not self._editable:
+        if not self._editable and key != 282:
             # duplicated but faster testing for non-editable keys
             if text and not is_interesting_key:
                 if is_shortcut and key == ord('c'):

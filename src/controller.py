@@ -162,21 +162,7 @@ class SiraController():
         self.view.print_header()
         self.view.info = [">"]
 
-<<<<<<< HEAD
     def _clearcache(self):
         self.position = self.tree
         self.args.clear()
-=======
-    def closeinteractive(self):
-        if(self.position is None or self.position == self.tree):
-            pass
-        self.clearcache()
-        self.view.commandText.readonly = False
-        self.view.info = ["interactive mode closed"]
-        self.view.print_header()
-
-    def clearcache(self):
-        self.position = None
-        self.paras.clear()
->>>>>>> UI
 

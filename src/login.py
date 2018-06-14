@@ -7,14 +7,7 @@ from util import mylog
 domain = '10.176.111.32:8080'
 cookie_path = ''
 
-# logformat = '%(asctime)s,%(msecs)d %(levelname)-8s\r\n [%(filename)s:%(lineno)d] %(message)s\r\n'
-# logging.basicConfig(
-#     filename='user.log',
-#     format=logformat,
-#     datefmt='%d-%m-%Y:%H:%M:%S',
-#     level=logging.ERROR)
-
-
+''' lst = ['username','password'] '''
 def login(lst):
     un = lst[0]
     pw = lst[1]

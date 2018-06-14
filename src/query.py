@@ -26,18 +26,20 @@ def send_request(url, method, headers, params, data):
         elif method is method.Put:
             r = requests.put(url, headers=headers, data=data, timeout=5)
         elif method is method.Delete:
-            r = requests.delete(url, headers=headers, data=data, timeout=5)
+            r = requests.delete(url, headers=headers,data=data, timeout=5)
         else:
             r = requests.post(url, headers=headers, data=data, timeout=5)
         try:
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            mylog.error(err)
             mylog.error(r.text)
-            # print('Request denied!\r\nerror code:' + str(r.status_code) +
-                #   '\r\n' + str(_codes[r.status_code][0]))
-            return (False,
-                    'Request denied!\r\nerror code:' + str(r.status_code))
+            try:
+                errmsg = r.json()['errorMessages']
+                return (False,
+                'Request denied!\r\nerror code:' + str(r.status_code)+' '+errmsg[0])
+            except KeyError:
+                return (False,
+                    'Request denied!\r\nerror code:' + str(r.status_code)+ str(_codes[r.status_code][0]))
         mylog.info(r)
         return (True, r)
     except requests.exceptions.RequestException as err:
@@ -46,33 +48,6 @@ def send_request(url, method, headers, params, data):
             False,
             'Internet error\r\nTry:\r\n\tChecking the network cables, modem, and route\r\n\tReconnecting to Wi-Fi\r\n\tRunning Network Diagnostics'
         )
-
-# def finduser(user):
-#     if user == '':
-#         return (False, 'No user found!')
-#     cookie = ''
-#     try:
-#         cookie = read_cookie()
-#     except FileNotFoundError as err:
-#         mylog.error(err)
-#         return (False, "Please log in first")
-#     url = 'http://' + domain + '/rest/api/2/user/search'
-#     headers = {'Content-Type': 'application/json', 'cookie': cookie}
-#     params = {'username': user}
-#     f, r = send_request(url, method.Get, headers, params, None)
-#     if not f:
-#         mylog.error(r)
-#         return (False, r)
-#     j = json.loads(r.text)
-#     try:
-#         return (True, j[0]['key'])
-#     except KeyError as err:
-#         mylog.error(err)
-#         return (False, 'No user found!')
-#     except IndexError as err:
-#         mylog.error(err)
-#         return (False, 'No user found!')
-
 
 def query(field1, field2, f):
     cookie = ''
@@ -98,6 +73,7 @@ def query(field1, field2, f):
 
 """ This function will return all information of issue represented by pid """
 
+''' lst = ['issue name or id'] '''
 def query_number(lst):
     issue = lst[0]
     cookie = ''
@@ -125,30 +101,39 @@ def query_number(lst):
             return 'given field "{}" not found'.format(err)
 
 
+
 def addQuotation(s):
     return '\''+s+'\''
 
+''' lst = ['sprint name or id'] '''
 def query_sprint(lst):
     return query('sprint='+ addQuotation(lst[0]),'',0)
     
+''' lst = ['assignee name or id'] '''
 def query_assignee(lst):
     return query('assignee='+ addQuotation(lst[0]),'',0)
 
+''' lst = ['issuetype or issuetype id'] '''
 def query_type(lst):
     return query('issuetype ='+ addQuotation(lst[0]),'',0)
 
-def query_project_type(lst):
-    return query('project='+addQuotation(lst[0]),'issuetype ='+addQuotation(lst[1]),1)
-
-def query_project_assignee(lst):
-    return query('project='+addQuotation(lst[0]),'assignee ='+addQuotation(lst[1]),1)
-
-def query_project_sprint(lst):
-    return query('project =' + addQuotation(lst[0]), 'sprint =' + addQuotation(lst[1]), 1)
-
+''' lst = ['issue status name or id'] '''
 def query_status(lst):
     return query('status='+ addQuotation(lst[0]),'',0)
 
+''' lst = ['project name or id','issuetype or issuetype id'] '''
+def query_project_type(lst):
+    return query('project='+addQuotation(lst[0]),'issuetype ='+addQuotation(lst[1]),1)
+
+''' lst = ['project name or id','assignee name or id'] '''
+def query_project_assignee(lst):
+    return query('project='+addQuotation(lst[0]),'assignee ='+addQuotation(lst[1]),1)
+
+''' lst = ['project name or id','sprint name or id'] '''
+def query_project_sprint(lst):
+    return query('project =' + addQuotation(lst[0]), 'sprint =' + addQuotation(lst[1]), 1)
+
+''' lst = ['project name or id','issue status name or id'] '''
 def query_project_status(lst):
     return query('project =' + addQuotation(lst[0]), 'status =' + addQuotation(lst[1]), 1)
 

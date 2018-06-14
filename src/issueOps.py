@@ -75,12 +75,17 @@ def issue_getComment(lst):
     f, r = send_request(url, method.Get, headers, None, None)
     if not f:
         return r
+    
     comments = r.json()['comments']
-    string = 'Here are the comments for ' + issue + ':\r\n'
-    for com in comments:
-        string += '"' + com['body'] + '"\r\n\twrote by ' + com['updateAuthor']['key'] + '\r\n\t' + com['created'] + '\r\n\r\n'
-    mylog.info(string)
-    return string
+    if len(comments) > 0:
+        string = 'Here are the comments for ' + issue + ':\r\n'
+        for com in comments:
+            string += '"' + com['body'] + '"\r\n\twrote by ' + com['updateAuthor']['key'] + '\r\n\t' + com['created'] + '\r\n\t' + '(cid: '+com['id']+')\r\n'
+        mylog.info(string)
+        return string
+    else:
+        mylog.info('get empty msg')
+        return "There is no comment yet!"
 
 
 def issue_addComment(lst):
@@ -105,8 +110,30 @@ def issue_addComment(lst):
     if not f:
         return r
     mylog.info(r.text)
-    return 'Comment added'
+    print('Comment(ID: '+r.json()['id']+')added')
+    return 'Comment(ID: '+r.json()['id']+')added'
 
+def issue_delComment(lst):
+    issue = lst[0]
+    cid = lst[1]
+    cookie = ''
+    try:
+        cookie = read_cookie()
+    except FileNotFoundError as err:
+        return err
+    url = 'http://' + domain + '/rest/api/2/issue/' + issue + '/comment/'+cid
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'cookie': cookie
+    }
 
-# issue_addComment(['Test-01'])
+    f, r = send_request(url, method.Delete, headers, None, None)
+    if not f:
+        return r
+    mylog.info('Comment {} deleted'.format(cid))
+    #print('Comment(ID: '+r.json()['id']+')added')
+    return 'Comment deleted'
+
+# issue_delComment(['Test-01','10103'])
 # issue_getComment(['Test-01'])

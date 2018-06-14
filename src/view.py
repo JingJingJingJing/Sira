@@ -3,7 +3,6 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.settings import Settings, SettingsWithSidebar
 from kivy.uix.widget import Widget
-from kivy.utils import boundary
 from kivy.config import ConfigParser
 
 from advancedtextinput import AdvancedTextInput

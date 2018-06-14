@@ -1,6 +1,8 @@
 import json
-from myLog import mylog
+
 import requests
+
+from util import mylog
 
 domain = '10.176.111.32:8080'
 cookie_path = ''
@@ -51,4 +53,5 @@ def logout():
     f.write('')
     f.close
     mylog.info("Successfully logged out")
+    
 login(['admin','admin'])

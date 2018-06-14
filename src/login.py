@@ -1,17 +1,18 @@
 import json
-import logging
 
 import requests
+
+from util import mylog
 
 domain = '10.176.111.32:8080'
 cookie_path = ''
 
-logformat = '%(asctime)s,%(msecs)d %(levelname)-8s\r\n [%(filename)s:%(lineno)d] %(message)s\r\n'
-logging.basicConfig(
-    filename='user.log',
-    format=logformat,
-    datefmt='%d-%m-%Y:%H:%M:%S',
-    level=logging.ERROR)
+# logformat = '%(asctime)s,%(msecs)d %(levelname)-8s\r\n [%(filename)s:%(lineno)d] %(message)s\r\n'
+# logging.basicConfig(
+#     filename='user.log',
+#     format=logformat,
+#     datefmt='%d-%m-%Y:%H:%M:%S',
+#     level=logging.ERROR)
 
 
 def login(lst):
@@ -25,24 +26,25 @@ def login(lst):
         try:
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            logging.error(err)
+            mylog.error(err)
             return (
                 False,
                 "Login failed! Please make sure that your username and password are correct!"
             )
-        j = json.loads(r.text)
+        j = r.json()
         try:
             cookie = j['session']['name'] + '=' + j['session']['value']
         except KeyError:
-            logging.error('No session information from HTTP response\r\n' +
+            mylog.error('No session information from HTTP response\r\n' +
                           r.text)
             return (False, 'session info not found!')
         f = open(cookie_path + "cookie.txt", "w")
         f.write(cookie)
         f.close
+        mylog.info("Successfully logged in as "+un)
         return (True, "Success")
     except requests.exceptions.RequestException as err:
-        logging.error(err)
+        mylog.error(err)
         return (False, 'Login failed due to an internet error!')
 
 
@@ -50,4 +52,6 @@ def logout():
     f = open(cookie_path + "cookie.txt", "w")
     f.write('')
     f.close
-    logging.info("Successfully logged out")
+    mylog.info("Successfully logged out")
+    
+login(['admin','admin'])

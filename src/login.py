@@ -47,4 +47,4 @@ def logout():
     f.close
     mylog.info("Successfully logged out")
     
-login(['admin','admin'])
+# login(['admin','admin'])

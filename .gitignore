@@ -140,7 +140,8 @@ venv.bak/
 ehthumbs.db
 Thumbs.db
 
-# project file
+# project file #
+################
 cookie.txt
 .vscode/
 username.txt

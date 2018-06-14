@@ -2,7 +2,7 @@ import json
 
 import requests
 
-from util import mylog
+from utils import mylog
 
 domain = '10.176.111.32:8080'
 cookie_path = ''

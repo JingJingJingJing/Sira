@@ -39,7 +39,10 @@ def send_request(url, method, headers, params, data):
                 'Request denied!\r\nerror code:' + str(r.status_code)+' '+errmsg[0])
             except KeyError:
                 return (False,
-                    'Request denied!\r\nerror code:' + str(r.status_code)+ str(_codes[r.status_code][0]))
+                    'Request denied!\r\nerror code: {} {}'.format(str(r.status_code), str(_codes[r.status_code][0])))
+            except json.JSONDecodeError:
+                return (False,
+                    'Request denied!\r\nerror code: {} {}'.format(str(r.status_code), str(_codes[r.status_code][0])))
         mylog.info(r)
         return (True, r)
     except requests.exceptions.RequestException as err:
@@ -62,9 +65,9 @@ def query(field1, field2, f):
         data += ' and '+field2+'","startAt":0, "maxResults": 100,"fields":["summary","issuetype","project","fixVersions","assignee","status"]}'
     else:
         data += '","startAt":0, "maxResults": 100,"fields":["summary","issuetype","project","fixVersions","assignee","status"]}'
-    print(data)
     flag,r = send_request(url, method.Post, headers, None, data)
     if not flag:
+        print(r)
         return r
     string = getString(r.text)
     mylog.info(string)

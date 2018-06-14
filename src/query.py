@@ -1,13 +1,3 @@
-<<<<<<< Updated upstream
-import requests
-import json
-
-from extract import getIssue
-from extract import getField
-from extract import dtos
-from login import method
-from login import send_request
-=======
 import json
 import logging
 from enum import Enum
@@ -18,7 +8,6 @@ from requests.status_codes import _codes
 from extract import dtos, getField, getIssue, getString
 from login import login
 
->>>>>>> Stashed changes
 domain = '10.176.111.32:8080'
 cookie_path = ''
 
@@ -31,8 +20,6 @@ def read_cookie():
 """ This function returns all issue assigned to the user 'user' """
 
 
-<<<<<<< Updated upstream
-=======
 def send_request(url, method, headers, params, data):
     r = requests.Response
     try:
@@ -85,7 +72,6 @@ def finduser(user):
         return (False, 'No user found!')
 
 
->>>>>>> Stashed changes
 def query(field1, field2, f):
     cookie = ''
     try:
@@ -102,32 +88,9 @@ def query(field1, field2, f):
     flag,r = send_request(url, method.Post, headers, None, data)
     if not flag:
         return r
-<<<<<<< Updated upstream
-    j = json.loads(r.text)
-    try:
-        return j['warningMessages']
-    except KeyError:
-        pass
-    issue_lst = getIssue(r.text, None)
-    if len(issue_lst) > 0:
-        string = ''
-        for i in range(0, len(issue_lst)):
-            try:
-                if i == len(issue_lst)-1:
-                    string += dtos(getField(issue_lst[i],None),issue_lst[i]['key'])
-                else:
-                    string += dtos(getField(issue_lst[i],None),issue_lst[i]['key']) + '\r\n'
-            except KeyError as err:
-                return_val = 'given field "{}" not found'.format(err)
-                return return_val
-        return string
-    else:
-        return 'Issue not Found'
-=======
     string = getString(r.text)
     logging.error(string)
     return string
->>>>>>> Stashed changes
 
 
 """ This function will return all information of issue represented by pid """
@@ -181,34 +144,6 @@ def query_project_assignee(lst):
         return data
 
 def query_project_sprint(lst):
-<<<<<<< Updated upstream
-    return query('project ='+lst[0],'sprint ='+lst[1],1)
-    
-
-
-
-def finduser(user):
-    if user == '':
-        return (False,'No user found!')
-    cookie = ''
-    try:
-        cookie = read_cookie()
-    except FileNotFoundError as err:
-        return (False,err)
-    url = 'http://'+domain+'/rest/api/2/user/search'
-    headers = {'Content-Type':'application/json','cookie':cookie}
-    params={'username':user}
-    f,r = send_request(url, method.Get, headers, params, None)
-    if not f:
-        return (False, r)
-    j = json.loads(r.text)
-    try:
-        return (True,j[0]['key'])
-    except KeyError:
-        return (False,'No user found!')
-    except IndexError:
-        return (False,'No user found!')
-=======
     return query('project =' + lst[0], 'sprint =' + lst[1], 1)
 
 
@@ -242,4 +177,3 @@ query_project_type(['Sira', 'task'])
 query_project_assignee(['Sira', 'Hang'])
 query_project_sprint(['Sira', '2'])
 query_project_assignee(['Sira', 'xp Zheng'])
->>>>>>> Stashed changes

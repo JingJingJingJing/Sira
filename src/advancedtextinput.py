@@ -363,7 +363,7 @@ class AdvancedTextInput(TextInput):
             if scroll_type == 'up':
                 if self.multiline:
                     ### changes in the next two lines
-                    if (self.scroll_y + 17 >=
+                    if (self.scroll_y + self.line_height - 1 >=
                             (len(self._lines) - 1) * self.line_height):
                         return
                     self.scroll_y += self.line_height

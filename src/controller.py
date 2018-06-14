@@ -3,15 +3,21 @@ import threading
 import re
 import login
 import query
-import time
 
 class SiraController():
 
+    """The controller class which can handle input command and return the corresponding function result
+
+    public methods:
+        processInput(self, instance, string) -> None
+        cal(self,command) -> None
+        closeinteractive -> None
+
+    """
     normal_cursor = ">"
-    interactive_cursor = "-"
+    no_need_login = ["sira", "sira login", "login", "exit", "clear"]
 
     def __init__(self, view, model):
-        self.cursor = self.normal_cursor
         self.view = view
         self.model = model
         self.separater = re.compile("\\s+")    # command separater
@@ -23,18 +29,13 @@ class SiraController():
         try:
             self.cal(string)
         except Exception:
-            self.view.info = ["error while processing", self.cursor]
+            self.sendinfo("error while processing")
 
-    def cal(self, command):
+    def cal(self, command): 
         # return when command is empty in non-interactive mode
         if(len(command) <= 0 and (self.position is None or self.position == self.tree)):
             self.view.set_command_mode(True)
-            self.view.info = [self.cursor]
-            return
-
-        if(command.startswith("sira login") and self.view.username):
-            self.view.commandText.readonly = False
-            self.view.info = ["already logged in as "+self.view.username, self.cursor]
+            self.view.print_header()
             return
 
         tokens = self.separater.split(command.strip())
@@ -44,27 +45,30 @@ class SiraController():
 
         for token in tokens:
             pre_position = self.position
-            for child in list(self.position):
+            for child in self.position.getchildren():
                 if(child.tag == "keyword" and child.attrib['name'] == token):
-                    if((not self.view.username) and (token != "login" and token != "exit" and token != "clear" and token != "sira")):
-                        self.clearcache()
-                        self.view.commandText.readonly = False
-                        self.view.info = ["Please login first", self.cursor]
-                        return
-                    self.position = child
-                    break
-                elif (child.tag == "optional" or child.tag == "required"):
-                    if(token):
+                    # exclude keywords need to login
+                    if((not self.view.username) and (token not in self.no_need_login)):
+                        return self.sendinfo("Please login first")
+                    # exclude login keyword if have logged in
+                    elif(self.view.username and token == "login"):
+                        return self.sendinfo("already logged in as " + self.view.username)
+                    else:
                         self.position = child
-                        self.paras.append(token)
+                        break
+                elif(child.tag == "optional" or child.tag == "required"):
+                    self.position = child
+                    self.paras.append(token)
                     break
-            # no keyword paired, return error
-            if(pre_position == self.position and token):
-                self.clearcache()
-                self.view.set_command_mode(True)
-                self.view.info = ["error command", self.cursor]
-                return
-
+            # do not extend deep
+            if(pre_position == self.position):
+                if(pre_position.tag != "keyword" and self.paras):
+                    para = self.paras.pop()
+                    para = para + " " + token
+                    self.paras.append(para)
+                else:
+                    return self.sendinfo("error command")
+        # return if has sub-node ,exec function if has't
         if(self.position.find("./required") is not None):
             # call function first if exist
             func = self.position.find("./function")
@@ -73,7 +77,7 @@ class SiraController():
                     getattr(eval(func.attrib['object']),func.attrib['name'])()
                 else:
                     getattr(self,func.attrib['name'])()
-            # return intseractive text
+            # display intseractive text
             interactive = self.position.find("./interactive")
             self.view.set_command_mode(False)
             if(interactive is not None):
@@ -82,16 +86,14 @@ class SiraController():
                 self.view.info = [""]
             return
         elif(self.position.find("./keyword") is not None):
+            # display intseractive text
             interactive = self.position.find("./interactive")
             if(interactive is not None):
                 self.view.set_command_mode(False)
-                self.view.info = [interactive.text, self.interactive_cursor]
+                self.view.info = [interactive.text, "-"]
                 return
             else:
-                self.view.set_command_mode(True)
-                self.clearcache()
-                self.view.info = ["error command", self.cursor]
-                return
+                return self.sendinfo("error command")
         else:
             self.view.commandText.readonly = True
             functag = self.position.find("./function")
@@ -100,7 +102,7 @@ class SiraController():
             else:
                 if(functag.attrib['name'] == "on_clear"):
                     self.view.commandText.readonly = False
-                    self.view.info = [self.cursor]
+                    self.view.print_header()
                     self.view.on_clear()
                     self.clearcache()
                 else:
@@ -109,28 +111,28 @@ class SiraController():
 
     def execfunc(self):
         functag = self.position.find("./function")
-        funcobj = functag.attrib['object']
+        obj = functag.attrib['object']
+        name = functag.attrib['name']
         if(self.paras):
-            result = getattr(eval(funcobj), functag.attrib['name'])(self.paras)
+            result = getattr(eval(obj), name)(self.paras)
         else:
-            result = getattr(eval(funcobj), functag.attrib['name'])()
+            result = getattr(eval(obj), name)()
         # set cursor value to username when login successd
-        if(functag.attrib['name'] == "login" and result[0]):
+        if(name == "login" and result[0]):
             self.view.username = self.paras[0]
-            self.cursor = self.paras[0] + self.normal_cursor
-        elif((functag.attrib['name'] == "login" and not result[0]) or functag.attrib['name'] == "logout"):
+        elif((name == "login" and not result[0]) or name == "logout"):
             self.view.username = ""
-            self.cursor = self.normal_cursor
-        self.view.commandText.readonly = False
-        if(result):
-            if(funcobj == "login"):
-                self.view.info = [result[1], self.cursor]
-            else:
-                self.view.info = [result, self.cursor]
-        else:
-            self.view.info = [self.cursor]
+        result = result[1] if (name == "login") else result
+        # display result
+        self.sendinfo(result)
+
+    def sendinfo(self, msg):
         self.clearcache()
+        self.view.commandText.readonly = False
         self.view.set_command_mode(True)
+        if(msg):
+            self.view.info = [msg]
+        self.view.print_header()
 
     def closeinteractive(self):
         if(self.position is None or self.position == self.tree):
@@ -138,7 +140,8 @@ class SiraController():
         self.clearcache()
         self.view.set_command_mode(True)
         self.view.commandText.readonly = False
-        self.view.info = ["interactive mode closed", self.cursor]
+        self.view.info = ["interactive mode closed"]
+        self.view.print_header()
 
     def clearcache(self):
         self.position = None

@@ -138,7 +138,6 @@ class SiraController():
         if(self.position is None or self.position == self.tree):
             pass
         self.clearcache()
-        self.view.set_command_mode(True)
         self.view.commandText.readonly = False
         self.view.info = ["interactive mode closed"]
         self.view.print_header()

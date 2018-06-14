@@ -5,7 +5,7 @@ import requests
 from requests.status_codes import _codes
 
 from extract import dtos, getField, getIssue, getString
-from util import mylog
+from utils import mylog
 
 domain = '10.176.111.32:8080'
 cookie_path = ''

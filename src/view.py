@@ -7,13 +7,8 @@ from kivy.config import ConfigParser
 
 from advancedtextinput import AdvancedTextInput
 from controller import SiraController
+from utils import mylog, overrides, asserts
 
-###
-def overrides(interface_class):
-    def overrider(method):
-        assert(method.__name__ in dir(interface_class))
-        return method
-    return overrider
 
 class SiraApp(App):
 
@@ -68,7 +63,7 @@ class SiraApp(App):
             Fired when option is changed. This will print everything, one
             element per line, in the {@code info} to the command window without
             moving the cursor.
-        
+
         `on_username`
             Fired when username is changed. This will change and write the
             sira.ini (Section: Text, Key: username) based on its value, and call
@@ -91,7 +86,7 @@ class SiraApp(App):
     
     [callback]: None
     """
-  
+
     info = kp.ListProperty([])
     """Kivy list property to store buffered results. When info changes,
     function on_info will be dispatched, and self.commandText will print
@@ -132,7 +127,7 @@ class SiraApp(App):
     @overrides(App)
     def __init__(self, **kwargs) -> None:
         """Constructor of SiraApp.
-        
+
         [ensures]:  isinstance(self.__events__, list),
                     isinstance(self.config_func_dict)
         [calls]:    super(SiraApp, self).__init__
@@ -141,10 +136,10 @@ class SiraApp(App):
         self.__events__ = ["on_info", "on_option", "on_username"]
         # Element Constraint: {(section, key): func}
         self.config_func_dict = {
-            ("Text", "cmd_identifier") : self._on_cmd_idf,
-            ("Text", "font_size") : self._on_font_size
+            ("Text", "cmd_identifier"): self._on_cmd_idf,
+            ("Text", "font_size"): self._on_font_size
         }
-        
+
     @overrides(App)
     def build(self) -> Widget:
         """Builder of the application interface, called after build_config().
@@ -159,21 +154,23 @@ class SiraApp(App):
         [calls]:    _reset_header
                     [reset self.commandText.protected_len]
         """
-        assert isinstance(self.config, ConfigParser), """
-                self.config is not initialized.
-            """
+        if not asserts(isinstance(self.config, ConfigParser),
+                       "self.config is not initialized."):
+            return
 
         self.settings_cls = SettingsWithSidebar
         self.username = self.config.get("Text", "username")
         self._reset_header(self.username,
-            self.config.get("Text", "cmd_identifier"))
+                           self.config.get("Text", "cmd_identifier"))
         self.protected_text = self.header
         self.commandText = Builder.load_file("res/sira.kv")
         return self.commandText
 
     @overrides(App)
     def build_config(self, config: ConfigParser) -> None:
-        """Builder of self.config from src/sira.ini.
+        """Public function builds self.config from src/sira.ini if it exists,
+        otherwise sets self.config with default values and writes in
+        src/sira.ini.
 
         [ensures]:  self.config is not None
                     [self.config has all attributes in its source file]
@@ -183,19 +180,24 @@ class SiraApp(App):
                         "Text", "font_size"
                     ]
         """
-        config.read("src/sira.ini")
+        Text = {
+            "cmd_identifier": ">",
+            "font_size": "14",
+            "username": ""
+        }
+        config.setdefaults("Text", Text)
 
     @overrides(App)
     def build_settings(self, settings: Settings) -> None:
         """Builds and adds custom setting pannels to original settings,
         called when the user open settings for the first time.
-        
+
         [requires]: isinstance(self.config, kivy.config.Config)
                     [see [ensures] of build_config]
         """
-        assert isinstance(self.config, ConfigParser), """
-                self.config is not initialized.
-            """
+        if not asserts(isinstance(self.config, ConfigParser),
+                       "self.config is not initialized."):
+            return
         settings.add_json_panel("Text Option", self.config,
                                 filename="res/sira.json")
 
@@ -214,9 +216,9 @@ class SiraApp(App):
         """
 
         if config == self.config:
-            assert (section, key) in self.config_func_dict.keys(), """
-                ({}, {}) is not a key pair in self.config_func_dict
-            """.format(section, key)
+            if not asserts((section, key) in self.config_func_dict.keys(),
+                           "({}, {}) is not a key pair in self.config_func_dict".format(section, key)):
+                return
             self.config_func_dict[(section, key)](value)
 
     def on_clear(self) -> None:
@@ -235,12 +237,12 @@ class SiraApp(App):
                     self.protected_text = self.header
         [calls]:    [reset self.commandText.protected_len]
         """
-        assert self.header is not None, """
-            self.header must be initialized before calling print_header.
-        """
-        assert self.commandText is not None, """
-            self.commandText must be initialized before calling print_header.
-        """
+        if not asserts(self.header is not None,
+                       "self.header must be initialized before calling print_header."):
+            return
+        if not asserts(self.commandText is not None,
+                       "self.commandText must be initialized before callingprint_header."):
+            return
 
         self.commandText.insert_text("\n" + self.header)
         self.protected_text = self.header
@@ -309,6 +311,7 @@ class SiraApp(App):
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
         self.controller.processInput(instance, string)
+        instance._editable = True
         return True
 
     def _reset_header(self, username: str, identifier: str) -> None:
@@ -345,12 +348,13 @@ class SiraApp(App):
         """
         if self.info == []:
             return
+        for s in info:
+            if not asserts(isinstance(s, str),
+                           "(for line in self.info: isinstance(line, str))."):
+                return
         self.commandText.do_cursor_movement("cursor_end", control=True)
         self.protected_text = info[-1]
         for s in info:
-            assert isinstance(s, str), """
-                (for line in self.info: isinstance(line, str)).
-            """
             self.commandText.insert_text("\n" + str(s))
         self.info = []
 
@@ -370,9 +374,9 @@ class SiraApp(App):
                     [convention #1.1]
         [calls]:    _reset_header
         """
-        assert self.config is not None, """
-            self.config must be initialized before calling on_username.
-        """
+        if not asserts(self.config is not None,
+                       "self.config must be initialized before calling on_username."):
+            return
 
         self.config.set("Text", "username", value)
         self.config.write()

@@ -21,6 +21,7 @@ def getIssue(s, key):
     else:
         for i in range(0, len(issue)):
             if issue[i]['key'] == key:
+
                 return [issue[i]]
         return None
 
@@ -57,15 +58,15 @@ def dtos(dic, issue):
     return string
 
 
-def getString(s):
+def getString(j):
     global defaultList
     string = ''
-    j = json.loads(s)
+    issue_lst = []
     try:
+        issue_lst = j['issues']
         return j['warningMessages']
     except KeyError:
         pass
-    issue_lst = getIssue(s, None)
     if len(issue_lst) > 0:
         for i in defaultHeader:
             string += '{}'.format(i).ljust(15, ' ')
@@ -85,3 +86,4 @@ def getString(s):
         return string
     else:
         return 'Issue not Found'
+

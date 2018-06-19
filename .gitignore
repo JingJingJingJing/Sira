@@ -142,10 +142,11 @@ Thumbs.db
 
 # project file #
 ################
-cookie.txt
 .vscode/
 username.txt
 src/sira.ini
 selfnote.md
 TSuit.py
 TTest.py
+cookie.txt
+testfolder

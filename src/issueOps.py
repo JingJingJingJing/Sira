@@ -1,10 +1,11 @@
 import requests
 import json
-from util import mylog
+from utils import mylog
 from query import read_cookie
 from query import send_request
 from query import method
-domain = '10.176.111.32:8080'
+from utils import glob_dic
+
 cookie_path = ''
 '''
 send_request(url, method, headers, params, data);
@@ -12,13 +13,11 @@ send_request(url, method, headers, params, data);
 
 
 def issue_create(lst):
-    cookie = ''
-    try:
-        cookie = read_cookie()
-    except FileNotFoundError as err:
-        return err
+    cookie = read_cookie()
+    if not cookie:
+        return 'Cookie not Found, please log in again'
 
-    url = 'http://' + domain + '/rest/api/2/issue'
+    url = 'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue'
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -38,12 +37,10 @@ def issue_create(lst):
 def issue_assign(lst):
     issue = lst[0]
     assignee = lst[1]
-    cookie = ''
-    try:
-        cookie = read_cookie()
-    except FileNotFoundError as err:
-        return err
-    url = 'http://' + domain + '/rest/api/2/issue/' + issue + '/assignee'
+    cookie = read_cookie()
+    if not cookie:
+        return 'Cookie not Found, please log in again'
+    url = 'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue/' + issue + '/assignee'
 
     headers = {
         'Accept': 'application/json',
@@ -66,7 +63,7 @@ def issue_getComment(lst):
         cookie = read_cookie()
     except FileNotFoundError as err:
         return err
-    url = 'http://' + domain + '/rest/api/2/issue/' + issue + '/comment'
+    url = 'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue/' + issue + '/comment'
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -75,12 +72,12 @@ def issue_getComment(lst):
     f, r = send_request(url, method.Get, headers, None, None)
     if not f:
         return r
-    
+
     comments = r.json()['comments']
     if len(comments) > 0:
         string = 'Here are the comments for ' + issue + ':\r\n'
         for com in comments:
-            string += '"' + com['body'] + '"\r\n\twrote by ' + com['updateAuthor']['key'] + '\r\n\t' + com['created'] + '\r\n\t' + '(cid: '+com['id']+')\r\n'
+            string += '"' + com['body'] + '"\r\n\twrote by ' + com['updateAuthor']['key'] + '\r\n\t' + com['created'] + '\r\n\t' + '(cid: ' + com['id'] + ')\r\n'
         mylog.info(string)
         return string
     else:
@@ -95,7 +92,7 @@ def issue_addComment(lst):
         cookie = read_cookie()
     except FileNotFoundError as err:
         return err
-    url = 'http://' + domain + '/rest/api/2/issue/' + issue + '/comment'
+    url = 'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue/' + issue + '/comment'
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -110,8 +107,9 @@ def issue_addComment(lst):
     if not f:
         return r
     mylog.info(r.text)
-    print('Comment(ID: '+r.json()['id']+')added')
-    return 'Comment(ID: '+r.json()['id']+')added'
+    print('Comment(ID: ' + r.json()['id'] + ')added')
+    return 'Comment(ID: ' + r.json()['id'] + ')added'
+
 
 def issue_delComment(lst):
     issue = lst[0]
@@ -121,7 +119,7 @@ def issue_delComment(lst):
         cookie = read_cookie()
     except FileNotFoundError as err:
         return err
-    url = 'http://' + domain + '/rest/api/2/issue/' + issue + '/comment/'+cid
+    url = 'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue/' + issue + '/comment/' + cid
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -135,5 +133,7 @@ def issue_delComment(lst):
     #print('Comment(ID: '+r.json()['id']+')added')
     return 'Comment deleted'
 
+
 # issue_delComment(['Test-01','10103'])
 # issue_getComment(['Test-01'])
+# issue_assign(['Test-01','testuser1'])

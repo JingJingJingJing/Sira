@@ -100,7 +100,7 @@ class AdvancedTextInput(TextInput):
                                         self).keyboard_on_key_down(window, keycode, text, modifiers):
             return True
 
-        if not self._editable:
+        if not self._editable and key != 282:
             # duplicated but faster testing for non-editable keys
             if text and not is_interesting_key:
                 if is_shortcut and key == ord('c'):
@@ -363,7 +363,7 @@ class AdvancedTextInput(TextInput):
             if scroll_type == 'up':
                 if self.multiline:
                     ### changes in the next two lines
-                    if (self.scroll_y + 17 >=
+                    if (self.scroll_y + self.line_height - 1 >=
                             (len(self._lines) - 1) * self.line_height):
                         return
                     self.scroll_y += self.line_height

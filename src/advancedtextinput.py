@@ -22,10 +22,14 @@ class AdvancedTextInput(TextInput):
 
     command_mode = kp.BooleanProperty(True)
 
+    completion_mode = kp.BooleanProperty(False)
+
     last_row = kp.NumericProperty(0)
+    
+    last_row_start = kp.NumericProperty(0)
 
     __events__ = ('on_text_validate', 'on_double_tap', 'on_triple_tap',
-                  'on_quad_touch', 'on_tab', 'on_ctrl_c')
+                  'on_quad_touch', 'on_tab', 'on_ctrl_c', 'on_stop_completion')
 
     def __init__(self, **kwargs):
         super(AdvancedTextInput, self).__init__(**kwargs)
@@ -101,6 +105,11 @@ class AdvancedTextInput(TextInput):
         if not self.write_tab and super(AdvancedTextInput,
                                         self).keyboard_on_key_down(window, keycode, text, modifiers):
             return True
+
+        ### changes start here
+        if self.completion_mode and key != 9:
+            self.dispatch('on_stop_completion')
+        ### changes end here
 
         if not self._editable and key != 282:
             # duplicated but faster testing for non-editable keys
@@ -228,10 +237,10 @@ class AdvancedTextInput(TextInput):
         ### changes start from here
 
         # If the selection includes protected parts, cancel selection.
-        index = -1 if self.last_row < 2 else self.text.rindex('\n')
+        index = 0 if self.last_row < 1 else self.last_row_start
 
         ### when user selected both protected texts and the command
-        if self.selection_from < index + self.protected_len + 1:
+        if self.selection_from < index + self.protected_len:
             self.delete_lastchar()
             return
 
@@ -402,17 +411,6 @@ class AdvancedTextInput(TextInput):
 
         return False
 
-    def display_command(self, text):
-        self.cancel_selection()
-        index = -1 if self.last_row < 2 else self.text.rindex('\n')
-        start = index + self.protected_len + 1
-        end = len(self.text)
-        self.select_text(start, end)
-        self.delete_selection()
-        self.insert_text(text)
-        col, row = self.cursor
-        return len(self._lines[row]), row
-
     def on_cursor(self, instance, value):
         # When the cursor is moved, reset cursor blinking to keep it showing,
         # and update all the graphics.
@@ -456,6 +454,17 @@ class AdvancedTextInput(TextInput):
 
     ### custom functions:
 
+    def display_command(self, text):
+        self.cancel_selection()
+        index = 0 if self.last_row < 1 else self.last_row_start
+        start = index + self.protected_len
+        end = len(self.text)
+        self.select_text(start, end)
+        self.delete_selection()
+        self.insert_text(text)
+        col, row = self.cursor
+        return len(self._lines[row]), row
+
     def on_password_mode(self, instance, value):
         if not value:
             self.password_cache = ''
@@ -464,6 +473,9 @@ class AdvancedTextInput(TextInput):
         pass
 
     def on_ctrl_c(self):
+        pass
+
+    def on_stop_completion(self):
         pass
     
     def delete_lastchar(self):

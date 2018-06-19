@@ -107,7 +107,9 @@ class SiraApp(App):
     [callback]: on_info
     """
 
-    # option = kp.ListProperty([])
+    option = kp.ListProperty([])
+    """TODO
+    """
 
     protected_text = kp.StringProperty(None)
     """Kivy string property to store the protected_text of the current
@@ -118,6 +120,14 @@ class SiraApp(App):
     }
 
     [callback]: self.commandText.protected_len (from res/sira.kv)
+    """
+
+    start_indices = kp.ListProperty([])
+    """TODO: both here and class doc
+    """
+
+    tab_index = kp.NumericProperty(0)
+    """TODO: both here and class doc
     """
 
     username = kp.StringProperty(None)
@@ -253,9 +263,12 @@ class SiraApp(App):
                        "self.commandText must be initialized before callingprint_header."):
             return
 
-        self.commandText.insert_text("\n" + self.header)
+        obj = self.commandText
+
+        obj.insert_text("\n" + self.header)
         self.protected_text = self.header
-        self.commandText.last_row = len(self.commandText._lines) - 1
+        obj.last_row = len(obj._lines) - 1
+        obj.last_row_start = len(obj.text) - len(obj._lines[obj.last_row])
 
     def set_pwd_mode(self) -> None:
         """Public function to set self.commandText.password_mode to True.
@@ -320,16 +333,19 @@ class SiraApp(App):
         """
         self.commandText.font_size = int(value)
 
-    def _on_tab(self, instance: AdvancedTextInput):
+    def _on_tab(self, instance: AdvancedTextInput) -> bool:
         """TODO
         """
         if instance.password_mode:
             return
-        string = instance._lines[instance.last_row][instance.protected_len:]
-        self.controller.auto_complete(string)
+        if instance.completion_mode:
+            self._select_next_option()
+        else:
+            string = instance._lines[instance.last_row][instance.protected_len:]
+            self.controller.auto_complete(string)
         return True
 
-    def _on_command(self, instance: AdvancedTextInput) -> True:
+    def _on_command(self, instance: AdvancedTextInput) -> bool:
         """"Privated function fired when self.commandText.on_text_validate is
         called, in other words, when users hit the 'enter' key. This property
         is established by res/sira.kv.
@@ -353,6 +369,47 @@ class SiraApp(App):
         instance._editable = True
         return True
 
+    def _select_next_option(self) -> None:
+        """TODO
+        """
+        instance = self.commandText
+        # delete and insert next option
+        instance.cancel_selection()
+        search_start = instance.last_row_start + instance.protected_len
+        search_end = instance.last_row_start\
+                     + len(instance._lines[instance.last_row])
+        try:
+            start = instance.text.rindex(" ", search_start, search_end) + 1
+        except ValueError:
+            start = search_start
+        end = len(instance.text) - len(instance._lines[-1]) - 1
+        instance.select_text(start, end)
+        instance.delete_selection()
+        instance.cursor = (len(instance._lines[instance.last_row]),
+                           instance.last_row)
+        instance.insert_text(self.option[self.tab_index])
+        # select next option
+        last_char_return = instance.text.rindex("\n")
+        start = last_char_return + self.start_indices[self.tab_index] + 1
+        end = start + len(self.option[self.tab_index])
+        instance.select_text(start, end)
+        self.tab_index = self.tab_index + 1\
+                         if self.tab_index < len(self.option) - 1\
+                         else 0
+
+    def _stop_completion(self, instance: AdvancedTextInput) -> None:
+        """TODO: here & class doc
+        """
+        instance.cancel_selection()
+        start = instance.text.rindex('\n')
+        end = len(instance.text)
+        instance.select_text(start, end)
+        instance.delete_selection()
+        instance.completion_mode = False
+        self.tab_index = 0
+        self.option = []
+        self.start_indices = []
+
     def _stop_interaction(self, instance: AdvancedTextInput) -> None:
         """Private function to interrupt interactive mode. This function will
         be fired when the user hit control-C.
@@ -374,7 +431,7 @@ class SiraApp(App):
         """
         self.header = username + identifier
 
-    def on_info(self, instance: AdvancedTextInput, info: list) -> None:
+    def on_info(self, instance: App, info: list) -> None:
         """Property driven function, fired when info is changed. This function
         automatically prints all elements in info on seperate lines in
         this.commandText.
@@ -387,23 +444,36 @@ class SiraApp(App):
         """
         if self.info == []:
             return
+        obj = self.commandText
         for s in info:
             if not asserts(isinstance(s, str),
                            "(for line in self.info: isinstance(line, str))."):
                 return
-        self.commandText.do_cursor_movement("cursor_end", control=True)
+        obj.do_cursor_movement("cursor_end", control=True)
         self.protected_text = info[-1]
         for s in info:
-            self.commandText.insert_text("\n" + str(s))
+            obj.insert_text("\n" + str(s))
+        obj.last_row = len(obj._lines) - 1
+        obj.last_row_start = len(obj.text) - len(obj._lines[obj.last_row])
         self.info = []
-        self.commandText.last_row = len(self.commandText._lines) - 1
 
-    def on_option(self, instance, info):
+    def on_option(self, instance: App, option: list) -> None:
         """TODO
         """
-        pass
+        if self.option == []:
+            return
+        self.commandText.completion_mode = True
+        self.commandText.do_cursor_movement("cursor_end", control=True)
+        cursor = self.commandText.cursor
+        self.commandText.insert_text("\n" + " ".join(option))
+        self.commandText.cursor = cursor
+        index = 0
+        for s in option:
+            self.start_indices.append(index)
+            index += len(s) + 1
+        self._select_next_option()
 
-    def on_username(self, instance: AdvancedTextInput, value: str) -> None:
+    def on_username(self, instance: App, value: str) -> None:
         """Property driven function, fired when username is changed. This
         function writes the new value in self.config and its corresponding
         config files.

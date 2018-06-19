@@ -25,7 +25,7 @@ class SiraController():
         self.paras = []         # hold the paras of command
         self.tree = ET.parse("res/glossary.xml").getroot()
 
-    def processInput(self, instance, string):
+    def processInput(self, string):
         try:
             self.cal(string)
         except Exception:

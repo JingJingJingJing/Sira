@@ -22,6 +22,8 @@ class AdvancedTextInput(TextInput):
 
     command_mode = kp.BooleanProperty(True)
 
+    last_row = kp.NumericProperty(0)
+
     __events__ = ('on_text_validate', 'on_double_tap', 'on_triple_tap',
                   'on_quad_touch', 'on_tab', 'on_ctrl_c')
 
@@ -226,7 +228,7 @@ class AdvancedTextInput(TextInput):
         ### changes start from here
 
         # If the selection includes protected parts, cancel selection.
-        index = -1 if len(self._lines) < 2 else self.text.rindex('\n')
+        index = -1 if self.last_row < 2 else self.text.rindex('\n')
 
         ### when user selected both protected texts and the command
         if self.selection_from < index + self.protected_len + 1:
@@ -314,7 +316,7 @@ class AdvancedTextInput(TextInput):
                 col, row = self._move_cursor_word_right()
             else:
                 if col == len(self._lines[row]):
-                    if row < len(self._lines) - 1:
+                    if row < self.last_row:
                         col = 0
                         row += 1
                 else:
@@ -325,13 +327,13 @@ class AdvancedTextInput(TextInput):
                 row = 0
         elif action == 'cursor_end':
             if control:
-                row = len(self._lines) - 1
+                row = self.last_row
             col = len(self._lines[row])
         elif action == 'cursor_pgup':
             row = max(0, row - pgmove_speed)
             col = min(len(self._lines[row]), col)
         elif action == 'cursor_pgdown':
-            row = min(row + pgmove_speed, len(self._lines) - 1)
+            row = min(row + pgmove_speed, self.last_row)
             col = min(len(self._lines[row]), col)
         self.cursor = (col, row)
     
@@ -364,7 +366,7 @@ class AdvancedTextInput(TextInput):
                 if self.multiline:
                     ### changes in the next two lines
                     if (self.scroll_y + self.line_height - 1 >=
-                            (len(self._lines) - 1) * self.line_height):
+                            (self.last_row) * self.line_height):
                         return
                     self.scroll_y += self.line_height
                 else:
@@ -402,7 +404,7 @@ class AdvancedTextInput(TextInput):
 
     def display_command(self, text):
         self.cancel_selection()
-        index = -1 if len(self._lines) < 2 else self.text.rindex('\n')
+        index = -1 if self.last_row < 2 else self.text.rindex('\n')
         start = index + self.protected_len + 1
         end = len(self.text)
         self.select_text(start, end)
@@ -416,7 +418,7 @@ class AdvancedTextInput(TextInput):
         # and update all the graphics.
         if self.focus:
             self._trigger_cursor_reset()
-            if self._get_cursor_row() != len(self._lines) - 1 or \
+            if self._get_cursor_row() != self.last_row or \
                     self._get_cursor_col() < self.protected_len:
                 self._editable = False
             else:

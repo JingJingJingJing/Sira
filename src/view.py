@@ -77,6 +77,10 @@ class SiraApp(App):
         on_option(self, kivy.uix.widget.Widget(), list()) -> None
         on_username(self, kivy.uix.widget.Widget(), str) -> None
 
+    Conventions:
+        {
+            TODO: self.commandText.last_row
+        }
     """
 
     header = kp.StringProperty(None)
@@ -110,7 +114,7 @@ class SiraApp(App):
     command line.
 
     [convention #3]: {
-        (self.protected_text = self.commandText._lines[-1])         #3.1
+        (self.protected_text = self.commandText._lines[instance.last_row])         #3.1
     }
 
     [callback]: self.commandText.protected_len (from res/sira.kv)
@@ -231,7 +235,7 @@ class SiraApp(App):
         scrolls all historical texts above the window.
         """
         instance = self.commandText
-        instance.scroll_y = (len(instance._lines) - 1) * instance.line_height
+        instance.scroll_y = (instance.last_row) * instance.line_height
 
     def print_header(self) -> None:
         """Public function to print self.header in self.commandText.
@@ -251,6 +255,7 @@ class SiraApp(App):
 
         self.commandText.insert_text("\n" + self.header)
         self.protected_text = self.header
+        self.commandText.last_row = len(self.commandText._lines) - 1
 
     def set_pwd_mode(self) -> None:
         """Public function to set self.commandText.password_mode to True.
@@ -315,32 +320,36 @@ class SiraApp(App):
         """
         self.commandText.font_size = int(value)
 
-    def _on_tab(self, instance):
+    def _on_tab(self, instance: AdvancedTextInput):
         """TODO
         """
-        pass
+        if instance.password_mode:
+            return
+        string = instance._lines[instance.last_row][instance.protected_len:]
+        self.controller.auto_complete(string)
+        return True
 
     def _on_command(self, instance: AdvancedTextInput) -> True:
         """"Privated function fired when self.commandText.on_text_validate is
         called, in other words, when users hit the 'enter' key. This property
         is established by res/sira.kv.
 
-        [ensures]:  len(instance._lines) > 0
-                    instance.protected_len <= len(instance._lines[-1])
+        [ensures]:  instance.last_row > 0
+                    instance.protected_len <= len(instance._lines[instance.last_row])
                     instance.password_mode = False
                     instance.history_stack.traversal =
                         instance.history_stack.traversal_dummy
         [calls]:    instance.history_stack.reset_traversal
                     self.controller.processInput
         """
-        string = instance._lines[-1][instance.protected_len:]
+        string = instance._lines[instance.last_row][instance.protected_len:]
         if instance.password_mode:
             string = instance.password_cache
             instance.password_mode = False
         elif instance.command_mode:
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
-        self.controller.processInput(instance, string)
+        self.controller.processInput(string)
         instance._editable = True
         return True
 
@@ -387,6 +396,7 @@ class SiraApp(App):
         for s in info:
             self.commandText.insert_text("\n" + str(s))
         self.info = []
+        self.commandText.last_row = len(self.commandText._lines) - 1
 
     def on_option(self, instance, info):
         """TODO

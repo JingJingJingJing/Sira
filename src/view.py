@@ -1,13 +1,15 @@
+from os import F_OK, access, listdir
+
 import kivy.properties as kp
 from kivy.app import App
+from kivy.config import ConfigParser
 from kivy.lang import Builder
 from kivy.uix.settings import Settings, SettingsWithSidebar
 from kivy.uix.widget import Widget
-from kivy.config import ConfigParser
 
 from advancedtextinput import AdvancedTextInput
 from controller import SiraController
-from utils import mylog, overrides, asserts
+from utils import asserts, mylog, overrides
 
 
 class SiraApp(App):
@@ -31,6 +33,7 @@ class SiraApp(App):
 
     Public Methods:
         Overrided from kivy.app.App:
+            __init__(self, **kwargs) -> None
             build(self) -> kivy.uix.widget.Widget()
             build_config(self, config) -> None
             build_settings(self, kivy.uix.settings.Settings()) -> None
@@ -43,15 +46,15 @@ class SiraApp(App):
             set_controller(self, controller.SiraController()) -> None
             set_pwd_mode(self) -> None
 
-
     Private Methods:
-        __init__(self, **kwargs) -> None
+        _get_font_path(self, str) -> str
         _on_cmd_idf(self, str) -> None
+        _on_font_name(self, str) -> None
         _on_font_size(self, str) -> None
         [TODO] _on_tab(self, kivy.uix.widget.Widget()) -> None
         _on_command(self, kivy.uix.widget.Widget()) -> None
-        _stop_interaction(self, kivy.uix.widget.Widget()) -> None
         _reset_header(self, str, str) -> None
+        _stop_interaction(self, kivy.uix.widget.Widget()) -> None
 
     Events:
         `on_info`
@@ -137,7 +140,8 @@ class SiraApp(App):
         # Element Constraint: {(section, key): func}
         self.config_func_dict = {
             ("Text", "cmd_identifier"): self._on_cmd_idf,
-            ("Text", "font_size"): self._on_font_size
+            ("Text", "font_size"): self._on_font_size,
+            ("Text", "font_name"): self._on_font_name
         }
 
     @overrides(App)
@@ -183,6 +187,7 @@ class SiraApp(App):
         Text = {
             "cmd_identifier": ">",
             "font_size": "14",
+            "font_name": "Monaco",
             "username": ""
         }
         config.setdefaults("Text", Text)
@@ -268,14 +273,39 @@ class SiraApp(App):
         """
         self.controller = controller
 
+    def _get_font_path(self, font_name) -> str:
+        """Private function to search the path of font file based on font_name.
+
+        [returns]:  "Roboto" if ["res/fonts/" directory is not readable]
+                                or [not font file matches font_name]
+                                or [the matched file is not readable]
+                    "res/fonts/{font_name}.*" if [there is a font file matches
+                                                  font_name]
+        """
+        directory = "res/fonts/"
+        if not access(directory, F_OK):
+            return "Roboto"
+        file_list = listdir(directory)
+        for file_name in file_list:
+            if font_name.lower() in file_name.lower():
+                path = directory + file_name
+                break
+        return path if access(path, F_OK) else "Roboto"
+
     def _on_cmd_idf(self, value: str) -> None:
-        """Privated function fired when cmd_identifier is changed through
+        """Private function fired when cmd_identifier is changed through
         self.config.
 
         [ensures]:  reset self.header to preserve [convention #1.1]
         [calls]:    _reset_header
         """
         self._reset_header(self.username, value)
+
+    def _on_font_name(self, value: str) -> None:
+        """"Privated function fired when font_name is changed through
+        self.config.
+        """
+        self.commandText.font_name = self._get_font_path(value)
 
     def _on_font_size(self, value: str) -> None:
         """Privated function fired when font_size is changed through
@@ -314,14 +344,6 @@ class SiraApp(App):
         instance._editable = True
         return True
 
-    def _reset_header(self, username: str, identifier: str) -> None:
-        """Private funciton to reset self.header based on username and
-        identifier to preserve [convention #1.1]
-
-        [ensures]:  [convention #1.1]
-        """
-        self.header = username + identifier
-
     def _stop_interaction(self, instance: AdvancedTextInput) -> None:
         """Private function to interrupt interactive mode. This function will
         be fired when the user hit control-C.
@@ -334,6 +356,14 @@ class SiraApp(App):
             self.controller.closeinteractive()
             instance.password_mode = False
             instance.command_mode = True
+
+    def _reset_header(self, username: str, identifier: str) -> None:
+        """Private funciton to reset self.header based on username and
+        identifier to preserve [convention #1.1]
+
+        [ensures]:  [convention #1.1]
+        """
+        self.header = username + identifier
 
     def on_info(self, instance: AdvancedTextInput, info: list) -> None:
         """Property driven function, fired when info is changed. This function

@@ -11,7 +11,7 @@ AdvancedTextInput:
     cursor_color: [1, 1, 1, 1]
     foreground_color: [1, 1, 1, 1]
     padding: [20, 20, 20, 20]
-    font_name: "res/DejaVuSansMono.ttf"
+    font_name: app._get_font_path(app.config.get("Text", "font_name"))
     on_text_validate: app._on_command(self)
     on_tab: app._on_tab(self)
     on_ctrl_c: app._stop_interaction(self)

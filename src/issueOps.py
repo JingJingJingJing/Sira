@@ -1,6 +1,6 @@
 import requests
 import json
-from util import mylog
+from utils import mylog
 from query import read_cookie
 from query import send_request
 from query import method

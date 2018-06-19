@@ -34,7 +34,7 @@ class SiraController():
         self.position = self.tree   # the current position of tree
         self.prompter = Prompter()
 
-    def processInput(self, instance, string):
+    def processInput(self, string):
         """According to the xml DOM structure, parser the input from UI, exec function and display the result
 
         *string* is the command from UI

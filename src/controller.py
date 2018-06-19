@@ -4,7 +4,7 @@ import re
 from prompter import Prompter
 import login
 import query
-from util import mylog
+from utils import mylog
 
 class SiraController():
 
@@ -174,9 +174,6 @@ class SiraController():
 
     def auto_complete(self, command):
         tokens = self.separater.split(command.strip())
-        return self.prompter.auto_complete(self.position,tokens)
+        self.view.option = self.prompter.auto_complete(self.position,tokens)
 
-controller = SiraController(None, None)
-print(controller.auto_complete("sira query pro"))
-print(controller.auto_complete("sira query "))
         

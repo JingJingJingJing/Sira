@@ -9,7 +9,7 @@ from kivy.uix.widget import Widget
 
 from advancedtextinput import AdvancedTextInput
 from controller import SiraController
-from utils import asserts, mylog, overrides, tryload
+from utils import asserts, mylog, overrides
 
 
 class SiraApp(App):
@@ -247,13 +247,6 @@ class SiraApp(App):
                            "({}, {}) is not a key pair in self.config_func_dict".format(section, key)):
                 return
             self.config_func_dict[(section, key)](value)
-    
-    @overrides(App)
-    def on_start(self) -> None:
-        try:
-            tryload()
-        except FileNotFoundError as fe:
-            mylog.error(fe)
 
     def on_clear(self) -> None:
         """Public function to clear the screen. This methods essentially

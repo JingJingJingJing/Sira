@@ -1,12 +1,24 @@
+import re
+from utils import glob_dic
 
 class Prompter:
 
-    def __init__(self):
-        pass
+    blank = " "
 
-    def auto_complete(self, position, tokens):
+    def __init__(self):
+        self.separater = re.compile("\\s+")
+
+    def auto_complete(self, position, command):
         result = []
         complete = False
+
+        l = len(command)
+        if l > 0 and command[-1] != Prompter.blank:
+            complete = True
+        elif l > 1 and command[-2] == Prompter.blank:
+            return result
+
+        tokens = self.separater.split(command.strip())
         for token in tokens:
             pre_position = position
             # traverse every chlid nodes
@@ -17,27 +29,24 @@ class Prompter:
                 elif child.tag == "optional" or child.tag == "required":
                     position = child
                     break
-            if position == pre_position:
-                if(token != tokens[-1]):
+            if position == pre_position and l > 0:
+                if(token != tokens[-1] or not complete):
                     return []
-                complete = True
 
         keywords = position.findall("./keyword")
         if keywords:
-            if complete:
-                for keyword in keywords:
-                    if keyword.attrib['name'].startswith(tokens[-1]):
-                        result.append(keyword.attrib['name'])
-                        break
-            else:
-                for keyword in keywords:
-                    result.append(keyword.attrib['name'])
+            for keyword in keywords:
+                name = keyword.attrib['name']
+                if complete and name.startswith(tokens[-1]):
+                    result.append(name)
+                elif not complete:
+                    result.append(name)
         else:
-            result = ["tips about project/sprint/status"]
+            option = position.find("./required")
+            if not option:
+                option = position.find("./optional")
+            if option and option.attrib['name'] in glob_dic.tips:
+                result = glob_dic.tips[option.attrib['name']]
 
         return result
-
-
-
-
 

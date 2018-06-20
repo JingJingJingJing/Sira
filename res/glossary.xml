@@ -8,7 +8,7 @@
     </keyword>
     <keyword name="sira">
         <keyword name="login">
-            <required name="user_name">
+            <required name="username">
                 <required name="pwd">
                     <function multi-thread="True" object="login" name="login" para="user pwd"/>
                 </required>
@@ -30,7 +30,7 @@
             </keyword>
             <keyword name="project">
                 <interactive>project:</interactive>
-                <required name="project_name">
+                <required name="project">
                     <interactive>-type -assignee -sprint</interactive>
                     <keyword name="type">
                         <interactive>type:</interactive>
@@ -60,13 +60,13 @@
             </keyword>
             <keyword name="assignee">
                 <interactive>assignee:</interactive>
-                <required name="assignee_name">
+                <required name="assignee">
                     <function multi-thread="True" object="query" name="query_assignee" para="assignee_name"/>
                 </required>
             </keyword>
             <keyword name="sprint">
                 <interactive>sprint:</interactive>
-                <required name="sprint_name">
+                <required name="sprint">
                     <function multi-thread="True" object="query" name="query_sprint" para="sprint_name"/>
                 </required>
             </keyword>

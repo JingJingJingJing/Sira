@@ -5,75 +5,85 @@ from query import read_cookie
 from query import send_request
 from query import method
 from utils import glob_dic
+from utils import prepare, issue_create_args
+from receiver import issue_create_data
 
-cookie_path = ''
+issue_list = []
 '''
 send_request(url, method, headers, params, data);
 '''
+default_order = ['project', 'summary', 'issuetype']
+
+def todic(lst):
+    for i in range(0,len(default_order)):
+        issue_create_args[default_order[i]] = lst[i]
 
 
 def issue_create(lst):
-    cookie = read_cookie()
-    if not cookie:
-        return 'Cookie not Found, please log in again'
-
-    url = 'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue'
-    headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'cookie': cookie
-    }
-    data = ''
-    with open("res/create.json", "r") as f:
-        data = json.load(f)
-        data = json.dumps(data)
+    todic(lst)
+    url, headers = prepare('issue')
+    data = json.dumps(issue_create_data())
     f, r = send_request(url, method.Post, headers, None, data)
-    print(r)
     if not f:
+        print(r)
         return r
-    return "Issue successfully created!"
+    msg = 'Issue {} successfully created!'.format(r['key'])
+    mylog.info(msg)
+    return msg
 
+def issue_delete(lst):
+    msg = ''
+    for issue in lst:
+        msg += '{}\r\n'.format(issue_delete_helper(issue))
+    msg += 'Done!'
+    return msg
+
+def issue_delete_helper(issue):
+    url, headers = prepare('issue')
+    url += '/{}'.format(issue)
+    f, r = send_request(url, method.Delete, headers, None, None)
+    if not f:
+        return 'DOING {}\r\n{}'.format(issue, r)
+    msg = '{} successfully deleted!'.format(issue)
+    mylog.info(msg)
+    return msg
+
+
+# def finduser(user):
+#     url,headers = prepare('search')
+#     params={'username':user}
+#     f,r = send_request(url, method.Get, headers, params, None)
+#     if not f:
+#         return r
+#     return r.get('key')
 
 def issue_assign(lst):
     issue = lst[0]
     assignee = lst[1]
-    cookie = read_cookie()
-    if not cookie:
-        return 'Cookie not Found, please log in again'
-    url = 'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue/' + issue + '/assignee'
-
-    headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'cookie': cookie
-    }
+    url, headers = prepare('issue')
+    url += '/{}/assignee'.format(issue)
+    # user_key = finduser(assignee)
+    # if not user_key:
+    #     return 'User not found!'
     data = '{"name":"' + assignee + '"}'
 
     f, r = send_request(url, method.Put, headers, None, data)
     if not f:
         return r
-    mylog.info(issue + ' successfully assigned to ' + assignee)
-    return issue + ' successfully assigned to ' + assignee
+    msg = '{} successfully assigned to {}'.format(issue, assignee)
+    mylog.info(msg)
+    return msg
 
 
 def issue_getComment(lst):
     issue = lst[0]
-    cookie = ''
-    try:
-        cookie = read_cookie()
-    except FileNotFoundError as err:
-        return err
-    url = 'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue/' + issue + '/comment'
-    headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'cookie': cookie
-    }
+    url, headers = prepare('issue')
+    url += issue + '/comment'
     f, r = send_request(url, method.Get, headers, None, None)
     if not f:
         return r
 
-    comments = r.json()['comments']
+    comments = r.json().get('comments',[])
     if len(comments) > 0:
         string = 'Here are the comments for ' + issue + ':\r\n'
         for com in comments:
@@ -87,53 +97,38 @@ def issue_getComment(lst):
 
 def issue_addComment(lst):
     issue = lst[0]
-    cookie = ''
-    try:
-        cookie = read_cookie()
-    except FileNotFoundError as err:
-        return err
-    url = 'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue/' + issue + '/comment'
-    headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'cookie': cookie
-    }
+    url, headers = prepare('issue')
+    url += issue + '/comment'
     data = ''
     with open("res/comments.json", "r") as f:
         data = json.load(f)
         data = json.dumps(data)
-    print(data, type(data))
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
         return r
     mylog.info(r.text)
-    print('Comment(ID: ' + r.json()['id'] + ')added')
     return 'Comment(ID: ' + r.json()['id'] + ')added'
 
 
 def issue_delComment(lst):
     issue = lst[0]
     cid = lst[1]
-    cookie = ''
-    try:
-        cookie = read_cookie()
-    except FileNotFoundError as err:
-        return err
-    url = 'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue/' + issue + '/comment/' + cid
-    headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'cookie': cookie
-    }
-
+    url, headers = prepare('issue')
+    url += issue + '/comment/' + cid
     f, r = send_request(url, method.Delete, headers, None, None)
     if not f:
         return r
     mylog.info('Comment {} deleted'.format(cid))
-    #print('Comment(ID: '+r.json()['id']+')added')
     return 'Comment deleted'
 
+# for i in range(0,11):
+#     a = 'This is test. Iteration '+ str(i)
+#     issue_create(['TEST',a, 'Task'])
 
+# issue_assign(['TEST-38','hang'])
+# issue_assign(['TEST-29','hang'])
+# finduser('xp zheng')
+# finduser('yuhang4')
 # issue_delComment(['Test-01','10103'])
 # issue_getComment(['Test-01'])
 # issue_assign(['Test-01','testuser1'])

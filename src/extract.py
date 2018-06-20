@@ -1,10 +1,10 @@
 import json
 
 defaultList = [
-    'issuetype', 'assignee', 'status', 'fixVersions', 'project', 'summary'
+    'issuetype', 'assignee', 'status', 'fixVersions', 'summary'
 ]
 defaultHeader = [
-    'IssueID', 'Type', 'Assignee', 'Status', 'FixVer.', 'Project', 'Summary'
+    'IssueID', 'Type', 'Assignee', 'Status', 'FixVer.', 'Summary'
 ]
 
 
@@ -13,7 +13,6 @@ def getIssue(s, key):
     issue = []
     try:
         issue = j['issues']
-        # print(issue)
     except KeyError:
         pass
     if key is None:

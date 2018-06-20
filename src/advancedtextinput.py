@@ -429,6 +429,7 @@ class AdvancedTextInput(TextInput):
             self._trigger_cursor_reset()
             if self._get_cursor_row() != self.last_row or \
                     self._get_cursor_col() < self.protected_len:
+                # import pdb; pdb.set_trace()
                 self._editable = False
             else:
                 self._editable = True

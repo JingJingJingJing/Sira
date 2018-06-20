@@ -284,6 +284,7 @@ class SiraApp(App):
         self.protected_text = self.header
         obj.last_row = len(obj._lines) - 1
         obj.last_row_start = len(obj.text) - len(obj._lines[obj.last_row])
+        obj.on_cursor(obj, obj.cursor)
 
     def set_pwd_mode(self) -> None:
         """Public function to set self.commandText.password_mode to True.
@@ -368,10 +369,7 @@ class SiraApp(App):
         elif instance.command_mode:
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
-        if string == "pdb":
-            import pdb; pdb.set_trace()
-        else:
-            self.controller.processInput(string)
+        self.controller.processInput(string)
         instance._editable = True
         return True
 
@@ -441,7 +439,6 @@ class SiraApp(App):
         instance.cancel_selection()
         start = self.completion_start
         end = instance.last_row_start + len(instance._lines[instance.last_row])
-        # import pdb; pdb.set_trace()
         instance.select_text(start, end)
         instance.delete_selection()
         instance.do_cursor_movement("cursor_end", control=True)
@@ -510,6 +507,7 @@ class SiraApp(App):
             obj.insert_text("\n" + str(s))
         obj.last_row = len(obj._lines) - 1
         obj.last_row_start = len(obj.text) - len(obj._lines[obj.last_row])
+        obj.on_cursor(obj, obj.cursor)
         self.info = []
 
     def on_option(self, instance: App, option: list) -> None:

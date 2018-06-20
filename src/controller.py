@@ -4,7 +4,7 @@ import re
 from prompter import Prompter
 import login
 import query
-from utils import mylog
+from utils import mylog, Super401
 
 class SiraController():
 
@@ -154,9 +154,9 @@ class SiraController():
             result = result[1] if name == "login" else result
             # display result
             self._sendinfo(result)
-        #except super401:
-            #self.viwe.username = ""
-            #login.logout()
+        except Super401:
+            self.view.username = ""
+            login.logout()
         except Exception as err:
             mylog.error(err)
 
@@ -173,7 +173,4 @@ class SiraController():
         self.args.clear()
 
     def auto_complete(self, command):
-        tokens = self.separater.split(command.strip())
-        self.view.option = self.prompter.auto_complete(self.position,tokens)
-
-        
+        self.view.option = self.prompter.auto_complete(self.position,command)

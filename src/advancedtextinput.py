@@ -29,7 +29,9 @@ class AdvancedTextInput(TextInput):
     last_row_start = kp.NumericProperty(0)
 
     __events__ = ('on_text_validate', 'on_double_tap', 'on_triple_tap',
-                  'on_quad_touch', 'on_tab', 'on_ctrl_c', 'on_stop_completion')
+                  'on_quad_touch', 'on_tab', 'on_ctrl_c', 'on_stop_completion',
+                  'on_space', 'on_reduce_option', 'on_left_option',
+                  'on_right_option')
 
     def __init__(self, **kwargs):
         super(AdvancedTextInput, self).__init__(**kwargs)
@@ -62,7 +64,7 @@ class AdvancedTextInput(TextInput):
             if self._selection and not self._selection_finished:
                 self._selection_to = self.cursor_index()
                 self._update_selection()
-            else:
+            elif not self.completion_mode:
                 self.cancel_selection()
         elif self._selection and internal_action in ('del', 'backspace'):
             self.delete_selection()
@@ -107,7 +109,7 @@ class AdvancedTextInput(TextInput):
             return True
 
         ### changes start here
-        if self.completion_mode and key != 9:
+        if self.completion_mode and key not in (9, 275, 276) and not text:
             self.dispatch('on_stop_completion')
         ### changes end here
 
@@ -316,13 +318,22 @@ class AdvancedTextInput(TextInput):
                 self.history_stack.step_forward()
                 col, row = self.display_command(self.history_stack.peak())
         elif action == 'cursor_left':
-            if not self.password and control:
+            ### changes in the next line
+            if not self.password_mode and control:
                 col, row = self._move_cursor_word_left()
+            ### changes in the next two lines
+            elif self.completion_mode:
+                self.dispatch("on_left_option")
+                col, row = self.cursor
             elif self._get_cursor_col() > self.protected_len:
                 col, row = col - 1, row
         elif action == 'cursor_right':
-            if not self.password and control:
+            ### changes in the next line
+            if not self.password_mode and control:
                 col, row = self._move_cursor_word_right()
+            elif self.completion_mode:
+                self.dispatch("on_right_option")
+                col, row = self.cursor
             else:
                 if col == len(self._lines[row]):
                     if row < self.last_row:
@@ -433,6 +444,10 @@ class AdvancedTextInput(TextInput):
             self.password_cache += text
         else:
             self.insert_text(text, False)
+        if text == " ":
+            self.dispatch("on_space")
+        elif self.completion_mode:
+            self.dispatch("on_reduce_option")
         ### changes end here
         return
 
@@ -474,8 +489,20 @@ class AdvancedTextInput(TextInput):
 
     def on_ctrl_c(self):
         pass
+    
+    def on_left_option(self):
+        pass
 
     def on_stop_completion(self):
+        pass
+
+    def on_space(self):
+        pass
+
+    def on_reduce_option(self):
+        pass
+
+    def on_right_option(self):
         pass
     
     def delete_lastchar(self):

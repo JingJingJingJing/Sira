@@ -84,6 +84,12 @@ class SiraApp(App):
     """
 
     completion_start = kp.NumericProperty(0)
+    """TODO: here and class doc
+    """
+
+    from_space = kp.BooleanProperty(True)
+    """TODO: here and class doc
+    """
 
     header = kp.StringProperty(None)
     """Kivy string property to store the command header.
@@ -335,18 +341,6 @@ class SiraApp(App):
         """
         self.commandText.font_size = int(value)
 
-    def _on_tab(self, instance: AdvancedTextInput) -> bool:
-        """TODO
-        """
-        if instance.password_mode:
-            return
-        if instance.completion_mode:
-            self._select_next_option()
-        else:
-            string = instance._lines[instance.last_row][instance.protected_len:]
-            self.controller.auto_complete(string)
-        return True
-
     def _on_command(self, instance: AdvancedTextInput) -> bool:
         """"Privated function fired when self.commandText.on_text_validate is
         called, in other words, when users hit the 'enter' key. This property
@@ -371,27 +365,82 @@ class SiraApp(App):
         instance._editable = True
         return True
 
-    def _select_next_option(self) -> None:
+    def _on_reduce_option(self, instance: AdvancedTextInput) -> bool:
+        """TODO: both here and class doc
+        """
+        copy = list()
+        instance.do_cursor_movement("cursor_end", control=False)
+        end = instance.cursor_index(instance.cursor)
+        word_truc = instance.text[self.completion_start:end]
+        for s in self.option:
+            if s.startswith(word_truc):
+                copy.append(s)
+        self._stop_completion(instance)
+        self.option = copy
+
+    def _on_space(self, instance: AdvancedTextInput) -> bool:
+        """TODO: both here and class doc
+        """
+        if instance.completion_mode:
+            self._stop_completion(instance)
+        c_index = instance.cursor_index(instance.cursor) - 1
+        if instance.last_row_start + instance.protected_len != c_index\
+                and instance.text[c_index - 1] != " ":
+            string = instance._lines[instance.last_row][instance.protected_len:]
+            self.from_space = True
+            self.controller.auto_complete(string)
+        return True
+
+    def _on_switch_option(self,
+                          instance: AdvancedTextInput,
+                          direction: str) -> bool:
+        self._select_next_option(direction)
+
+    def _on_tab(self, instance: AdvancedTextInput) -> bool:
         """TODO
         """
+        if instance.password_mode:
+            return True
+        if instance.completion_mode:
+            self._select_next_option("tab")
+        else:
+            string = instance._lines[instance.last_row][instance.protected_len:]
+            self.from_space = False
+            self.controller.auto_complete(string)
+        return True
+
+    def _select_next_option(self, direction: str) -> None:
+        """TODO
+        """
+        
         instance = self.commandText
+        # update self.tab_index according to direction
+        if direction == "tab":
+            self.tab_index = self.tab_index + 1\
+                             if self.tab_index < len(self.option) - 1\
+                             else 0
+        elif direction == "left":
+            self.tab_index = self.tab_index - 1\
+                             if self.tab_index > 0\
+                             else 0
+        elif direction == "right":
+            self.tab_index = self.tab_index + 1\
+                             if self.tab_index < len(self.option) - 1\
+                             else len(self.option) - 1
         # delete and insert next option
         instance.cancel_selection()
         start = self.completion_start
         end = len(instance.text) - len(instance._lines[-1]) - 1
         instance.select_text(start, end)
         instance.delete_selection()
-        instance.cursor = (len(instance._lines[instance.last_row]),
-                           instance.last_row)
+        instance.do_cursor_movement("cursor_end", control=True)
         instance.insert_text(self.option[self.tab_index])
         # select next option
+        # import pdb; pdb.set_trace()
         last_char_return = instance.text.rindex("\n")
         start = last_char_return + self.start_indices[self.tab_index] + 1
         end = start + len(self.option[self.tab_index])
         instance.select_text(start, end)
-        self.tab_index = self.tab_index + 1\
-                         if self.tab_index < len(self.option) - 1\
-                         else 0
 
     def _stop_completion(self, instance: AdvancedTextInput) -> None:
         """TODO: here & class doc
@@ -456,9 +505,10 @@ class SiraApp(App):
     def on_option(self, instance: App, option: list) -> None:
         """TODO
         """
-        if self.option == []:
-            return
         obj = self.commandText
+        if self.option == []:
+            obj.completion_mode = False
+            return
         obj.completion_mode = True
         obj.do_cursor_movement("cursor_end", control=True)
         cursor = obj.cursor
@@ -479,7 +529,8 @@ class SiraApp(App):
                                                     search_end) + 1
         except ValueError:
             self.completion_start = search_start
-        self._select_next_option()
+        if not self.from_space:
+            self._select_next_option("tab")
 
     def on_username(self, instance: App, value: str) -> None:
         """Property driven function, fired when username is changed. This

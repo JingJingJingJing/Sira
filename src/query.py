@@ -8,21 +8,9 @@ from extract import dtos, getField, getIssue, getString
 from utils import mylog
 from utils import Super401
 from utils import glob_dic
+from utils import read_cookie
+from utils import prepare
 
-
-
-
-def read_cookie():
-    if glob_dic.get_value('cookie') == '' or glob_dic.get_value('cookie') is None:
-        try:
-            with open(glob_dic.get_value('cookie_path') + "cookie.txt", "r") as f:
-                glob_dic.set_value('cookie',f.read())
-                f.close()
-        except FileNotFoundError as err:
-            mylog.error(err)
-            raise Super401
-    return glob_dic.get_value('cookie')
-        
 
 
 """ This function returns all issue assigned to the user 'user' """
@@ -32,59 +20,58 @@ def send_request(url, method, headers, params, data):
     r = requests.Response
     try:
         if method is method.Get:
-            r = requests.get(url, headers=headers, params=params, timeout=5)
+            r = requests.get(url, headers=headers, params=params, timeout=glob_dic.get_value('timeout'))
         elif method is method.Put:
-            r = requests.put(url, headers=headers, data=data, timeout=5)
+            r = requests.put(url, headers=headers, data=data, timeout=glob_dic.get_value('timeout'))
         elif method is method.Delete:
-            r = requests.delete(url, headers=headers, data=data, timeout=5)
+            r = requests.delete(url, headers=headers, data=data, timeout=glob_dic.get_value('timeout'))
+        elif method is method.Post:
+            r = requests.post(url, headers=headers, data=data, timeout=glob_dic.get_value('timeout'))
         else:
-            r = requests.post(url, headers=headers, data=data, timeout=5)
+            mylog.error('Wrong method that not suppord:'+str(method))
+            return(False, 'Unknown internal error occured')
         if r.status_code == 401:
             mylog.error("401 Unauthorized")
             raise Super401
         try:
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            mylog.error(r.status_code)
             mylog.error(r.text)
+            s = 'Request denied!\r\nerror code: {} {}\r\n'.format(
+                str(r.status_code), str(_codes[r.status_code][0]))
             try:
-                lst = r.json().get('errorMessages')
-                if (lst is not None) and (lst != []):
-                    string = 'Request denied!\r\nerror code: {}. May be one of the listed reasons\r\n'.format(str(r.status_code))
-                    # print('Request denied!\r\nerror code:{}'.format(str(r.status_code))
-                    for all_errors in lst:
-                        string += all_errors + '\r\n'
-                    return (False, string)
-                dic = r.json().get('errors')
-                if (dic is not None) and (dic != {}):
-                    s = 'Request denied!\r\nerror code:{} '.format(str(
-                        r.status_code))
-                    for key in dic:
-                        s+='{} '.format(dic[key])
-                    return (False,s)
+                lst = r.json().get('errorMessages',[])
+                for all_errors in lst:
+                    s += all_errors + '\r\n'
+                dic = r.json().get('errors',{})
+                for key in dic:
+                    s+='{} '.format(dic[key]) + '\r\n'
             except json.JSONDecodeError:
                 pass
-            return (False, 'Request denied!\r\nerror code: {} {}'.format(
-                str(r.status_code), str(_codes[r.status_code][0])))
+            s += 'Please try again'
+            mylog.error(s)
+            return (False, s)
         mylog.info(r)
-        return (True, r.json())
+        try:
+            return (True, r.json())
+        except json.JSONDecodeError:
+            return (True, r)
     except requests.exceptions.RequestException as err:
         mylog.error(err)
         return (
             False,
-            'Internet error\r\nTry:\r\n\tChecking the network cables, modem, and route\r\n\tReconnecting to Wi-Fi\r\n\tRunning Network Diagnostics'
+            '''Internet error\r\nTry:\r\n\tChecking the network cables, 
+            modem, and route\r\n\tReconnecting to Wi-Fi\r\n\tRunning Network Diagnostics'''
         )
 
 
 def query(field1, field2, f):
-    cookie = read_cookie()
-    url = 'http://' + glob_dic.get_value('domain') + '/rest/api/2/search'
-    headers = {'Content-Type': 'application/json', 'cookie': cookie}
+    url, headers = prepare('query')
     data = '{"jql":"' + field1
     if f:
-        data += ' and ' + field2 + '","startAt":0, "maxResults": 100,"fields":["summary","issuetype","project","fixVersions","assignee","status"]}'
+        data += ' and ' + field2 + glob_dic.get_value('jql_default_tail')
     else:
-        data += '","startAt":0, "maxResults": 100,"fields":["summary","issuetype","project","fixVersions","assignee","status"]}'
+        data += glob_dic.get_value('jql_default_tail')
     flag, r = send_request(url, method.Post, headers, None, data)
     if not flag:
         return r
@@ -95,11 +82,12 @@ def query(field1, field2, f):
 
 """ This function will return all information of issue represented by pid """
 ''' lst = ['issue name or id'] '''
+
+''' add issue id after get address from address book'''
 def query_number(lst):
     issue = lst[0]
-    cookie = read_cookie()
-    url = 'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue/' + issue
-    headers = {'Content-Type': 'application/json', 'cookie': cookie}
+    url, headers = prepare('query_number')
+    url += issue
     f, r = send_request(url, method.Get, headers, None, None)
     if not f:
         return r
@@ -171,24 +159,6 @@ class method(Enum):
     Delete = 3
 
 
-# def test():
-#     query_number(['sira-21'])
-#     query_assignee([''])
-#     query_assignee(['xp zheng'])
-#     query_type(['story'])
-#     query_sprint(['Spike'])
-#     query_project_type(['Sira', 'bug'])
-#     pass
-#     '''
-#     options = {
-#     'server': 'http://10.176.111.32:8080',
-#     'cookies': {'JSESSIONID':'DD537C56B9ABD14EEAA710C6BE539644'}
-#     }
-
-#     jira = JIRA(options)
-#     '''
-
-# test()
 if __name__ == '__main__':
     # query_project_type(['Sira', 'bug'])
     # query_project_type(['Sira', 'task'])

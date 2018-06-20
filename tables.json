@@ -1,0 +1,1 @@
+{"project": ["SIRA", "TEST"], "issuetype": ["Task", "Sub-task", "Story", "Bug", "Epic"], "type": ["software", "business"], "sprint": ["TEST Sprint 1", "TEST Sprint 2", "TEST Sprint 3", "Spike Sprint", "SIRA Sprint 1", "SIRA Sprint 2", "SIRA Sprint 3", "SIRA Sprint 4", "SIRA Sprint 5"], "board": [1, 2], "status": ["In Progress", "To Do", "Done"]}

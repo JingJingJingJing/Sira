@@ -83,6 +83,8 @@ class SiraApp(App):
         }
     """
 
+    completion_start = kp.NumericProperty(0)
+
     header = kp.StringProperty(None)
     """Kivy string property to store the command header.
 
@@ -375,13 +377,7 @@ class SiraApp(App):
         instance = self.commandText
         # delete and insert next option
         instance.cancel_selection()
-        search_start = instance.last_row_start + instance.protected_len
-        search_end = instance.last_row_start\
-                     + len(instance._lines[instance.last_row])
-        try:
-            start = instance.text.rindex(" ", search_start, search_end) + 1
-        except ValueError:
-            start = search_start
+        start = self.completion_start
         end = len(instance.text) - len(instance._lines[-1]) - 1
         instance.select_text(start, end)
         instance.delete_selection()
@@ -462,15 +458,27 @@ class SiraApp(App):
         """
         if self.option == []:
             return
-        self.commandText.completion_mode = True
-        self.commandText.do_cursor_movement("cursor_end", control=True)
-        cursor = self.commandText.cursor
-        self.commandText.insert_text("\n" + " ".join(option))
-        self.commandText.cursor = cursor
+        obj = self.commandText
+        obj.completion_mode = True
+        obj.do_cursor_movement("cursor_end", control=True)
+        cursor = obj.cursor
+        obj.insert_text("\n" + " ".join(option))
+        obj.cursor = cursor
+        # calc start indices of all options
         index = 0
         for s in option:
             self.start_indices.append(index)
             index += len(s) + 1
+        # calc the start index of the completion part
+        search_start = obj.last_row_start + obj.protected_len
+        search_end = obj.last_row_start\
+                     + len(obj._lines[obj.last_row])
+        try:
+            self.completion_start = obj.text.rindex(" ",
+                                                    search_start,
+                                                    search_end) + 1
+        except ValueError:
+            self.completion_start = search_start
         self._select_next_option()
 
     def on_username(self, instance: App, value: str) -> None:

@@ -34,7 +34,7 @@
                     <interactive>-type -assignee -sprint</interactive>
                     <keyword name="type">
                         <interactive>type:</interactive>
-                        <required name="type">
+                        <required name="issuetype">
                             <function multi-thread="True" object="query" name="query_project_type" para="project_name type"/>
                         </required>
                     </keyword>
@@ -54,7 +54,7 @@
             </keyword>
             <keyword name="type">
                 <interactive>type:</interactive>
-                <required name="type">
+                <required name="issuetype">
                     <function multi-thread="True" object="query" name="query_type" para="type"/>
                 </required>
             </keyword>

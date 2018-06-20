@@ -9,7 +9,7 @@ from kivy.uix.widget import Widget
 
 from advancedtextinput import AdvancedTextInput
 from controller import SiraController
-from utils import asserts, mylog, overrides
+from utils import asserts, mylog, overrides, tryload
 
 
 class SiraApp(App):
@@ -134,7 +134,7 @@ class SiraApp(App):
     """TODO: both here and class doc
     """
 
-    tab_index = kp.NumericProperty(0)
+    tab_index = kp.NumericProperty(-1)
     """TODO: both here and class doc
     """
 
@@ -247,6 +247,13 @@ class SiraApp(App):
                            "({}, {}) is not a key pair in self.config_func_dict".format(section, key)):
                 return
             self.config_func_dict[(section, key)](value)
+    
+    @overrides(App)
+    def on_start(self) -> None:
+        try:
+            tryload()
+        except FileNotFoundError as fe:
+            mylog.error(fe)
 
     def on_clear(self) -> None:
         """Public function to clear the screen. This methods essentially
@@ -361,7 +368,10 @@ class SiraApp(App):
         elif instance.command_mode:
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
-        self.controller.processInput(string)
+        if string == "pdb":
+            import pdb; pdb.set_trace()
+        else:
+            self.controller.processInput(string)
         instance._editable = True
         return True
 
@@ -412,7 +422,7 @@ class SiraApp(App):
     def _select_next_option(self, direction: str) -> None:
         """TODO
         """
-        
+        # import pdb; pdb.set_trace()
         instance = self.commandText
         # update self.tab_index according to direction
         if direction == "tab":
@@ -430,13 +440,13 @@ class SiraApp(App):
         # delete and insert next option
         instance.cancel_selection()
         start = self.completion_start
-        end = len(instance.text) - len(instance._lines[-1]) - 1
+        end = instance.last_row_start + len(instance._lines[instance.last_row])
+        # import pdb; pdb.set_trace()
         instance.select_text(start, end)
         instance.delete_selection()
         instance.do_cursor_movement("cursor_end", control=True)
         instance.insert_text(self.option[self.tab_index])
         # select next option
-        # import pdb; pdb.set_trace()
         last_char_return = instance.text.rindex("\n")
         start = last_char_return + self.start_indices[self.tab_index] + 1
         end = start + len(self.option[self.tab_index])
@@ -451,7 +461,7 @@ class SiraApp(App):
         instance.select_text(start, end)
         instance.delete_selection()
         instance.completion_mode = False
-        self.tab_index = 0
+        self.tab_index = -1
         self.option = []
         self.start_indices = []
 

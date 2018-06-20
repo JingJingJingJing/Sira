@@ -45,8 +45,8 @@ class Prompter:
             option = position.find("./required")
             if not option:
                 option = position.find("./optional")
-            if option and option.attrib['name'] in glob_dic.tips:
-                result = glob_dic.tips[option.attrib['name']]
-
+            if option and option.attrib['name'] in glob_dic.tips.dic:
+                result = glob_dic.tips.get_value(option.attrib['name'])
+        # import pdb; pdb.set_trace()
         return result
 

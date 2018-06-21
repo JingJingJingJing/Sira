@@ -357,11 +357,11 @@ class SiraApp(App):
         if instance.password_mode:
             string = instance.password_cache
             instance.password_mode = False
-        elif instance.command_mode:
+        elif instance.command_mode and string != "":
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
         self.controller.processInput(string)
-        instance._editable = True
+        instance.on_cursor(instance, instance.cursor)
         return True
 
     def _on_font_name(self, value: str) -> None:
@@ -386,7 +386,7 @@ class SiraApp(App):
         end = instance.cursor_index(instance.cursor)
         word_truc = instance.text[self.completion_start:end]
         for s in self.option:
-            if s.startswith(word_truc):
+            if s.lower().startswith(word_truc.lower()):
                 copy.append(s)
         self._stop_completion(instance)
         self.option = copy
@@ -435,7 +435,6 @@ class SiraApp(App):
     def _select_next_option(self, direction: str) -> None:
         """TODO
         """
-        # import pdb; pdb.set_trace()
         instance = self.commandText
         # update self.tab_index according to direction
         if direction == "tab":

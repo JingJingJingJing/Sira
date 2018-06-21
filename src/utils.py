@@ -11,11 +11,10 @@ mylog.error('msg')
 """
 import logging
 
-import inspect
 
 
 def read_cookie():
-    if glob_dic.get_value('cookie') == '' or glob_dic.get_value('cookie') is None:
+    if glob_dic.get_value('cookie','') == '':
         try:
             with open(glob_dic.get_value('cookie_path') + "cookie.txt", "r") as f:
                 glob_dic.set_value('cookie',f.read())
@@ -54,18 +53,19 @@ def asserts(expression, msg):
 
 class Super401(Exception):
     def __init__(self):
-        err = 'Error Unauthorized. please login in again'
-        Exception.__init__(self, err)
+        self.err = 'Error Unauthorized. please login in again'
+        Exception.__init__(self, self.err)
 
 class glob():
     def __init__(self,dic):
         self.dic = dic
         self.set_value('domain', '10.176.111.32:8080')
+        self.set_value('jira', 'lnvusjira.lenovonet.lenovo.local')
         self.set_value('cookie_path', '')
         self.set_value('cookie', '')
-        self.set_value('timeout', 5)
-        self.set_value('jql_default_tail','","startAt":0, "maxResults": 100,"fields":["summary","issuetype","project","fixVersions","assignee","status"]}')
-        self.tips = tips({'project':[],'issuetype':[],'type':[],'sprint':[],'board':[]})
+        self.set_value('timeout', 15)
+        self.set_value('protocol','http://')
+        self.tips = tips({})
 
     def set_value(self,key,value):
         self.dic[key] = value
@@ -90,39 +90,49 @@ class tips(dict):
 
 
 glob_dic = glob({})
-issue_create_args = dict()
+domain = glob_dic.get_value('domain')
+protocol = glob_dic.get_value('protocol')
+address_book = {
+    'logout':protocol + domain + '/rest/auth/1/session',
+    'getProject':protocol + domain + '/rest/api/2/project',
+    'getBoard':protocol + domain + '/rest/agile/1.0/board',
+    'getStatus':protocol + domain + '/rest/api/2/status',
+    'getType':protocol + domain + '/rest/api/2/project/type',
+    'getIssuetype':protocol + domain + '/rest/api/2/issuetype',
+    'getAssignee':protocol + domain + '/rest/api/2/user/search?username=.',
+    'getPriority':protocol + domain + '/rest/api/2/priority',
+    'query':protocol + domain + '/rest/api/2/search',
+    'query_number':protocol + domain + '/rest/api/2/issue',
+    'issue':protocol + domain + '/rest/api/2/issue',
+    'search':protocol + domain + '/rest/api/2/user',
+    'getVersion':protocol + domain + '/rest/api/2/project'
+}
+
+headers_book = {
+    'logout':{'Accept': 'application/json', 'cookie':''},
+    'getProject':{'Accept': 'application/json', 'cookie':''},
+    'getBoard':{'Accept': 'application/json', 'cookie':''},
+    'getStatus':{'Accept': 'application/json', 'cookie':''},
+    'getSprint':{'Accept': 'application/json', 'cookie':''},
+    'getType':{'Accept': 'application/json', 'cookie':''},
+    'getAssignee':{'Accept': 'application/json', 'cookie':''},
+    'getPriority':{'Accept': 'application/json', 'cookie':''},
+    'getIssuetype':{'Accept': 'application/json', 'cookie':''},
+    'query':{'Content-Type': 'application/json', 'cookie':''},
+    'query_number':{'Content-Type': 'application/json', 'cookie':''},
+    'issue':{
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'cookie':''
+        },
+    'search':{'Accept': 'application/json','cookie':''},
+    'getVersion':{'Accept': 'application/json', 'cookie':''}
+}
 
 
-def prepare(s):
-    address_book = {
-        'login':'http://' + glob_dic.get_value('domain') + '/rest/auth/1/session',
-        'logout':'http://' + glob_dic.get_value('domain') + '/rest/auth/1/session',
-        'getProject':'http://' + glob_dic.get_value('domain') + '/rest/api/2/project',
-        'getBoard':'http://' + glob_dic.get_value('domain') + '/rest/agile/1.0/board',
-        'getStatus':'http://' + glob_dic.get_value('domain') + '/rest/api/2/status',
-        'getType':'http://' + glob_dic.get_value('domain') + '/rest/api/2/project/type',
-        'getIssuetype':'http://' + glob_dic.get_value('domain') + '/rest/api/2/issuetype',
-        'query':'http://' + glob_dic.get_value('domain') + '/rest/api/2/search',
-        'query_number':'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue/',
-        'issue':'http://' + glob_dic.get_value('domain') + '/rest/api/2/issue',
-        'search':'http://' + glob_dic.get_value('domain') + '/rest/api/2/user'
-    }
-    headers_book = {
-        'login':{'Content-Type': 'application/json'},
-        'logout':{'Accept': 'application/json', 'cookie':read_cookie()},
-        'getProject':{'Accept': 'application/json', 'cookie':read_cookie()},
-        'getBoard':{'Accept': 'application/json', 'cookie':read_cookie()},
-        'getStatus':{'Accept': 'application/json', 'cookie':read_cookie()},
-        'getSprint':{'Accept': 'application/json', 'cookie':read_cookie()},
-        'getType':{'Accept': 'application/json', 'cookie':read_cookie()},
-        'getIssuetype':{'Accept': 'application/json', 'cookie':read_cookie()},
-        'query':{'Content-Type': 'application/json', 'cookie':read_cookie()},
-        'query_number':{'Content-Type': 'application/json', 'cookie':read_cookie()},
-        'issue':{
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'cookie':read_cookie()
-            },
-        'search':{'Accept': 'application/json','cookie':read_cookie()}
-    }
+def prepare(s, extend=None):
+    headers_book.get(s)['cookie'] = read_cookie()
+    if extend is not None:
+        return (address_book.get(s)+extend, headers_book.get(s))
     return (address_book.get(s), headers_book.get(s))
+

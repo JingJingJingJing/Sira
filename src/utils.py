@@ -128,14 +128,3 @@ def prepare(s):
         'search':{'Accept': 'application/json','cookie':read_cookie()}
     }
     return (address_book.get(s), headers_book.get(s))
-
-def tryload():
-    f = open('tables.json', 'r')
-    data = json.loads(f.read())
-    f.close()
-    glob_dic.tips.set_value('project',data.get('project'))
-    glob_dic.tips.set_value('type',data.get('type'))
-    glob_dic.tips.set_value('issuetype',data.get('issuetype'))
-    glob_dic.tips.set_value('sprint',data.get('sprint'))
-    glob_dic.tips.set_value('status',data.get('status'))
-    # print(data)

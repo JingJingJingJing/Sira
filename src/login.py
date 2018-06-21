@@ -67,40 +67,6 @@ def logout():
     mylog.info('Successfully logged out')
     return (True, 'Successfully logged out')
 
-
-
-
-    # try:
-    #     r = requests.delete(url, headers=headers, timeout=glob_dic.get_value('timeout'))
-    #     if r.status_code == 401:
-    #         mylog.error("401 Unauthorized")
-    #         raise Super401
-    #     try:
-    #         r.raise_for_status()
-    #     except requests.exceptions.HTTPError as err:
-    #         mylog.error(err)
-    #         try:
-    #             errmsg = r.json()['errorMessages'][0]
-    #             mylog.error(errmsg)
-    #         except KeyError:
-    #             pass
-    #         except json.decoder.JSONDecodeError:
-    #             pass
-    #         mylog.error('Unknown error occured')
-    #         return (False, 'Unknown error occured')
-    # except requests.exceptions.RequestException as err:
-    #     mylog.error(err)
-    #     return (False, 'Internet Error Occured!')
-
-    # f = open(glob_dic.get_value('cookie_path') + "cookie.txt", "w")
-    # f.write('')
-    # f.close
-    # glob_dic.set_value('cookie','')
-    # mylog.info('Successfully logged out')
-    # return 'Successfully logged out'
-
-
-
 def goInto(lst, key, field):
     target = []
     for element in lst:
@@ -172,25 +138,19 @@ def download():
     ''' Write to disk '''
     pass
 
-# login(['admin','admin'])
+def tryload():
+    f = open('tables.json', 'r')
+    data = json.loads(f.read())
+    f.close()
+    glob_dic.tips.set_value('project',data.get('project'))
+    glob_dic.tips.set_value('type',data.get('type'))
+    glob_dic.tips.set_value('issuetype',data.get('issuetype'))
+    glob_dic.tips.set_value('sprint',data.get('sprint'))
+    glob_dic.tips.set_value('status',data.get('status'))
+    # print(data)
 
-# # getStatus()
-
-# getType()
-# print(glob_dic.tips.get_value('type'))
-# # getIssuetype()
-# print(glob_dic.tips.get_value('issuetype'))
-# # getSprint()
-# print(glob_dic.tips.get_value('project'))
-# print(glob_dic.tips.get_value('sprint'))
-# print(glob_dic.tips.get_value('status'))
-# # logout()
-# # logout()
-# tryload()
-# print(glob_dic.tips.get_value('type'))
-# # getIssuetype()
-# print(glob_dic.tips.get_value('issuetype'))
-# # getSprint()
-# print(glob_dic.tips.get_value('project'))
-# print(glob_dic.tips.get_value('sprint'))
-# print(glob_dic.tips.get_value('status'))
+try:
+    tryload()
+except FileNotFoundError as fe:
+    mylog.error(fe)
+    download()

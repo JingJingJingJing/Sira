@@ -31,7 +31,7 @@ class AdvancedTextInput(TextInput):
     __events__ = ('on_text_validate', 'on_double_tap', 'on_triple_tap',
                   'on_quad_touch', 'on_tab', 'on_ctrl_c', 'on_stop_completion',
                   'on_space', 'on_reduce_option', 'on_left_option',
-                  'on_right_option')
+                  'on_right_option', 'on_prev_options', 'on_next_options')
 
     def __init__(self, **kwargs):
         super(AdvancedTextInput, self).__init__(**kwargs)
@@ -109,7 +109,9 @@ class AdvancedTextInput(TextInput):
             return True
 
         ### changes start here
-        if self.completion_mode and key not in (9, 275, 276) and not text:
+        if self.completion_mode\
+                and key not in (9, 275, 276, 280, 281)\
+                and not text:
             self.dispatch('on_stop_completion')
         ### changes end here
 
@@ -331,6 +333,7 @@ class AdvancedTextInput(TextInput):
             ### changes in the next line
             if not self.password_mode and control:
                 col, row = self._move_cursor_word_right()
+            ### changes in the next two lines
             elif self.completion_mode:
                 self.dispatch("on_right_option")
                 col, row = self.cursor
@@ -350,11 +353,21 @@ class AdvancedTextInput(TextInput):
                 row = self.last_row
             col = len(self._lines[row])
         elif action == 'cursor_pgup':
-            row = max(0, row - pgmove_speed)
-            col = min(len(self._lines[row]), col)
+            ### changes start here
+            if self.completion_mode:
+                self.dispatch("on_prev_options")
+            else:
+                row = max(0, row - pgmove_speed)
+                col = min(len(self._lines[row]), col)
+            ### changes end here
         elif action == 'cursor_pgdown':
-            row = min(row + pgmove_speed, self.last_row)
-            col = min(len(self._lines[row]), col)
+            ### changes start here
+            if self.completion_mode:
+                self.dispatch("on_next_options")
+            else:
+                row = min(row + pgmove_speed, self.last_row)
+                col = min(len(self._lines[row]), col)
+            ### changes end here
         self.cursor = (col, row)
     
     def on_touch_down(self, touch):
@@ -429,6 +442,7 @@ class AdvancedTextInput(TextInput):
             self._trigger_cursor_reset()
             if self._get_cursor_row() != self.last_row or \
                     self._get_cursor_col() < self.protected_len:
+                # import pdb; pdb.set_trace()
                 self._editable = False
             else:
                 self._editable = True
@@ -491,6 +505,12 @@ class AdvancedTextInput(TextInput):
         pass
     
     def on_left_option(self):
+        pass
+    
+    def on_next_options(self):
+        pass
+    
+    def on_prev_options(self):
         pass
 
     def on_stop_completion(self):

@@ -9,7 +9,7 @@ from kivy.uix.widget import Widget
 
 from advancedtextinput import AdvancedTextInput
 from controller import SiraController
-from utils import asserts, mylog, overrides, tryload
+from utils import asserts, mylog, overrides
 
 
 class SiraApp(App):
@@ -21,10 +21,14 @@ class SiraApp(App):
 
     Instance Variables:
         Class-scope Variables:
+            completion_start -- kivy.properties.NumericProperty (default 0)
+            from_space -- kivy.properties.BooleanProperty (default True)
             header -- kivy.properties.StringPorperty (default None)
             info -- kivy.properties.ListProperty (default [])
-            [TODO] option -- kivy.properties.ListProperty (default [])
+            option -- kivy.properties.ListProperty (default [])
             protected_text -- kivy.properties.StringPorperty (default None)
+            start_indices -- kivy.properties.ListProperty (default [])
+            tab_index -- kp.NumericProperty (default -1)
             username -- kivy.properties.StringPorperty (default None)
 
         Method-established Variables:
@@ -34,27 +38,35 @@ class SiraApp(App):
     Public Methods:
         Overrided from kivy.app.App:
             __init__(self, **kwargs) -> None
-            build(self) -> kivy.uix.widget.Widget()
-            build_config(self, config) -> None
-            build_settings(self, kivy.uix.settings.Settings()) -> None
-            on_config_change(self, config, section, key, value) -> None
+            build(self) -> advancedtextinput.AdvancedTextInput()
+            build_config(self, config.ConfigParser) -> None
+            build_settings(self, kivy.uix.settings.Settings) -> None
+            on_config_change(self, config.ConfigParser, str, str, str) -> None
 
         Original:
             on_clear(self) -> None
             print_header(self) -> None
             set_command_mode(self, bool) -> None
-            set_controller(self, controller.SiraController()) -> None
+            set_controller(self, controller.SiraController) -> None
             set_pwd_mode(self) -> None
 
     Private Methods:
         _get_font_path(self, str) -> str
         _on_cmd_idf(self, str) -> None
+        _on_command(self, advancedtextinput.AdvancedTextInput) -> None
         _on_font_name(self, str) -> None
         _on_font_size(self, str) -> None
-        [TODO] _on_tab(self, kivy.uix.widget.Widget()) -> None
-        _on_command(self, kivy.uix.widget.Widget()) -> None
+        _on_reduce_option(self, advancedtextinput.AdvancedTextInput) -> bool
+        _on_space(self, advancedtextinput.AdvancedTextInput) -> bool
+        _on_switch_option(self,
+                          advancedtextinput.AdvancedTextInput,
+                          str) -> bool
+        _on_tab(self, advancedtextinput.AdvancedTextInput) -> None
         _reset_header(self, str, str) -> None
-        _stop_interaction(self, kivy.uix.widget.Widget()) -> None
+        _select_next_option(self, str) -> None
+        _stop_completion(self, advancedtextinput.AdvancedTextInput) -> None
+        _stop_interaction(self, advancedtextinput.AdvancedTextInput) -> None
+        
 
     Events:
         `on_info`
@@ -70,12 +82,12 @@ class SiraApp(App):
         `on_username`
             Fired when username is changed. This will change and write the
             sira.ini (Section: Text, Key: username) based on its value, and call
-            _reset_header() to preserve [convention #1.1].
+            _reset_header to preserve [convention #1.1].
 
     Property Driven Methods:
-        on_info(self, kivy.uix.widget.Widget(), list()) -> None
-        on_option(self, kivy.uix.widget.Widget(), list()) -> None
-        on_username(self, kivy.uix.widget.Widget(), str) -> None
+        on_info(self, advancedtextinput.AdvancedTextInput, list) -> None
+        on_option(self, advancedtextinput.AdvancedTextInput, list) -> None
+        on_username(self, advancedtextinput.AdvancedTextInput, str) -> None
 
     Conventions:
         {
@@ -84,11 +96,11 @@ class SiraApp(App):
     """
 
     completion_start = kp.NumericProperty(0)
-    """TODO: here and class doc
+    """TODO: here
     """
 
     from_space = kp.BooleanProperty(True)
-    """TODO: here and class doc
+    """TODO: here
     """
 
     header = kp.StringProperty(None)
@@ -131,11 +143,11 @@ class SiraApp(App):
     """
 
     start_indices = kp.ListProperty([])
-    """TODO: both here and class doc
+    """TODO: both here
     """
 
     tab_index = kp.NumericProperty(-1)
-    """TODO: both here and class doc
+    """TODO: both here
     """
 
     username = kp.StringProperty(None)
@@ -247,13 +259,6 @@ class SiraApp(App):
                            "({}, {}) is not a key pair in self.config_func_dict".format(section, key)):
                 return
             self.config_func_dict[(section, key)](value)
-    
-    @overrides(App)
-    def on_start(self) -> None:
-        try:
-            tryload()
-        except FileNotFoundError as fe:
-            mylog.error(fe)
 
     def on_clear(self) -> None:
         """Public function to clear the screen. This methods essentially
@@ -284,13 +289,7 @@ class SiraApp(App):
         self.protected_text = self.header
         obj.last_row = len(obj._lines) - 1
         obj.last_row_start = len(obj.text) - len(obj._lines[obj.last_row])
-
-    def set_pwd_mode(self) -> None:
-        """Public function to set self.commandText.password_mode to True.
-
-        [ensures]:  self.commandText.password_mode = True
-        """
-        self.commandText.password_mode = True
+        obj.on_cursor(obj, obj.cursor)
 
     def set_command_mode(self, value: bool) -> None:
         """Public function to set self.commandText.command_mode to value.
@@ -305,6 +304,13 @@ class SiraApp(App):
         [ensures]:  self.controller = controller
         """
         self.controller = controller
+
+    def set_pwd_mode(self) -> None:
+        """Public function to set self.commandText.password_mode to True.
+
+        [ensures]:  self.commandText.password_mode = True
+        """
+        self.commandText.password_mode = True
 
     def _get_font_path(self, font_name) -> str:
         """Private function to search the path of font file based on font_name.
@@ -334,20 +340,6 @@ class SiraApp(App):
         """
         self._reset_header(self.username, value)
 
-    def _on_font_name(self, value: str) -> None:
-        """"Privated function fired when font_name is changed through
-        self.config.
-        """
-        self.commandText.font_name = self._get_font_path(value)
-
-    def _on_font_size(self, value: str) -> None:
-        """Privated function fired when font_size is changed through
-        self.config.
-
-        [ensures]:  self.commandText.font_size = int(value)
-        """
-        self.commandText.font_size = int(value)
-
     def _on_command(self, instance: AdvancedTextInput) -> bool:
         """"Privated function fired when self.commandText.on_text_validate is
         called, in other words, when users hit the 'enter' key. This property
@@ -365,25 +357,41 @@ class SiraApp(App):
         if instance.password_mode:
             string = instance.password_cache
             instance.password_mode = False
-        elif instance.command_mode:
+        elif instance.command_mode and string != "":
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
-        if string == "pdb":
-            import pdb; pdb.set_trace()
-        else:
-            self.controller.processInput(string)
-        instance._editable = True
+        self.controller.processInput(string)
+        instance.on_cursor(instance, instance.cursor)
         return True
 
+    def _on_display_options(self,
+                            instance: AdvancedTextInput,
+                            behavior: str) -> bool:
+        return True
+
+    def _on_font_name(self, value: str) -> None:
+        """"Privated function fired when font_name is changed through
+        self.config.
+        """
+        self.commandText.font_name = self._get_font_path(value)
+
+    def _on_font_size(self, value: str) -> None:
+        """Privated function fired when font_size is changed through
+        self.config.
+
+        [ensures]:  self.commandText.font_size = int(value)
+        """
+        self.commandText.font_size = int(value)
+
     def _on_reduce_option(self, instance: AdvancedTextInput) -> bool:
-        """TODO: both here and class doc
+        """TODO: both here
         """
         copy = list()
         instance.do_cursor_movement("cursor_end", control=False)
         end = instance.cursor_index(instance.cursor)
         word_truc = instance.text[self.completion_start:end]
         for s in self.option:
-            if s.startswith(word_truc):
+            if s.lower().startswith(word_truc.lower()):
                 copy.append(s)
         self._stop_completion(instance)
         self.option = copy
@@ -404,6 +412,8 @@ class SiraApp(App):
     def _on_switch_option(self,
                           instance: AdvancedTextInput,
                           direction: str) -> bool:
+        """TODO: here
+        """
         self._select_next_option(direction)
 
     def _on_tab(self, instance: AdvancedTextInput) -> bool:
@@ -419,10 +429,17 @@ class SiraApp(App):
             self.controller.auto_complete(string)
         return True
 
+    def _reset_header(self, username: str, identifier: str) -> None:
+        """Private funciton to reset self.header based on username and
+        identifier to preserve [convention #1.1]
+
+        [ensures]:  [convention #1.1]
+        """
+        self.header = username + identifier
+
     def _select_next_option(self, direction: str) -> None:
         """TODO
         """
-        # import pdb; pdb.set_trace()
         instance = self.commandText
         # update self.tab_index according to direction
         if direction == "tab":
@@ -441,7 +458,6 @@ class SiraApp(App):
         instance.cancel_selection()
         start = self.completion_start
         end = instance.last_row_start + len(instance._lines[instance.last_row])
-        # import pdb; pdb.set_trace()
         instance.select_text(start, end)
         instance.delete_selection()
         instance.do_cursor_movement("cursor_end", control=True)
@@ -478,14 +494,6 @@ class SiraApp(App):
             instance.password_mode = False
             instance.command_mode = True
 
-    def _reset_header(self, username: str, identifier: str) -> None:
-        """Private funciton to reset self.header based on username and
-        identifier to preserve [convention #1.1]
-
-        [ensures]:  [convention #1.1]
-        """
-        self.header = username + identifier
-
     def on_info(self, instance: App, info: list) -> None:
         """Property driven function, fired when info is changed. This function
         automatically prints all elements in info on seperate lines in
@@ -510,6 +518,7 @@ class SiraApp(App):
             obj.insert_text("\n" + str(s))
         obj.last_row = len(obj._lines) - 1
         obj.last_row_start = len(obj.text) - len(obj._lines[obj.last_row])
+        obj.on_cursor(obj, obj.cursor)
         self.info = []
 
     def on_option(self, instance: App, option: list) -> None:

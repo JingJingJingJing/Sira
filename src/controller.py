@@ -1,10 +1,12 @@
-import xml.etree.ElementTree as ET
-import threading
 import re
-from prompter import Prompter
+import threading
+import xml.etree.ElementTree as ET
+
 import login
 import query
-from utils import mylog, Super401
+from prompter import Prompter
+from utils import Super401, mylog
+
 
 class SiraController():
 

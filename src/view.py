@@ -387,6 +387,7 @@ class SiraApp(App):
                             option: list) -> bool:
         """TODO: here and class doc
         """
+        # display options based on behavior
         instance.do_cursor_movement("cursor_end", control=True)
         cursor = instance.cursor
         if behavior == "init":
@@ -428,7 +429,7 @@ class SiraApp(App):
         self.commandText.font_size = int(value)
 
     def _on_reduce_option(self, instance: AdvancedTextInput) -> bool:
-        """TODO: both here
+        """TODO: both here and class doc
         """
         copy = list()
         instance.do_cursor_movement("cursor_end", control=False)

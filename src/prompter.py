@@ -31,10 +31,10 @@ class Prompter:
                     break
             if position == pre_position and l > 0:
                 if(token != tokens[-1] or not complete):
-                    return []
+                    return result
 
         keywords = position.findall("./keyword")
-        if keywords:
+        if keywords or complete:
             for keyword in keywords:
                 name = keyword.attrib['name']
                 if complete and name.startswith(tokens[-1]):
@@ -47,6 +47,5 @@ class Prompter:
                 option = position.find("./optional")
             if option and option.attrib['name'] in glob_dic.tips.dic:
                 result = glob_dic.tips.get_value(option.attrib['name'])
-        # import pdb; pdb.set_trace()
         return result
 

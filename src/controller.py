@@ -154,9 +154,10 @@ class SiraController():
             result = result[1] if name == "login" else result
             # display result
             self._sendinfo(result)
-        except Super401:
+        except Super401 as autherr:
             self.view.username = ""
             login.logout()
+            self._sendinfo(autherr.err)
         except Exception as err:
             mylog.error(err)
 

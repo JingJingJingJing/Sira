@@ -1,4 +1,4 @@
-import json
+# import json
 
 defaultList = [
     'issuetype', 'assignee', 'status', 'fixVersions', 'summary'
@@ -8,21 +8,21 @@ defaultHeader = [
 ]
 
 
-def getIssue(s, key):
-    j = json.loads(s)
-    issue = []
-    try:
-        issue = j['issues']
-    except KeyError:
-        pass
-    if key is None:
-        return issue
-    else:
-        for i in range(0, len(issue)):
-            if issue[i]['key'] == key:
+# def getIssue(s, key):
+#     j = json.loads(s)
+#     issue = []
+#     try:
+#         issue = j['issues']
+#     except KeyError:
+#         pass
+#     if key is None:
+#         return issue
+#     else:
+#         for i in range(0, len(issue)):
+#             if issue[i]['key'] == key:
 
-                return [issue[i]]
-        return None
+#                 return [issue[i]]
+#         return None
 
 
 '''

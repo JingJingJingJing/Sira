@@ -4,7 +4,7 @@ from enum import Enum
 import requests
 from requests.status_codes import _codes
 
-from extract import dtos, getField, getIssue, getString
+from extract import dtos, getField, getString
 from utils import mylog
 from utils import Super401
 from utils import glob_dic
@@ -20,13 +20,13 @@ def send_request(url, method, headers, params, data):
     r = requests.Response
     try:
         if method is method.Get:
-            r = requests.get(url, headers=headers, params=params, timeout=glob_dic.get_value('timeout'))
+            r = requests.get(url, headers=headers, params=params, timeout=glob_dic.get_value('timeout'),verify=False)
         elif method is method.Put:
-            r = requests.put(url, headers=headers, data=data, timeout=glob_dic.get_value('timeout'))
+            r = requests.put(url, headers=headers, data=data, timeout=glob_dic.get_value('timeout'),verify=False)
         elif method is method.Delete:
-            r = requests.delete(url, headers=headers, data=data, timeout=glob_dic.get_value('timeout'))
+            r = requests.delete(url, headers=headers, data=data, timeout=glob_dic.get_value('timeout'),verify=False)
         elif method is method.Post:
-            r = requests.post(url, headers=headers, data=data, timeout=glob_dic.get_value('timeout'))
+            r = requests.post(url, headers=headers, data=data, timeout=glob_dic.get_value('timeout'),verify=False)
         else:
             mylog.error('Wrong method that not suppord:'+str(method))
             return(False, 'Unknown internal error occured')
@@ -67,16 +67,20 @@ def send_request(url, method, headers, params, data):
 
 def query(field1, field2, f):
     url, headers = prepare('query')
-    data = '{"jql":"' + field1
-    if f:
-        data += ' and ' + field2 + glob_dic.get_value('jql_default_tail')
-    else:
-        data += glob_dic.get_value('jql_default_tail')
+    if field2:
+        field2 = 'and '+field2
+    data = {}
+    data["jql"] = '{} {}'.format(field1,field2)
+    data["startAt"] = 0
+    data["maxResults"] = 10000
+    data["fields"] = ["summary","issuetype","project","fixVersions","assignee","status"]
+    data = json.dumps(data)
     flag, r = send_request(url, method.Post, headers, None, data)
     if not flag:
         return r
     string = getString(r)
     mylog.info(string)
+    print(string)
     return string
 
 
@@ -86,8 +90,7 @@ def query(field1, field2, f):
 ''' add issue id after get address from address book'''
 def query_number(lst):
     issue = lst[0]
-    url, headers = prepare('query_number')
-    url += issue
+    url, headers = prepare('query_number','/{}'.format(issue))
     f, r = send_request(url, method.Get, headers, None, None)
     if not f:
         return r
@@ -160,11 +163,12 @@ class method(Enum):
 
 
 if __name__ == '__main__':
-    # query_project_type(['Sira', 'bug'])
+    
+    # query_project_type(['Tangram', 'bug'])
     # query_project_type(['Sira', 'task'])
     # query_project_assignee(['TEST', 'Hang'])
     # query_project_sprint(['Sira', '2'])
-    # query_project_assignee(['Sira', 'xp Zheng'])
+    # query_project_assignee(['sira', 'xp zheng'])
 
     # query_project_assignee(['TEST', 'Hang'])
     # query_number(['TEST-17'])

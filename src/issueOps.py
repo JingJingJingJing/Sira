@@ -5,29 +5,56 @@ from query import read_cookie
 from query import send_request
 from query import method
 from utils import glob_dic
-from utils import prepare, issue_create_args
-from receiver import issue_create_data
-
+from utils import prepare
+from login import login
+from login import getSprint
 issue_list = []
 '''
 send_request(url, method, headers, params, data);
 '''
-default_order = ['project', 'summary', 'issuetype']
-
-def todic(lst):
-    for i in range(0,len(default_order)):
-        issue_create_args[default_order[i]] = lst[i]
 
 
+
+def addfield(dic, lst):
+    reporter = {"name":lst[0]}
+    priority = {"name":lst[1]}
+    labels = [lst[2]]
+    description = lst[3]
+    assignee = {"name":lst[4]}
+    fields = [reporter, priority,labels,description,assignee]
+    extend = ['reporter', 'priority', 'labels', 'description', 'assignee']
+    for i in range(0, len(lst)):
+        if lst[i] is not '':
+            dic[extend[i]] = fields[i]
+    return dic
+'''
+lst = [project, issuetype, summary, reporter, 
+    priority, lable, description, assignee, sprint]
+'''
 def issue_create(lst):
-    todic(lst)
     url, headers = prepare('issue')
-    data = json.dumps(issue_create_data())
+    project = {"key":lst[0]}
+    issuetype = {"name":lst[1]}
+    summary = lst[2]
+    field = {"project":project, "summary":summary,"issuetype":issuetype}
+    data = json.dumps({"fields":addfield(field,lst[3:8])})
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
-        print(r)
         return r
-    msg = 'Issue {} successfully created!'.format(r['key'])
+    new_issue = r['key']
+    if lst[8] is not '':
+        pass
+    getSprint()
+    headers = prepare('issue')[1]
+    url = '{}{}/rest/agile/1.0/sprint/{}/issue'.format(glob_dic.get_value('protocol'),glob_dic.get_value('domain'),glob_dic.get_value('sid').get(lst[8]))
+    data={}
+    data['issues'] = [new_issue]
+    data = json.dumps(data)
+    f, r = send_request(url, method.Post, headers, None, data)
+    if not f:
+        mylog.error(r)
+        return r
+    msg = 'Issue {} successfully created!'.format(new_issue)
     mylog.info(msg)
     return msg
 
@@ -39,8 +66,7 @@ def issue_delete(lst):
     return msg
 
 def issue_delete_helper(issue):
-    url, headers = prepare('issue')
-    url += '/{}'.format(issue)
+    url, headers = prepare('issue','/{}'.format(issue))
     f, r = send_request(url, method.Delete, headers, None, None)
     if not f:
         return 'DOING {}\r\n{}'.format(issue, r)
@@ -60,8 +86,7 @@ def issue_delete_helper(issue):
 def issue_assign(lst):
     issue = lst[0]
     assignee = lst[1]
-    url, headers = prepare('issue')
-    url += '/{}/assignee'.format(issue)
+    url, headers = prepare('issue','/{}/assignee'.format(issue))
     # user_key = finduser(assignee)
     # if not user_key:
     #     return 'User not found!'
@@ -77,8 +102,8 @@ def issue_assign(lst):
 
 def issue_getComment(lst):
     issue = lst[0]
-    url, headers = prepare('issue')
-    url += issue + '/comment'
+    url, headers = prepare('issue', '/{}{}'.format(issue, '/comment'))
+
     f, r = send_request(url, method.Get, headers, None, None)
     if not f:
         return r
@@ -97,8 +122,7 @@ def issue_getComment(lst):
 
 def issue_addComment(lst):
     issue = lst[0]
-    url, headers = prepare('issue')
-    url += issue + '/comment'
+    url, headers = prepare('issue','/{}/{}'.format(issue, 'comment'))
     data = ''
     with open("res/comments.json", "r") as f:
         data = json.load(f)
@@ -113,18 +137,16 @@ def issue_addComment(lst):
 def issue_delComment(lst):
     issue = lst[0]
     cid = lst[1]
-    url, headers = prepare('issue')
-    url += issue + '/comment/' + cid
+    url, headers = prepare('issue', '/{}{}{}'.format(issue, '/comment/', cid))
     f, r = send_request(url, method.Delete, headers, None, None)
     if not f:
         return r
     mylog.info('Comment {} deleted'.format(cid))
     return 'Comment deleted'
 
-# for i in range(0,11):
-#     a = 'This is test. Iteration '+ str(i)
-#     issue_create(['TEST',a, 'Task'])
 
+# login(['admin','admin'])
+issue_create(['TEST', 'Story','This is summaryyyyyyy', '', 'Medium', '', 'This is Decriptionnnnnnn', 'ysg','TEST Sprint 1'])
 # issue_assign(['TEST-38','hang'])
 # issue_assign(['TEST-29','hang'])
 # finduser('xp zheng')

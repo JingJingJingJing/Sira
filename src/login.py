@@ -11,10 +11,11 @@ from utils import (Super401, glob_dic, mylog,
 def login(lst):
     un = lst[0]
     pw = lst[1]
-    url, headers = prepare('login')
-    data = '{"username":"' + str(un) + '","password":"' + str(pw) + '"}'
+    url = prepare('logout')[0]
+    headers = {'Content-Type': 'application/json'}
+    data = json.dumps({"username":un, "password":pw})
     try:
-        r = requests.post(url, headers=headers, data=data, timeout=glob_dic.get_value('timeout'))
+        r = requests.post(url, headers=headers, data=data, timeout=glob_dic.get_value('timeout'),verify=False)
         mylog.error(r.text)
         if r.status_code == 401:
             mylog.error("401 Unauthorized")
@@ -87,24 +88,30 @@ def getProject():
 def getBoard():
     url,headers = prepare('getBoard')
     f, r = send_request(url, method.Get, headers, None, None)
-    if not f:
-        return False
-    return goInto(r.get('values'), 'board', 'id')
+    if f:
+        return goInto(r.get('values'), 'board', 'id')
+
 
 def getSprint():
-    url,headers = prepare('getSprint')
+    headers = prepare('getSprint')[1]
     lst = []
+
     if not getBoard():
         return False
     for boardid in glob_dic.tips.get_value('board'):
         url = 'http://' + glob_dic.get_value('domain') + '/rest/agile/1.0/board/'+str(boardid)+'/sprint'
         f, r = send_request(url, method.Get, headers, None, None)
         if not f:
-            mylog.error(r)
             return False
         lst += r.get("values")
-    goInto(lst, 'sprint', 'name')
+    if not goInto(lst, 'sprint', 'name'):
+        return False
+    # print(lst)
+    glob_dic.set_value('sid',{})
+    for msg in lst:
+        glob_dic.get_value('sid')[msg['name']] = msg['id']
     return True
+
 
 def getStatus():
     url,headers = prepare('getStatus')
@@ -122,9 +129,34 @@ def getType():
 def getIssuetype():
     url,headers = prepare('getIssuetype')
     f, r = send_request(url, method.Get, headers, None, None)
-    if not f:
-        mylog.error(r)
-    return goInto(r, 'issuetype', 'name')
+    if f:
+        return goInto(r, 'issuetype', 'name')
+
+def getAssignee():
+    url,headers = prepare('getAssignee')
+    f, r = send_request(url, method.Get, headers, None, None)
+    if f:
+        return goInto(r, 'assignee', 'key')
+
+def getPriority():
+    url, headers = prepare('getPriority')
+    f, r = send_request(url, method.Get, headers, None, None)
+    print(r)
+    if f:
+        return goInto(r, 'priority', 'name')
+
+def getVersion():
+    getProject()
+    lst = []
+    for p in glob_dic.tips.get_value('project'):
+        url,headers = prepare('getVersion')
+        url += '/{}/versions'.format(p)
+        f, r = send_request(url, method.Get, headers, None, None)
+        if not f:
+            return False
+        lst += r
+    return goInto(lst, 'versions', 'name')
+
 
 def download():
     getProject()
@@ -132,11 +164,12 @@ def download():
     getType()
     getIssuetype()
     getStatus()
+    getAssignee()
+    getPriority()
     f = open('tables.json','w+')
     f.write(json.dumps(glob_dic.tips.dic))
     f.close()
-    ''' Write to disk '''
-    pass
+    # pass
 
 def tryload():
     f = open('tables.json', 'r')
@@ -147,7 +180,6 @@ def tryload():
     glob_dic.tips.set_value('issuetype',data.get('issuetype'))
     glob_dic.tips.set_value('sprint',data.get('sprint'))
     glob_dic.tips.set_value('status',data.get('status'))
-    # print(data)
 
 try:
     tryload()

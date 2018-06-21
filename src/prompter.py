@@ -19,6 +19,8 @@ class Prompter:
             return result
 
         tokens = self.separater.split(command.strip())
+        print("tokens:")
+        print(tokens)
         for token in tokens:
             pre_position = position
             # traverse every chlid nodes
@@ -26,7 +28,7 @@ class Prompter:
                 if child.tag == "keyword" and child.attrib['name'] == token:
                     position = child
                     break
-                elif child.tag == "optional" or child.tag == "required":
+                elif (child.tag == "optional" or child.tag == "required") and token:
                     position = child
                     break
             if position == pre_position and l > 0:

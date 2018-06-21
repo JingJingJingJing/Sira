@@ -32,7 +32,7 @@ def send_request(url, method, headers, params, data):
             return(False, 'Unknown internal error occured')
         if r.status_code == 401:
             mylog.error("401 Unauthorized")
-            raise Super401
+            raise Super401()
         try:
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:

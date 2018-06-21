@@ -18,7 +18,7 @@
             <interactive>User name:</interactive>
         </keyword>
         <keyword name="logout">
-            <function multi-thread="False" object="login" name="logout" />
+            <function multi-thread="True" object="login" name="logout" />
         </keyword>
         <keyword name="query">
             <interactive>-number -project -type -assignee -sprint</interactive>
@@ -70,6 +70,36 @@
                     <function multi-thread="True" object="query" name="query_sprint" para="sprint_name"/>
                 </required>
             </keyword>
+        </keyword>
+        <keyword name="create">
+            <interactive>project(*):</interactive>
+                <required name="project">
+                    <interactive>issuetype(*):</interactive>
+                    <required name="issuetype">
+                        <interactive>summary(*):</interactive>
+                        <required name="summary">
+                            <interactive>reporter:</interactive>
+                            <required name="reporter">
+                                <interactive>priority:</interactive>
+                                <required name="priority">
+                                    <interactive>labels:</interactive>
+                                    <required name="label">
+                                        <interactive>description:</interactive>
+                                        <required name="description">
+                                            <interactive>assignee:</interactive>
+                                            <required name="assignee">
+                                                <interactive>sprint:</interactive>
+                                                <required name="sprint">
+                                                    <function multi-thread="True" object="issueOps" name="issue_create" para="*"/>
+                                                </required>
+                                            </required>
+                                        </required>
+                                    </required>
+                                </required>
+                            </required>
+                        </required>
+                    </required>
+                </required>
         </keyword>
     </keyword>
 </cmd>

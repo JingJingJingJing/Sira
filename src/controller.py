@@ -1,9 +1,9 @@
 import re
 import threading
 import xml.etree.ElementTree as ET
-
 import login
 import query
+import issueOps
 from prompter import Prompter
 from utils import Super401, mylog
 
@@ -67,7 +67,7 @@ class SiraController():
         if len(command) <= 0:
             if self.position == self.tree:
                 self.view.print_header()
-            return
+                return
 
         tokens = self.separater.split(command.strip())
         for token in tokens:
@@ -116,7 +116,7 @@ class SiraController():
             interactive = self.position.find("./interactive")
             if interactive is not None:
                 self.view.set_command_mode(False)
-                self.view.info = [interactive.text, "-"]
+                self.view.info = ["-"]
             else:
                 self._sendinfo("error command")
         else:
@@ -141,6 +141,7 @@ class SiraController():
 
         """
         try:
+            print(self.args)
             functag = self.position.find("./function")
             obj = functag.attrib['object']
             name = functag.attrib['name']
@@ -156,9 +157,10 @@ class SiraController():
             result = result[1] if name == "login" else result
             # display result
             self._sendinfo(result)
-        except Super401:
+        except Super401 as autherr:
             self.view.username = ""
             login.logout()
+            self._sendinfo(autherr.err)
         except Exception as err:
             mylog.error(err)
 

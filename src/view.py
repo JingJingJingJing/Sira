@@ -364,6 +364,11 @@ class SiraApp(App):
         instance.on_cursor(instance, instance.cursor)
         return True
 
+    def _on_display_options(self,
+                            instance: AdvancedTextInput,
+                            behavior: str) -> bool:
+        return True
+
     def _on_font_name(self, value: str) -> None:
         """"Privated function fired when font_name is changed through
         self.config.

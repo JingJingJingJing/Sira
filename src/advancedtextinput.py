@@ -222,10 +222,8 @@ class AdvancedTextInput(TextInput):
             self.focus = False
             return True
         elif key == 9:  # tab
-            if self.command_mode:
+            if not self.password_mode:
                 self.dispatch('on_tab')
-            else:
-                self.insert_text(u"\t")
             return True
 
         k = self.interesting_keys.get(key)

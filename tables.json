@@ -1,1 +1,54 @@
-{"project": ["SIRA", "TEST"], "board": [1, 2], "sprint": ["TEST Sprint 1", "TEST Sprint 2", "TEST Sprint 3", "Spike Sprint", "SIRA Sprint 1", "SIRA Sprint 2", "SIRA Sprint 3", "SIRA Sprint 4", "SIRA Sprint 5"], "type": ["software", "business"], "issuetype": ["Task", "Sub-task", "Story", "Bug", "Epic"], "status": ["In Progress", "To Do", "Done"], "assignee": ["admin", "henry", "sailer43", "test01", "testuser1", "testusername1", "ysg", "zhengxp"], "priority": ["Highest", "High", "Medium", "Low", "Lowest"]}
+{
+    "project": [
+        "SIRA",
+        "TEST"
+    ],
+    "type": [
+        "software",
+        "business"
+    ],
+    "issuetype": [
+        "Task",
+        "Sub-task",
+        "Story",
+        "Bug",
+        "Epic"
+    ],
+    "sprint": [
+        "TEST Sprint 1",
+        "TEST Sprint 2",
+        "TEST Sprint 3",
+        "Spike Sprint",
+        "SIRA Sprint 1",
+        "SIRA Sprint 2",
+        "SIRA Sprint 3",
+        "SIRA Sprint 4",
+        "SIRA Sprint 5"
+    ],
+    "status": [
+        "In Progress",
+        "To Do",
+        "Done"
+    ],
+    "board": [
+        1,
+        2
+    ],
+    "assignee": [
+        "admin",
+        "henry",
+        "sailer43",
+        "test01",
+        "testuser1",
+        "testusername1",
+        "ysg",
+        "zhengxp"
+    ],
+    "priority": [
+        "Highest",
+        "High",
+        "Medium",
+        "Low",
+        "Lowest"
+    ]
+}

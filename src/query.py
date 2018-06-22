@@ -80,7 +80,6 @@ def query(field1, field2, f):
         return r
     string = getString(r)
     mylog.info(string)
-    print(string)
     return string
 
 

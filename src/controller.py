@@ -141,7 +141,6 @@ class SiraController():
 
         """
         try:
-            print(self.args)
             functag = self.position.find("./function")
             obj = functag.attrib['object']
             name = functag.attrib['name']

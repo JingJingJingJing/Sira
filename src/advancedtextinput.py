@@ -7,6 +7,8 @@ from kivy.clock import Clock
 from kivy.uix.textinput import TextInput
 from kivy.utils import platform
 
+from utils import overrides
+
 
 class AdvancedTextInput(TextInput):
 
@@ -479,7 +481,16 @@ class AdvancedTextInput(TextInput):
             self.select_text(line_start, text_end)
         ### changes end here
 
+    @overrides(TextInput)
+    def _trigger_refresh_text(self, *largs):
+        super(AdvancedTextInput, self)._trigger_refresh_text(*largs)
+        self._reset_last_line_ev = Clock.schedule_once(
+            lambda dt: self._reset_last_line()
+        )
+        
     ### custom functions:
+    def _reset_last_line(self):
+        self.last_row = len(self._lines) - 1
 
     def display_command(self, text):
         self.cancel_selection()

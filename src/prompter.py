@@ -19,8 +19,6 @@ class Prompter:
             return result
 
         tokens = self.separater.split(command.strip())
-        print("tokens:")
-        print(tokens)
         for token in tokens:
             pre_position = position
             # traverse every chlid nodes

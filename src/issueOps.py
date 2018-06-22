@@ -146,7 +146,7 @@ def issue_delComment(lst):
 
 
 # login(['admin','admin'])
-issue_create(['TEST', 'Story','This is summaryyyyyyy', '', 'Medium', '', 'This is Decriptionnnnnnn', 'ysg','TEST Sprint 1'])
+# issue_create(['TEST', 'Story','This is summaryyyyyyy', '', 'Medium', '', 'This is Decriptionnnnnnn', 'ysg','TEST Sprint 1'])
 # issue_assign(['TEST-38','hang'])
 # issue_assign(['TEST-29','hang'])
 # finduser('xp zheng')

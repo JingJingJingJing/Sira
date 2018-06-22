@@ -105,7 +105,8 @@ address_book = {
     'query_number':protocol + domain + '/rest/api/2/issue',
     'issue':protocol + domain + '/rest/api/2/issue',
     'search':protocol + domain + '/rest/api/2/user',
-    'getVersion':protocol + domain + '/rest/api/2/project'
+    'getVersion':protocol + domain + '/rest/api/2/project',
+    'assign_sprint':protocol + domain + '/rest/agile/1.0/sprint'
 }
 
 headers_book = {
@@ -126,7 +127,12 @@ headers_book = {
         'cookie':''
         },
     'search':{'Accept': 'application/json','cookie':''},
-    'getVersion':{'Accept': 'application/json', 'cookie':''}
+    'getVersion':{'Accept': 'application/json', 'cookie':''},
+    'assign_sprint':{
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'cookie':''
+        }
 }
 
 

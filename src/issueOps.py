@@ -17,7 +17,7 @@ send_request(url, method, headers, params, data);
 
 def addfield(dic, lst):
     reporter = {"name":lst[0]}
-    priority = {"name":lst[1]}
+    priority = {"name":lst[1].capitalize()}
     labels = [lst[2]]
     description = lst[3]
     assignee = {"name":lst[4]}
@@ -33,30 +33,34 @@ lst = [project, issuetype, summary, reporter,
 '''
 def issue_create(lst):
     url, headers = prepare('issue')
-    project = {"key":lst[0]}
-    issuetype = {"name":lst[1]}
+    project = {"key":lst[0].upper()}
+    issuetype = {"name":lst[1].capitalize()}
     summary = lst[2]
     field = {"project":project, "summary":summary,"issuetype":issuetype}
     data = json.dumps({"fields":addfield(field,lst[3:8])})
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
         return r
-    new_issue = r['key']
+    new_issue = r.get('key')
     if lst[8] is not '':
-        pass
-    getSprint()
-    headers = prepare('issue')[1]
-    url = '{}{}/rest/agile/1.0/sprint/{}/issue'.format(glob_dic.get_value('protocol'),glob_dic.get_value('domain'),glob_dic.get_value('sid').get(lst[8]))
-    data={}
-    data['issues'] = [new_issue]
-    data = json.dumps(data)
-    f, r = send_request(url, method.Post, headers, None, data)
-    if not f:
-        mylog.error(r)
-        return r
+        sprint = lst[8]
+        sprint = sprint.split(' ')
+        sprint[0] = sprint[0].upper()
+        sprint[1] = sprint[1].capitalize()
+        sprint = ' '.join(sprint)
+        getSprint()
+        url,headers = prepare('assign_sprint','/{}/issue'.format(glob_dic.get_value('sid').get(sprint)))
+        data={}
+        data['issues'] = [new_issue]
+        data = json.dumps(data)
+        f, r = send_request(url, method.Post, headers, None, data)
+        if not f:
+            mylog.error('Problem occured during assigning sprint\r\n{}'.format(r))
+            return 'Problem occured while assigning the issue to target sprint: Issue {} successfully created but not assigned to {}!'.format(new_issue,sprint)
     msg = 'Issue {} successfully created!'.format(new_issue)
     mylog.info(msg)
     return msg
+
 
 def issue_delete(lst):
     msg = ''
@@ -146,7 +150,7 @@ def issue_delComment(lst):
 
 
 # login(['admin','admin'])
-issue_create(['TEST', 'Story','This is summaryyyyyyy', '', 'Medium', '', 'This is Decriptionnnnnnn', 'ysg','TEST Sprint 1'])
+# issue_create(['test', 'story','This is summaryyyyyyy', '', 'medium', '', 'This is Decriptionnnnnnn', 'ysg','test sprint 1'])
 # issue_assign(['TEST-38','hang'])
 # issue_assign(['TEST-29','hang'])
 # finduser('xp zheng')
@@ -154,3 +158,4 @@ issue_create(['TEST', 'Story','This is summaryyyyyyy', '', 'Medium', '', 'This i
 # issue_delComment(['Test-01','10103'])
 # issue_getComment(['Test-01'])
 # issue_assign(['Test-01','testuser1'])
+

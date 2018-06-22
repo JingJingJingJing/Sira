@@ -175,7 +175,6 @@ def getAssignee():
 def getPriority():
     url, headers = prepare('getPriority')
     f, r = send_request(url, method.Get, headers, None, None)
-    print(r)
     if f:
         return goInto(r, 'priority', 'name')
 

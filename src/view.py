@@ -9,7 +9,7 @@ from kivy.uix.widget import Widget
 
 from advancedtextinput import AdvancedTextInput
 from controller import SiraController
-from utils import asserts, mylog, overrides
+from utils import asserts, func_log, mylog, overrides
 
 
 class SiraApp(App):
@@ -248,6 +248,7 @@ class SiraApp(App):
         settings.add_json_panel("Text Option", self.config,
                                 filename="res/sira.json")
 
+    @func_log
     @overrides(App)
     def on_config_change(self,
                          config: ConfigParser,
@@ -530,11 +531,13 @@ class SiraApp(App):
                     instance.command_mode = True
         [calls]:    self.controller.closeinteractive
         """
-        if not self.commandText.command_mode:
+        if not instance.command_mode:
+            if instance.completion_mode:
+                self._stop_completion(instance)
             self.controller.closeinteractive()
             instance.password_mode = False
             instance.command_mode = True
-
+            
     def on_info(self, instance: App, info: list) -> None:
         """Property driven function, fired when info is changed. This function
         automatically prints all elements in info on seperate lines in

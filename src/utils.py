@@ -9,10 +9,10 @@ mylog.error('msg')
 ...
 
 """
-import logging
-
-
 import json
+import logging
+from os import listdir, remove
+from time import localtime, strftime, strptime
 
 
 def read_cookie():
@@ -26,17 +26,54 @@ def read_cookie():
             raise Super401
     return glob_dic.get_value('cookie')
         
-
-
-
-
-logformat = '%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]\r\n%(message)s\r\n'
+log_directory = "log/"
+time_format = '%H-%M-%S %d(%b)%Y'
+logformat = '%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]\r%(message)s\r\n'
+min_time = localtime()
 logging.basicConfig(
-    filename='user.log', format=logformat, datefmt='%d-%m-%Y:%H:%M:%S')
-
+    filename='{}{}.log'.format(log_directory,
+                               strftime(time_format, min_time)),
+    format=logformat,
+    datefmt=time_format
+)
+log_list = listdir(log_directory)
+if len(log_list) > 10:
+    for s in listdir(log_directory):
+        try:
+            log_time = strptime(s, time_format + ".log")
+            if log_time < min_time:
+                min_time = log_time
+        except ValueError as ve:
+            remove(log_directory + s)
+    remove('{}{}.log'.format(log_directory,
+                                strftime(time_format, min_time)))
 mylog = logging.getLogger(__name__)
 mylog.setLevel(logging.DEBUG)
 
+func_enter_log_format = \
+"""\tEntered method {}.{} with the following positional arguments:
+\t\t{},
+\tand the following keyword arguments:
+\t\t{}"""
+
+func_return_log_format = \
+"""\tExited from method {}.{} with the following return value(s):
+\t\t{}"""
+
+def func_log(method):
+    def log(*args, **kwargs):
+        info = func_enter_log_format.format(method.__module__,
+                                            method.__name__,
+                                            args,
+                                            kwargs)
+        mylog.info(info)
+        result = method(*args, **kwargs)
+        info = func_return_log_format.format(method.__module__,
+                                            method.__name__,
+                                            result)
+        mylog.info(info)
+        return result
+    return log
 
 def overrides(interface_class):
     def overrider(method):
@@ -137,4 +174,3 @@ def prepare(s, extend=None):
     if extend is not None:
         return (address_book.get(s)+extend, headers_book.get(s))
     return (address_book.get(s), headers_book.get(s))
-

@@ -184,4 +184,3 @@ try:
     tryload()
 except FileNotFoundError as fe:
     mylog.error(fe)
-    download()

@@ -1,8 +1,12 @@
-import xml.etree.ElementTree as ET
-import threading
 import re
+import threading
+import xml.etree.ElementTree as ET
 import login
 import query
+import issueOps
+from prompter import Prompter
+from utils import Super401, mylog
+
 
 class SiraController():
 
@@ -30,8 +34,9 @@ class SiraController():
         self.args = []         # hold the args of command
         self.tree = ET.parse("res/glossary.xml").getroot()
         self.position = self.tree   # the current position of tree
+        self.prompter = Prompter()
 
-    def processInput(self, instance, string):
+    def processInput(self, string):
         """According to the xml DOM structure, parser the input from UI, exec function and display the result
 
         *string* is the command from UI
@@ -39,7 +44,8 @@ class SiraController():
         """
         try:
             self._cal(string)
-        except Exception:
+        except Exception as err:
+            mylog.error(err)
             self._sendinfo("error while processing")
 
     def closeinteractive(self):
@@ -55,15 +61,13 @@ class SiraController():
         self.view.commandText.readonly = False
         self.view.info = ["interactive mode closed"]
         self.view.print_header()
-        self.view.info = [">"]
 
     def _cal(self, command): 
         # pass when command is empty in non-interactive mode
         if len(command) <= 0:
             if self.position == self.tree:
                 self.view.print_header()
-                self.view.info = [">"]
-            pass
+                return
 
         tokens = self.separater.split(command.strip())
         for token in tokens:
@@ -73,11 +77,11 @@ class SiraController():
                     # exclude keywords need to login
                     if (not self.view.username) and (token not in self.no_need_login):
                         self._sendinfo("Please login first")
-                        pass
+                        return
                     # exclude login keyword if have logged in
                     elif self.view.username and token == "login":
                         self._sendinfo("already logged in as " + self.view.username)
-                        pass
+                        return
                     else:
                         self.position = child
                         break
@@ -93,7 +97,7 @@ class SiraController():
                     self.args.append(para)
                 else:
                     self._sendinfo("error command")
-                    pass
+                    return
         # pass if has sub-node ,exec function if has't
         if self.position.find("./required") is not None:
             # call function first if exist
@@ -112,7 +116,7 @@ class SiraController():
             interactive = self.position.find("./interactive")
             if interactive is not None:
                 self.view.set_command_mode(False)
-                self.view.info = [interactive.text, "-"]
+                self.view.info = ["-"]
             else:
                 self._sendinfo("error command")
         else:
@@ -124,7 +128,6 @@ class SiraController():
                 if functag.attrib['name'] == "on_clear":
                     self.view.commandText.readonly = False
                     self.view.print_header()
-                    self.view.info = [">"]
                     self.view.on_clear()
                     self._clearcache()
                 else:
@@ -137,21 +140,29 @@ class SiraController():
         Login function will pass 2 args contains status and result(str).
 
         """
-        functag = self.position.find("./function")
-        obj = functag.attrib['object']
-        name = functag.attrib['name']
-        if self.args:
-            result = getattr(eval(obj), name)(self.args)
-        else:
-            result = getattr(eval(obj), name)()
-        # set cursor value to username when login successd
-        if name == "login" and result[0]:
-            self.view.username = self.args[0]
-        elif (name == "login" and not result[0]) or name == "logout":
+        try:
+            print(self.args)
+            functag = self.position.find("./function")
+            obj = functag.attrib['object']
+            name = functag.attrib['name']
+            if self.args:
+                result = getattr(eval(obj), name)(self.args)
+            else:
+                result = getattr(eval(obj), name)()
+            # set cursor value to username when login successd
+            if name == "login" and result[0]:
+                self.view.username = self.args[0]
+            elif (name == "login" and not result[0]) or name == "logout":
+                self.view.username = ""
+            result = result[1] if name == "login" else result
+            # display result
+            self._sendinfo(result)
+        except Super401 as autherr:
             self.view.username = ""
-        result = result[1] if name == "login" else result
-        # display result
-        self._sendinfo(result)
+            login.logout()
+            self._sendinfo(autherr.err)
+        except Exception as err:
+            mylog.error(err)
 
     def _sendinfo(self, msg):
         self._clearcache()
@@ -160,9 +171,10 @@ class SiraController():
         if msg:
             self.view.info = [msg]
         self.view.print_header()
-        self.view.info = [">"]
 
     def _clearcache(self):
         self.position = self.tree
         self.args.clear()
 
+    def auto_complete(self, command):
+        self.view.option = self.prompter.auto_complete(self.position,command)

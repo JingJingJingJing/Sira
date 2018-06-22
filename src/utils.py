@@ -12,6 +12,8 @@ mylog.error('msg')
 import logging
 
 
+import json
+
 
 def read_cookie():
     if glob_dic.get_value('cookie','') == '':

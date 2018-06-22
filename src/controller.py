@@ -32,6 +32,7 @@ class SiraController():
         self.model = model
         self.separater = re.compile("\\s+")    # command separater
         self.args = []         # hold the args of command
+        self.interactive = False
         self.tree = ET.parse("res/glossary.xml").getroot()
         self.position = self.tree   # the current position of tree
         self.prompter = Prompter()
@@ -42,11 +43,12 @@ class SiraController():
         *string* is the command from UI
 
         """
-        try:
-            self._cal(string)
-        except Exception as err:
-            mylog.error(err)
-            self._sendinfo("error while processing")
+        self._cal(string)
+        # try:
+        #     self._cal(string)
+        # except Exception as err:
+        #     mylog.error(err)
+        #     self._sendinfo("error while processing")
 
     def closeinteractive(self):
         """Close the interactive mode by clear cache and display "interactive mode closed"
@@ -61,7 +63,7 @@ class SiraController():
         self.view.commandText.readonly = False
         self.view.info = ["interactive mode closed"]
         self.view.print_header()
-
+    
     def _cal(self, command): 
         # pass when command is empty in non-interactive mode
         if len(command) <= 0:
@@ -70,7 +72,7 @@ class SiraController():
                 return
 
         tokens = self.separater.split(command.strip())
-        for token in tokens:
+        for i, token in enumerate(tokens):
             pre_position = self.position
             for child in self.position.getchildren():
                 if child.tag == "keyword" and child.attrib['name'] == token:
@@ -86,20 +88,24 @@ class SiraController():
                         self.position = child
                         break
                 elif child.tag == "optional" or child.tag == "required":
-                    self.position = child
-                    self.args.append(token)
+                    # required field can't be empty
+                    if child.tag == "required" and not token:
+                        return
+                    if pre_position.tag != "keyword" and self.interactive and i != 0:
+                        break
+                    else:
+                        self.position = child
+                        self.args.append(token)
                     break
             # do not extend deep
             if pre_position == self.position:
                 if pre_position.tag != "keyword" and self.args:
-                    para = self.args.pop()
-                    para = para + " " + token
-                    self.args.append(para)
+                    self._increpara(token)
                 else:
                     self._sendinfo("error command")
                     return
         # pass if has sub-node ,exec function if has't
-        if self.position.find("./required") is not None:
+        if self.position.find("./required") or self.position.find("./optional"):
             # call function first if exist
             func = self.position.find("./function")
             if func is not None:
@@ -109,12 +115,14 @@ class SiraController():
                     getattr(self,func.attrib['name'])()
             # display intseractive text
             interactive = self.position.find("./interactive")
+            self.interactive = True
             self.view.set_command_mode(False)
             self.view.info = [interactive.text] if interactive is not None else [""]
-        elif self.position.find("./keyword") is not None:
+        elif self.position.find("./keyword"):
             # display intseractive text
             interactive = self.position.find("./interactive")
             if interactive is not None:
+                self.interactive = True
                 self.view.set_command_mode(False)
                 self.view.info = ["-"]
             else:
@@ -141,7 +149,6 @@ class SiraController():
 
         """
         try:
-            print(self.args)
             functag = self.position.find("./function")
             obj = functag.attrib['object']
             name = functag.attrib['name']
@@ -174,7 +181,16 @@ class SiraController():
 
     def _clearcache(self):
         self.position = self.tree
+        self.interactive = False
         self.args.clear()
 
+    def _increpara(self, s):
+        if self.args:
+            arg = self.args.pop()
+            arg = arg + " " + s
+            self.args.append(arg)
+        else:
+            self.args.append(s)
+
     def auto_complete(self, command):
-        self.view.option = self.prompter.auto_complete(self.position,command)
+        self.view.option = self.prompter.auto_complete(self.position,self.interactive,command)

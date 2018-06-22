@@ -8,7 +8,7 @@ class Prompter:
     def __init__(self):
         self.separater = re.compile("\\s+")
 
-    def auto_complete(self, position, command):
+    def auto_complete(self, position, interactive, command):
         result = []
         complete = False
 
@@ -19,9 +19,7 @@ class Prompter:
             return result
 
         tokens = self.separater.split(command.strip())
-        print("tokens:")
-        print(tokens)
-        for token in tokens:
+        for i, token in enumerate(tokens):
             pre_position = position
             # traverse every chlid nodes
             for child in position.getchildren():
@@ -29,10 +27,13 @@ class Prompter:
                     position = child
                     break
                 elif (child.tag == "optional" or child.tag == "required") and token:
+                    if interactive and child.find("./keyword") is None:
+                        return result
                     position = child
                     break
             if position == pre_position and l > 0:
-                if(token != tokens[-1] or not complete):
+                if((not complete and position.find("./keyword") is None) or (complete and i != len(tokens)-1 )):
+                    print("heiheihei")
                     return result
 
         keywords = position.findall("./keyword")

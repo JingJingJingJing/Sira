@@ -77,27 +77,27 @@
                     <interactive>issuetype(*):</interactive>
                     <required name="issuetype">
                         <interactive>summary(*):</interactive>
-                        <required name="summary">
+                        <optional name="summary">
                             <interactive>reporter:</interactive>
-                            <required name="reporter">
+                            <optional name="assignee">
                                 <interactive>priority:</interactive>
-                                <required name="priority">
+                                <optional name="priority">
                                     <interactive>labels:</interactive>
-                                    <required name="label">
+                                    <optional name="label">
                                         <interactive>description:</interactive>
-                                        <required name="description">
+                                        <optional name="description">
                                             <interactive>assignee:</interactive>
-                                            <required name="assignee">
+                                            <optional name="assignee">
                                                 <interactive>sprint:</interactive>
-                                                <required name="sprint">
+                                                <optional name="sprint">
                                                     <function multi-thread="True" object="issueOps" name="issue_create" para="*"/>
-                                                </required>
-                                            </required>
-                                        </required>
-                                    </required>
-                                </required>
-                            </required>
-                        </required>
+                                                </optional>
+                                            </optional>
+                                        </optional>
+                                    </optional>
+                                </optional>
+                            </optional>
+                        </optional>
                     </required>
                 </required>
         </keyword>

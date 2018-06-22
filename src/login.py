@@ -220,3 +220,5 @@ def getIssueFromSprint():
 # login(['admin','admin'])
 # download()
 # print(glob_dic.tips.get_value('assignee'))
+# getProject()
+# login(['admin', 'admin'])

@@ -147,12 +147,8 @@ def issue_display_info(issue):
         sprint = glob_dic.get_value('issues')[issue]
     s += '{}: {}\r\n'.format('sprint',sprint)
     s += 'Please choose from the fields above to update'
-    print(s)
     return True, s
 # issue_display_info('TEST-77')
-
-
-issue_display_info('TEST-77')
 
 def issue_edit(lst):
     issue = lst[0]
@@ -208,7 +204,6 @@ def issue_edit_labels(lst):
     f, r = send_request(url, method.Put, headers, None, data)
     if not f:
         return False, 'Error occured while add labels\r\n{}'.format(r)
-    print('label successfully {}ed'.format(mode))
     return True, 'label successfully {}ed'.format(mode)
 
 # issue_edit_labels(['Test-77','remove', 'label1','label2','label3'])
@@ -262,7 +257,6 @@ def issue_getComment(lst):
                 com['body'], com['updateAuthor']['key'], com['created'],
                 com['id'])
         mylog.info(string)
-        print(string)
         return string
     else:
         mylog.info('get empty msg')
@@ -280,7 +274,6 @@ def issue_addComment(lst):
     if not f:
         return r
     mylog.info(r)
-    print('Comment(ID: ' + r['id'] + ')added')
     return 'Comment(ID: ' + r['id'] + ')added'
 
 

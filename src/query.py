@@ -69,12 +69,15 @@ def send_request(url, method, headers, params, data):
         try:
             try:
                 s = ''
+                print(r.json())
                 lst = r.json()['warningMessages']
                 for errors in lst:
                     s += errors + '\r\n'
                 mylog.error(s)
                 return (False, s)
             except KeyError:
+                return (True, r.json())
+            except TypeError:
                 return (True, r.json())
         except json.JSONDecodeError:
             return (True, r)
@@ -212,7 +215,7 @@ if __name__ == '__main__':
     # query_project_assignee(['TEST', 'Hang'])
     # query_number(['TEST-17'])
     # query_sprint(['Sira Sprint 2'])
-    query_assignee(['ysg'])
+    # query_assignee(['ysg'])
     # query_status(['In progress'])
     # query_project_status(['sira','to do'])
     pass

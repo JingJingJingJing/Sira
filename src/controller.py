@@ -5,7 +5,7 @@ import login
 import query
 import issueOps
 from prompter import Prompter
-from utils import Super401, mylog
+from utils import Super401, mylog, glob_dic
 
 
 class SiraController():
@@ -36,6 +36,7 @@ class SiraController():
         self.tree = ET.parse("res/glossary.xml").getroot()
         self.position = self.tree   # the current position of tree
         self.prompter = Prompter()
+        self.tp = {}
 
     def processInput(self, string):
         """According to the xml DOM structure, parser the input from UI, exec function and display the result
@@ -73,9 +74,9 @@ class SiraController():
 
         tokens = self.separater.split(command.strip())
         for i, token in enumerate(tokens):
-            pre_position = self.position
+            pre_position = self.position        
             for child in self.position.getchildren():
-                if child.tag == "keyword" and child.attrib['name'] == token:
+                if child.tag == "keyword" and child.attrib['name'] == token:    # 如果在keyword里找到func
                     # exclude keywords need to login
                     if (not self.view.username) and (token not in self.no_need_login):
                         self._sendinfo("Please login first")
@@ -87,14 +88,15 @@ class SiraController():
                     else:
                         self.position = child
                         break
-                elif child.tag == "optional" or child.tag == "required":
+                elif child.tag == "optional" or child.tag == "required":    # 如果child是optional或者required
                     # required field can't be empty
-                    if child.tag == "required" and not token:
+                    if child.tag == "required" and not token:       # 如果required field 没有填
                         return
-                    if pre_position.tag != "keyword" and self.interactive and i != 0:
+                    if pre_position.tag != "keyword" and self.interactive and i != 0:   #
                         break
                     else:
                         self.position = child
+                        self.tp[token] = self.position.attrib.get('name') if token not in self.tp.keys() else self.tp[token]
                         self.args.append(token)
                     break
             # do not extend deep
@@ -118,7 +120,8 @@ class SiraController():
             self.interactive = True
             self.view.set_command_mode(False)
             self.view.info = [interactive.text] if interactive is not None else [""]
-        elif self.position.find("./keyword"):
+
+        elif self.position.find("./keyword"):   # 交互模式
             # display intseractive text
             interactive = self.position.find("./interactive")
             if interactive is not None:
@@ -152,10 +155,12 @@ class SiraController():
             functag = self.position.find("./function")
             obj = functag.attrib['object']
             name = functag.attrib['name']
+            # print(functag,obj, name, self.position.find('..'), self.position.attrib['name'])
             if self.args:
                 result = getattr(eval(obj), name)(self.args)
             else:
                 result = getattr(eval(obj), name)()
+
             # set cursor value to username when login successd
             if name == "login" and result[0]:
                 self.view.username = self.args[0]
@@ -163,13 +168,20 @@ class SiraController():
                 self.view.username = ""
             result = result[1] if name == "login" else result
             # display result
+
+            for i in range(0, len(self.args)):
+                if self.tp.get(self.args[i]) == 'project' or 'sprint' or 'assignee':
+                    # glob_dic.tips.upadate_priority('project', self.args[i])
+                    print(self.tp.get(self.args[i]))
+
             self._sendinfo(result)
+
         except Super401 as autherr:
             self.view.username = ""
             login.logout()
             self._sendinfo(autherr.err)
-        except Exception as err:
-            mylog.error(err)
+        # except Exception as err:
+        #     mylog.error(err)
 
     def _sendinfo(self, msg):
         self._clearcache()
@@ -183,14 +195,16 @@ class SiraController():
         self.position = self.tree
         self.interactive = False
         self.args.clear()
+        self.tp = {}
 
     def _increpara(self, s):
-        if self.args:
-            arg = self.args.pop()
-            arg = arg + " " + s
-            self.args.append(arg)
-        else:
-            self.args.append(s)
-
+        # if self.args:
+        arg = self.args.pop()
+        arg = arg + " " + s
+        self.args.append(arg)
+        self.tp[arg] = self.position.attrib.get('name') if arg not in self.tp.keys() else self.tp[arg]
+        # else:
+        #     self.args.append(s)
     def auto_complete(self, command):
         self.view.option = self.prompter.auto_complete(self.position,self.interactive,command)
+# 

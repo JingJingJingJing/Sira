@@ -6,7 +6,6 @@ from requests.status_codes import _codes
 
 from extract import dtos, getField, getString
 from utils import Super401, glob_dic, mylog, prepare, read_cookie
-
 """ This function returns all issue assigned to the user 'user' """
 
 
@@ -69,7 +68,6 @@ def send_request(url, method, headers, params, data):
         try:
             try:
                 s = ''
-                print(r.json())
                 lst = r.json()['warningMessages']
                 for errors in lst:
                     s += errors + '\r\n'

@@ -274,7 +274,7 @@ class SiraApp(App):
         """TODO: both here and class doc
         """
         write_memo_log(self, self.commandText)
-        glob_dic.tips.write_file('table.json')
+        glob_dic.tips.write_file('tables.json')
 
     def on_clear(self) -> None:
         """Public function to clear the screen. This methods essentially
@@ -386,6 +386,8 @@ class SiraApp(App):
         elif instance.command_mode and string != "":
             instance.history_stack.push(string)
         instance.history_stack.reset_traversal()
+        if string == "pdb":
+            import pdb; pdb.set_trace()
         self.controller.processInput(string)
         instance.on_cursor(instance, instance.cursor)
         return True

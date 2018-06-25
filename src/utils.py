@@ -149,12 +149,13 @@ class tips():
         index = -1
         for i in range(len(tgt_list)):
             if tgt_list[i][1] == key:
-                tgt_list[i][0] *= 1.05
+                tgt_list[i][0] = min(tgt_list[i][0] * 1.1, 1)
                 index = i
             else:
-                tgt_list[i][0] *= 0.95
+                tgt_list[i][0] = max(tgt_list[i][0] * 0.95, 0.1)
         if index == -1:
-            raise KeyError
+            self.add_new_key(section, key)
+            return
         element = tgt_list.pop(index)
         start_index = 0
         last_index = index

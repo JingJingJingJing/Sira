@@ -68,6 +68,10 @@ def send_request(url, method, headers, params, data):
         try:
             try:
                 s = ''
+<<<<<<< HEAD
+=======
+                # print(r.json())
+>>>>>>> dev
                 lst = r.json()['warningMessages']
                 for errors in lst:
                     s += errors + '\r\n'

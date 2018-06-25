@@ -180,9 +180,7 @@ def download():
     getAssignee()
     getPriority()
     getVersion()
-    f = open('tables.json', 'w+')
-    f.write(json.dumps(glob_dic.tips.dic))
-    f.close()
+    glob_dic.tips.write_file('tables.json')
     # pass
 
 

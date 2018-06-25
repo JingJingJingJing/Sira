@@ -33,14 +33,19 @@ lst = [project, issuetype, summary, reporter,
 
 
 def issue_assign_sprint(issue, sprint):
-    sprint = sprint.split(' ')
-    sprint[0] = sprint[0].upper()
-    sprint[1] = sprint[1].capitalize()
-    sprint = ' '.join(sprint)
-    getSprint()
+    # sprint = sprint.split(' ')
+    # sprint[0] = sprint[0].upper()
+    # sprint[1] = sprint[1].capitalize()
+    # sprint = ' '.join(sprint)
+
+    for sp in glob_dic.tips.get_value('sprint'):
+        if sprint.lower() == sp.lower():
+            sprint = sp
+            break
+    # getSprint()
     url, headers = prepare(
         'assign_sprint', '/{}/issue'.format(
-            glob_dic.get_value('sid').get(sprint)))
+            glob_dic.tips.get_value('sid')[0].get(sprint.lower())))
     data = {}
     data['issues'] = [issue]
     data = json.dumps(data)
@@ -61,16 +66,16 @@ def issue_create(lst):
     data = json.dumps({"fields": addfield(field, lst[3:8])})
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
-        return r
+        return False,r
     new_issue = r.get('key')
     if lst[8] is not '':
         f, r = issue_assign_sprint(new_issue, lst[8])
         if not f:
-            return 'Problem occured while assigning the issue to target sprint: Issue {} successfully created but not assigned to {}!\r\n{}'.format(
+            return False, 'Problem occured while assigning the issue to target sprint: Issue {} successfully created but not assigned to {}!\r\n{}'.format(
                 new_issue, lst[8], r)
     msg = 'Issue {} successfully created!'.format(new_issue)
     mylog.info(msg)
-    return msg
+    return True, msg
 
 
 def issue_get_tansition(issue, dic):
@@ -158,7 +163,7 @@ def issue_edit(lst):
     url, headers = prepare('issue', '/{}'.format(issue))
     status = lst[0]
     if not issue_transit([issue, status]):
-        return 'Error occured during transit'
+        return False, 'Error occured during transit'
 
     issuetype = {"name": lst[1].capitalize()}
     summary = lst[2]
@@ -183,9 +188,8 @@ def issue_edit(lst):
     if lst[8]:
         f, r = issue_assign_sprint(issue, lst[8])
         if not f:
-            return 'Problem occured while assigning the issue to target sprint: Issue {} successfully created but not assigned to {}!\r\n{}'.format(
-                issue, lst[8], r)
-    return 'Edit Success'
+            return False,'Problem occured while assigning the issue to target sprint: All other fields have been updated!\r\n{}'.format(r)
+    return True, 'Edit Success'
 
 
 # issue_edit([
@@ -212,22 +216,22 @@ def issue_edit_labels(lst):
 # issue_edit_labels(['Test-77','remove', 'label1','label2','label3'])
 
 
-def issue_delete(lst):
-    msg = ''
-    for issue in lst:
-        msg += '{}\r\n'.format(issue_delete_helper(issue))
-    msg += 'Done!'
-    return msg
+# def issue_delete(lst):
+#     msg = ''
+#     for issue in lst:
+#         msg += '{}\r\n'.format(issue_delete_helper(issue))
+#     msg += 'Done!'
+#     return msg
 
 
-def issue_delete_helper(issue):
-    url, headers = prepare('issue', '/{}'.format(issue))
-    f, r = send_request(url, method.Delete, headers, None, None)
-    if not f:
-        return 'DOING {}\r\n{}'.format(issue, r)
-    msg = '{} successfully deleted!'.format(issue)
-    mylog.info(msg)
-    return msg
+# def issue_delete_helper(issue):
+#     url, headers = prepare('issue', '/{}'.format(issue))
+#     f, r = send_request(url, method.Delete, headers, None, None)
+#     if not f:
+#         return False, 'DOING {}\r\n{}'.format(issue, r)
+#     msg = '{} successfully deleted!'.format(issue)
+#     mylog.info(msg)
+#     return True, msg
 
 
 def issue_assign(lst):
@@ -238,10 +242,10 @@ def issue_assign(lst):
 
     f, r = send_request(url, method.Put, headers, None, data)
     if not f:
-        return r
+        return False, r
     msg = '{} successfully assigned to {}'.format(issue, assignee)
     mylog.info(msg)
-    return msg
+    return True, msg
 
 
 def issue_getComment(lst):
@@ -250,7 +254,7 @@ def issue_getComment(lst):
 
     f, r = send_request(url, method.Get, headers, None, None)
     if not f:
-        return r
+        return False,r
 
     comments = r.get('comments', [])
     if len(comments) > 0:
@@ -260,10 +264,10 @@ def issue_getComment(lst):
                 com['body'], com['updateAuthor']['key'], com['created'],
                 com['id'])
         mylog.info(string)
-        return string
+        return False, string
     else:
         mylog.info('get empty msg')
-        return "There is no comment yet!"
+        return True, "There is no comment yet!"
 
 
 def issue_addComment(lst):
@@ -275,9 +279,9 @@ def issue_addComment(lst):
     #     data = json.dumps(data)
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
-        return r
+        return False, r
     mylog.info(r)
-    return 'Comment(ID: ' + r['id'] + ')added'
+    return True, 'Comment(ID: ' + r['id'] + ')added'
 
 
 def issue_delComment(lst):
@@ -286,9 +290,9 @@ def issue_delComment(lst):
     url, headers = prepare('issue', '/{}{}{}'.format(issue, '/comment/', cid))
     f, r = send_request(url, method.Delete, headers, None, None)
     if not f:
-        return r
+        return False, r
     mylog.info('Comment {} deleted'.format(cid))
-    return 'Comment deleted'
+    return True, 'Comment deleted'
 
 
 # login(['admin','admin'])

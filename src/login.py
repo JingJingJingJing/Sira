@@ -66,7 +66,7 @@ def logout():
     try:
         r.raise_for_status()
     except requests.exceptions.HTTPError:
-        return (True, 'No account logged in yet')
+        return (False, 'No account logged in yet')
     f = open(glob_dic.get_value('cookie_path') + "cookie.txt", "w")
     f.write('')
     f.close
@@ -117,9 +117,9 @@ def getSprint():
     if not goInto(lst, 'sprint', 'name'):
         return False
     # print(lst)
-    glob_dic.set_value('sid', {})
+    glob_dic.tips.set_value('sid', [{}])
     for msg in lst:
-        glob_dic.get_value('sid')[msg['name']] = msg['id']
+        glob_dic.tips.get_value('sid')[0][msg['name'].lower()] = msg['id']
     return True
 
 

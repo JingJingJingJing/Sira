@@ -158,22 +158,25 @@ class SiraController():
             name = functag.attrib['name']
             # print(functag,obj, name, self.position.find('..'), self.position.attrib['name'])
             if self.args:
-                result = getattr(eval(obj), name)(self.args)
+                f, result = getattr(eval(obj), name)(self.args)
             else:
-                result = getattr(eval(obj), name)()
+                f, result = getattr(eval(obj), name)()
 
             # set cursor value to username when login successd
-            if name == "login" and result[0]:
+            if name == "login" and f:
                 self.view.username = self.args[0]
-            elif (name == "login" and not result[0]) or name == "logout":
+            elif (name == "login" and not f) or name == "logout":
                 self.view.username = ""
-            result = result[1] if name == "login" else result
+            # result = result[1]
             # display result
-
-            for i in range(0, len(self.args)):
-                if self.tp.get(self.args[i]) == 'project' or 'sprint' or 'assignee':
-                    # glob_dic.tips.upadate_priority('project', self.args[i])
-                    print(self.tp.get(self.args[i]))
+            if f:
+                for i in range(0, len(self.args)):
+                    if self.tp.get(self.args[i]) == 'project':
+                        glob_dic.tips.update_priority('project', self.args[i])
+                    elif self.tp.get(self.args[i]) == 'sprint':
+                        glob_dic.tips.update_priority('sprint', self.args[i])
+                    elif self.tp.get(self.args[i]) == 'assignee':
+                        glob_dic.tips.update_priority('assignee', self.args[i])
 
             self._sendinfo(result)
 

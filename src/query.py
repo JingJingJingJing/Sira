@@ -68,10 +68,6 @@ def send_request(url, method, headers, params, data):
         try:
             try:
                 s = ''
-<<<<<<< HEAD
-=======
-                # print(r.json())
->>>>>>> dev
                 lst = r.json()['warningMessages']
                 for errors in lst:
                     s += errors + '\r\n'
@@ -105,10 +101,10 @@ def query(field1, field2, f):
     data = json.dumps(data)
     flag, r = send_request(url, method.Post, headers, None, data)
     if not flag:
-        return r
+        return False, r
     string = getString(r)
     mylog.info(string)
-    return string
+    return True, string
 
 
 """ This function will return all information of issue represented by pid """
@@ -124,15 +120,15 @@ def query_number(lst):
         return r
     try:
         mylog.error(r['warningMessages'])
-        return r['warningMessages']
+        return False, r['warningMessages']
     except KeyError:
         try:
             string = dtos(getField(r, None), r['key'])
             mylog.info(string)
-            return string
+            return True, string
         except KeyError as err:
             mylog.error(err)
-            return 'given field "{}" not found'.format(err)
+            return False, 'given field "{}" not found'.format(err)
 
 
 def addQuotation(s):

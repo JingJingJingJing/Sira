@@ -58,7 +58,7 @@ func_enter_log_format = \
 \t\t{}"""
 
 func_return_log_format = \
-"""\tExited from method {}.{} with the following return value(s):
+"""\tExited method {}.{} with the following return value(s):
 \t\t{}"""
 
 def func_log(method):
@@ -80,7 +80,6 @@ def overrides(interface_class):
     def overrider(method):
         assert (method.__name__ in dir(interface_class))
         return method
-
     return overrider
 
 
@@ -92,6 +91,16 @@ def asserts(expression, msg):
         return False
     return True
 
+def write_memo_log(*args):
+    info = "Program exited with the following attributes:"
+    info_line = "{}:\n\t\t{}\n"
+    for cls in args:
+        for attr in dir(cls):
+            value = getattr(cls, attr)
+            if not callable(value) and not attr.startswith("__"):
+                info += info_line.format("{}.{}".format(type(cls), attr),
+                                         value)
+    mylog.info(info)
 
 class Super401(Exception):
     def __init__(self):

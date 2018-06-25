@@ -9,7 +9,7 @@ from kivy.uix.widget import Widget
 
 from advancedtextinput import AdvancedTextInput
 from controller import SiraController
-from utils import asserts, func_log, mylog, overrides
+from utils import asserts, func_log, mylog, overrides, write_memo_log
 
 
 class SiraApp(App):
@@ -269,6 +269,12 @@ class SiraApp(App):
                 return
             self.config_func_dict[(section, key)](value)
 
+    @overrides(App)
+    def on_stop(self):
+        """TODO: both here and class doc
+        """
+        write_memo_log(self, self.commandText)
+
     def on_clear(self) -> None:
         """Public function to clear the screen. This methods essentially
         scrolls all historical texts above the window.
@@ -358,6 +364,7 @@ class SiraApp(App):
         """
         self._reset_header(self.username, value)
 
+    @func_log
     def _on_command(self, instance: AdvancedTextInput) -> bool:
         """"Privated function fired when self.commandText.on_text_validate is
         called, in other words, when users hit the 'enter' key. This property
@@ -382,6 +389,7 @@ class SiraApp(App):
         instance.on_cursor(instance, instance.cursor)
         return True
 
+    @func_log
     def _on_display_options(self,
                             instance: AdvancedTextInput,
                             behavior: str,
@@ -442,6 +450,7 @@ class SiraApp(App):
         self._stop_completion(instance)
         self.option = copy
 
+    @func_log
     def _on_space(self, instance: AdvancedTextInput) -> bool:
         """TODO: both here and class doc
         """
@@ -462,6 +471,7 @@ class SiraApp(App):
         """
         self._select_next_option(direction)
 
+    @func_log
     def _on_tab(self, instance: AdvancedTextInput) -> bool:
         """TODO
         """
@@ -537,7 +547,8 @@ class SiraApp(App):
             self.controller.closeinteractive()
             instance.password_mode = False
             instance.command_mode = True
-            
+
+    @func_log
     def on_info(self, instance: App, info: list) -> None:
         """Property driven function, fired when info is changed. This function
         automatically prints all elements in info on seperate lines in
@@ -565,6 +576,7 @@ class SiraApp(App):
         obj.on_cursor(obj, obj.cursor)
         self.info = []
 
+    @func_log
     def on_option(self, instance: App, option: list) -> None:
         """TODO
         """

@@ -11,7 +11,7 @@ mylog.error('msg')
 """
 import json
 import logging
-from os import listdir, remove
+from os import listdir, remove, access, F_OK, mkdir
 from time import localtime, strftime, strptime
 
 
@@ -28,6 +28,8 @@ def read_cookie():
     return glob_dic.get_value('cookie')
         
 log_directory = "log/"
+if not access(log_directory, F_OK):
+    mkdir(log_directory)
 time_format = '%H-%M-%S %d(%b)%Y'
 logformat = '%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]\r%(message)s\r\n'
 min_time = localtime()

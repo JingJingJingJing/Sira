@@ -30,6 +30,7 @@ class SiraController():
     def __init__(self, view, model):
         self.view = view
         self.model = model
+        login.tryload()
         self.separater = re.compile("\\s+")    # command separater
         self.args = []         # hold the args of command
         self.interactive = False

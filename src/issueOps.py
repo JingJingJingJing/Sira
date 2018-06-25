@@ -1,15 +1,10 @@
-import requests
 import json
-from utils import mylog
-from query import read_cookie
-from query import send_request
-from query import method
-from utils import glob_dic
-from utils import prepare
-from login import login
-from login import goInto
-from login import getSprint
-from login import getIssueFromSprint
+
+import requests
+
+from login import getIssueFromSprint, getSprint, goInto, login
+from query import method, read_cookie, send_request
+from utils import glob_dic, mylog, prepare
 
 issue_list = []
 '''
@@ -128,6 +123,7 @@ lst = [status, issuetype, summary, reporter,
 #         except KeyError as err:
 #             mylog.error(err)
 #             return 'given field "{}" not found'.format(err)
+
 def issue_display_info(issue):
     url, headers = prepare('query_number', '/{}'.format(issue))
     f, r = send_request(url, method.Get, headers, None, None)
@@ -154,10 +150,15 @@ def issue_edit(lst):
     issue = lst[0]
     lst = lst[1:]
     url, headers = prepare('issue', '/{}'.format(issue))
-    status = lst[0]
-    if not issue_transit([issue, status]):
-        return 'Error occured during transit'
-
+    if lst[0]:
+        status = lst[0]
+        if not issue_transit([issue, status]):
+            return 'Error occured during transit'
+    if lst[8]:
+        f, r = issue_assign_sprint(issue,lst[8])
+        if not f:
+            return 'Problem occured while assigning the issue to target sprint: Issue {} successfully created but not assigned to {}!\r\n{}'.format(
+                 issue, lst[8],r)
     issuetype = {"name": lst[1].capitalize()}
     summary = lst[2]
     reporter = {"name": lst[3]}
@@ -178,12 +179,7 @@ def issue_edit(lst):
             dic[keys[i]] = fields[i]
     data = json.dumps({"fields": dic})
     f, r = send_request(url, method.Put, headers, None, data)
-    if lst[8]:
-        f, r = issue_assign_sprint(issue,lst[8])
-        if not f:
-            return 'Problem occured while assigning the issue to target sprint: Issue {} successfully created but not assigned to {}!\r\n{}'.format(
-                 issue, lst[8],r)
-    return 'Edit Success'
+    return 'Success'
 
 
 # issue_edit([
@@ -267,9 +263,7 @@ def issue_addComment(lst):
     issue = lst[0]
     url, headers = prepare('issue', '/{}/{}'.format(issue, 'comment'))
     data = json.dumps({"body": lst[1]})
-    # with open("res/comments.json", "r") as f:
-    #     data = json.load(f)
-    #     data = json.dumps(data)
+
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
         return r

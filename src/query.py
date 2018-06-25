@@ -69,7 +69,7 @@ def send_request(url, method, headers, params, data):
         try:
             try:
                 s = ''
-                print(r.json())
+                # print(r.json())
                 lst = r.json()['warningMessages']
                 for errors in lst:
                     s += errors + '\r\n'

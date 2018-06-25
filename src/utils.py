@@ -131,19 +131,52 @@ class glob():
             return defValue
 
 
-class tips(dict):
+class tips():
     def __init__(self, dic):
         self.dic = dic
 
     def set_value(self, key, value):
-        self.dic[key] = value
+        self.dic[key] = [[0.5, x] for x in value]
 
     def get_value(self, key, defValue=None):
         try:
-            return self.dic[key]
+            return [x[1] for x in self.dic[key]]
         except KeyError:
             return defValue
 
+    def update_priority(self, section, key):
+        tgt_list = self.dic[section]
+        index = -1
+        for i in range(len(tgt_list)):
+            if tgt_list[i][1] == key:
+                tgt_list[i][0] *= 1.05
+                index = i
+            else:
+                tgt_list[i][0] *= 0.95
+        if index == -1:
+            raise KeyError
+        element = tgt_list.pop(index)
+        start_index = 0
+        last_index = index
+        while start_index < last_index:
+            mid_index = int((start_index + last_index) / 2)
+            if element[0] > tgt_list[mid_index][0]:
+                last_index = mid_index
+            elif element[0] < tgt_list[mid_index][0]:
+                start_index = mid_index + 1
+            else:
+                start_index = mid_index
+                break
+        tgt_list.insert(start_index, element)
+
+    def write_file(self, file_name):
+        f = open(file_name, 'w+')
+        f.write(json.dumps(self.dic))
+        f.close()
+    
+    def add_new_key(self, section, key):
+        tgt_list = self.dic[section]
+        tgt_list.insert(1, [tgt_list[1][0], key])
 
 glob_dic = glob({})
 domain = glob_dic.get_value('domain')

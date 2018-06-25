@@ -9,7 +9,7 @@ from kivy.uix.widget import Widget
 
 from advancedtextinput import AdvancedTextInput
 from controller import SiraController
-from utils import asserts, func_log, mylog, overrides, write_memo_log
+from utils import asserts, func_log, mylog, overrides, write_memo_log, glob_dic
 
 
 class SiraApp(App):
@@ -274,6 +274,7 @@ class SiraApp(App):
         """TODO: both here and class doc
         """
         write_memo_log(self, self.commandText)
+        glob_dic.tips.write_file('table.json')
 
     def on_clear(self) -> None:
         """Public function to clear the screen. This methods essentially

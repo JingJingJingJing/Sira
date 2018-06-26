@@ -136,7 +136,11 @@ class tips():
         self.dic = dic
 
     def set_value(self, key, value):
-        self.dic[key] = [[0.5, x] for x in value]
+        key_list = self.get_value(key)
+        if key_list:
+            for v in value:
+                if v not in key_list:
+                    self.add_new_key(key, v)
 
     def get_value(self, key, defValue=None):
         try:
@@ -177,7 +181,8 @@ class tips():
     
     def add_new_key(self, section, key):
         tgt_list = self.dic[section]
-        tgt_list.insert(1, [tgt_list[1][0], key])
+        tgt_list.insert(1, [tgt_list[1][0], key] if len(tgt_list) > 1\
+                                                 else [tgt_list[0][0], key])
 
 glob_dic = glob({})
 domain = glob_dic.get_value('domain')

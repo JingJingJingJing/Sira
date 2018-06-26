@@ -1,5 +1,5 @@
 import re
-from utils import glob_dic
+from utils import glob_dic, func_log
 
 class Prompter:
 
@@ -8,6 +8,7 @@ class Prompter:
     def __init__(self):
         self.separater = re.compile("\\s+")
 
+    @func_log
     def auto_complete(self, position, interactive, command):
         result = []
         complete = False

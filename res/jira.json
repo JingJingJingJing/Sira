@@ -1,0 +1,9 @@
+[
+    {
+        "type": "string",
+        "title": "Default Jira Url",
+        "desc": "TODO",
+        "section": "Jira",
+        "key": "url"
+    }
+]

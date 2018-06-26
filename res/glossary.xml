@@ -73,33 +73,33 @@
         </keyword>
         <keyword name="create">
             <interactive>project(*):</interactive>
-                <required name="project">
-                    <interactive>issuetype(*):</interactive>
-                    <required name="issuetype">
-                        <interactive>summary(*):</interactive>
-                        <optional name="summary">
-                            <interactive>reporter:</interactive>
-                            <optional name="assignee">
-                                <interactive>priority:</interactive>
-                                <optional name="priority">
-                                    <interactive>labels:</interactive>
-                                    <optional name="label">
-                                        <interactive>description:</interactive>
-                                        <optional name="description">
-                                            <interactive>assignee:</interactive>
-                                            <optional name="assignee">
-                                                <interactive>sprint:</interactive>
-                                                <optional name="sprint">
-                                                    <function multi-thread="True" object="issueOps" name="issue_create" para="*"/>
-                                                </optional>
+            <required name="project">
+                <interactive>issuetype(*):</interactive>
+                <required name="issuetype">
+                    <interactive>summary(*):</interactive>
+                    <optional name="summary">
+                        <interactive>reporter:</interactive>
+                        <optional name="assignee">
+                            <interactive>priority:</interactive>
+                            <optional name="priority">
+                                <interactive>labels:</interactive>
+                                <optional name="label">
+                                    <interactive>description:</interactive>
+                                    <optional name="description">
+                                        <interactive>assignee:</interactive>
+                                        <optional name="assignee">
+                                            <interactive>sprint:</interactive>
+                                            <optional name="sprint">
+                                                <function multi-thread="True" object="issueOps" name="issue_create" para="*"/>
                                             </optional>
                                         </optional>
                                     </optional>
                                 </optional>
                             </optional>
                         </optional>
-                    </required>
+                    </optional>
                 </required>
+            </required>
         </keyword>
     </keyword>
 </cmd>

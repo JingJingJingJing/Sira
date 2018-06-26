@@ -35,6 +35,7 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
             build_config(self, config.ConfigParser) -> None
             build_settings(self, kivy.uix.settings.Settings) -> None
             on_config_change(self, config.ConfigParser, str, str, str) -> None
+            on_stop(self) -> None
 
         Original:
             set_controller(self, controller.SiraController) -> None
@@ -102,13 +103,17 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
                         "Text", "font_size"
                     ]
         """
-        Text = {
+        text = {
             "cmd_identifier": ">",
             "font_size": "14",
             "font_name": "Monaco",
             "username": ""
         }
-        config.setdefaults("Text", Text)
+        jira = {
+            "url": "http://baidu.com"
+        }
+        config.setdefaults("Text", text)
+        config.setdefaults("Jira", jira)
 
     @overrides(App)
     def build_settings(self, settings: Settings) -> None:
@@ -121,8 +126,10 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
         if not asserts(isinstance(self.config, ConfigParser),
                        "self.config is not initialized."):
             return
-        settings.add_json_panel("Text Option", self.config,
-                                filename="res/sira.json")
+        settings.add_json_panel("Text", self.config,
+                                filename="res/text.json")
+        settings.add_json_panel("Jira", self.config,
+                                filename="res/jira.json")
 
     @func_log
     @overrides(App)
@@ -146,8 +153,8 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
             self.config_func_dict[(section, key)](value)
 
     @overrides(App)
-    def on_stop(self):
-        """TODO: both here and class doc
+    def on_stop(self) -> None:
+        """TODO: both here
         """
         if self.commandText.password_mode:
             self.commandText.password_mode = False

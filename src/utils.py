@@ -30,8 +30,8 @@ def read_cookie():
 log_directory = "log/"
 if not access(log_directory, F_OK):
     mkdir(log_directory)
-time_format = '%H-%M-%S %d(%b)%Y'
-logformat = '%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]\r%(message)s\r\n'
+time_format = '%d(%b)%Y %H-%M-%S'
+logformat = '%(asctime)s.%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]\r\t%(message)s\r\n'
 min_time = localtime()
 logging.basicConfig(
     filename='{}{}.log'.format(log_directory,
@@ -54,13 +54,13 @@ mylog = logging.getLogger(__name__)
 mylog.setLevel(logging.DEBUG)
 
 func_enter_log_format = \
-"""\tEntered method {}.{} with the following positional arguments:
+"""Entered method {}.{} with the following positional arguments:
 \t\t{},
 \tand the following keyword arguments:
 \t\t{}"""
 
 func_return_log_format = \
-"""\tExited method {}.{} with the following return value(s):
+"""Exited method {}.{} with the following return value(s):
 \t\t{}"""
 
 def func_log(method):
@@ -94,8 +94,8 @@ def asserts(expression, msg):
     return True
 
 def write_memo_log(*args):
-    info = "Program exited with the following attributes:"
-    info_line = "{}:\n\t\t{}\n"
+    info = "Program exited with the following attributes:\n"
+    info_line = "\t{}:\n\t\t{}\n"
     for cls in args:
         for attr in dir(cls):
             value = getattr(cls, attr)

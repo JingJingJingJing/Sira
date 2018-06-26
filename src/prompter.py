@@ -34,7 +34,6 @@ class Prompter:
                     break
             if position == pre_position and l > 0:
                 if((not complete and position.find("./keyword") is None) or (complete and i != len(tokens)-1 )):
-                    print("heiheihei")
                     return result
 
         keywords = position.findall("./keyword")

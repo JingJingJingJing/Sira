@@ -1,5 +1,5 @@
 import re
-from utils import glob_dic
+from utils import glob_dic, func_log
 
 class Prompter:
 
@@ -8,6 +8,7 @@ class Prompter:
     def __init__(self):
         self.separater = re.compile("\\s+")
 
+    @func_log
     def auto_complete(self, position, interactive, command):
         result = []
         complete = False
@@ -27,17 +28,16 @@ class Prompter:
                     position = child
                     break
                 elif (child.tag == "optional" or child.tag == "required") and token:
-                    if interactive and child.find("./keyword") is None:
+                    if interactive and child.find("./keyword") is None and not complete:
                         return result
                     position = child
                     break
             if position == pre_position and l > 0:
                 if((not complete and position.find("./keyword") is None) or (complete and i != len(tokens)-1 )):
-                    print("heiheihei")
                     return result
 
         keywords = position.findall("./keyword")
-        if keywords or complete:
+        if (not complete and keywords) or (complete and position.tag == "keyword"):
             for keyword in keywords:
                 name = keyword.attrib['name']
                 if complete and name.startswith(tokens[-1]):
@@ -45,10 +45,17 @@ class Prompter:
                 elif not complete:
                     result.append(name)
         else:
-            option = position.find("./required")
+            option = position.find("./required") if not complete else position
             if not option:
                 option = position.find("./optional")
             if option and option.attrib['name'] in glob_dic.tips.dic:
                 result = glob_dic.tips.get_value(option.attrib['name'])
+                if complete:
+                    cl = []
+                    for s in result:
+                        if s.startswith(tokens[-1]):
+                            cl.append(s)
+                    result = cl
+                            
         return result
 

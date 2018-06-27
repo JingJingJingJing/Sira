@@ -210,7 +210,7 @@ if __name__ == '__main__':
     # query_project_sprint(['Sira', '2'])
     # query_project_assignee(['sira', 'xp zheng'])
 
-    # query_project_assignee(['TEST', 'Hang'])
+    # query_project_assignee(['Tangram', 'zhengxp2'])
     # query_number(['TEST-17'])
     # query_sprint(['Sira Sprint 2'])
     # query_assignee(['ysg'])

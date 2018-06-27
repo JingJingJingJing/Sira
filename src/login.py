@@ -161,7 +161,8 @@ def getPriority():
 def getVersion():
     getProject()
     lst = []
-    for p in glob_dic.tips.get_value('project'):
+    for i, p in enumerate(glob_dic.tips.get_value('project')):
+        print('Iteration %d' % i)
         url, headers = prepare('getVersion')
         url += '/{}/versions'.format(p)
         f, r = send_request(url, method.Get, headers, None, None)
@@ -172,14 +173,22 @@ def getVersion():
 
 
 def download():
+    print('Downloading Project...')
     getProject()
-    getSprint()
+    # getSprint()
+    print('Downloading Type...')
     getType()
+    print('Downloading Issuetype...')
     getIssuetype()
+    print('Downloading Status...')
     getStatus()
+    print('Downloading Assignee...')
     getAssignee()
+    print('Downloading Priority...')
     getPriority()
-    getVersion()
+    # print('Downloading Version...')
+    # getVersion()
+    print('Writing to disk...')
     glob_dic.tips.write_file('tables.json')
     # pass
 
@@ -210,6 +219,46 @@ def getIssueFromSprint():
             glob_dic.get_value('issues')[issue.get('key')] = sp
     return True
 
+
+
+def getPermission():
+    url, headers = prepare('mypermission')
+
+    print(url)
+    print(headers)
+
+    f, r = send_request(url, method.Get, headers, None, None)
+
+def getProjectKey():
+    url, headers = prepare('createmeta')
+    f, r = send_request(url, method.Get, headers, None, None)
+    if not f:
+        return False, r
+    for p in r.get('projects'):
+        print(p.get('key'))
+
+
+def getAss():
+    url, headers = prepare('query')
+    data = {}
+    data["jql"] = '{}'.format('project=TAN')
+    data["startAt"] = 0
+    data["maxResults"] = 100
+    dic = {}
+    while data.get("startAt") < 1000:
+        print('DOING {}'.format(data.get("startAt")))
+        tosend = json.dumps(data)
+        f, r = send_request(url, method.Post, headers, None, tosend)
+        print(type(r))
+        dic.update(r)
+        data["startAt"] = data.get("startAt") + 100
+    f = open('jqlexample.json','a')
+    f.write(json.dumps(r))
+    f.close
+    # print(url, headers, data)
+# getAss()
+# print(glob_dic.tips.get_value('assignee'))
+# getPermission()
 # try:
 #     tryload()
 # except FileNotFoundError as fe:
@@ -220,3 +269,7 @@ def getIssueFromSprint():
 # print(glob_dic.tips.get_value('assignee'))
 # getProject()
 # login(['admin', 'admin'])
+
+# login(['admin','admin'])
+# getProjectKey()
+# login(['zhengxp2', 'bvfp-6217'])

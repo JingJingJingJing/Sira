@@ -77,7 +77,7 @@ def issue_create(lst):
     mylog.info(msg)
     return True, msg
 
-
+# issue_create(['Test','Story','Summary here','','','','','',''])
 def issue_get_tansition(issue, dic):
     url, headers = prepare('issue', '/{}/transitions'.format(issue))
     f, r = send_request(url, method.Get, headers, None, None)
@@ -164,7 +164,9 @@ def issue_edit(lst):
     status = lst[0]
     if not issue_transit([issue, status]):
         return False, 'Error occured during transit'
-
+    getSprint()
+    print(glob_dic.tips.get_value('sprint'))
+    print(glob_dic.tips.dic)
     issuetype = {"name": lst[1].capitalize()}
     summary = lst[2]
     reporter = {"name": lst[3]}
@@ -192,10 +194,10 @@ def issue_edit(lst):
     return True, 'Edit Success'
 
 
-# issue_edit([
-#     'TEST-77', 'done', 'epic', 'a new y', 'ysg', 'lowest', '',
-#     'try  one', 'ysg', 'test sprnit 1'
-# ])
+issue_edit([
+    'TEST-77', 'done', 'epic', 'a new y', 'ysg', 'lowest', '',
+    'try  one', 'ysg', 'test sprnit 1'
+])
 
 
 def issue_edit_labels(lst):
@@ -211,6 +213,8 @@ def issue_edit_labels(lst):
     if not f:
         return False, 'Error occured while add labels\r\n{}'.format(r)
     return True, 'label successfully {}ed'.format(mode)
+    
+
 
 
 # issue_edit_labels(['Test-77','remove', 'label1','label2','label3'])

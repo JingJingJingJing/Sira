@@ -11,7 +11,7 @@ mylog.error('msg')
 """
 import json
 import logging
-from os import listdir, remove, access, F_OK, mkdir
+from os import F_OK, access, listdir, mkdir, remove
 from time import localtime, strftime, strptime
 
 
@@ -26,7 +26,7 @@ def read_cookie():
             mylog.error(err)
             raise Super401
     return glob_dic.get_value('cookie')
-        
+
 log_directory = "log/"
 if not access(log_directory, F_OK):
     mkdir(log_directory)
@@ -117,7 +117,7 @@ class glob():
         self.set_value('jira', 'lnvusjira.lenovonet.lenovo.local')
         self.set_value('cookie_path', '')
         self.set_value('cookie', '')
-        self.set_value('timeout', 5)
+        self.set_value('timeout', 10)
         self.set_value('protocol', 'http://')
         self.tips = tips({})
 
@@ -174,33 +174,70 @@ class tips():
         f = open(file_name, 'w+')
         f.write(json.dumps(self.dic))
         f.close()
-    
+
     def add_new_key(self, section, key):
         tgt_list = self.dic[section]
         tgt_list.insert(1, [tgt_list[1][0], key])
+
 
 glob_dic = glob({})
 domain = glob_dic.get_value('domain')
 protocol = glob_dic.get_value('protocol')
 address_book = {
-    'logout': protocol + domain + '/rest/auth/1/session',
-    'getProject': protocol + domain + '/rest/api/2/project',
-    'getBoard': protocol + domain + '/rest/agile/1.0/board',
-    'getStatus': protocol + domain + '/rest/api/2/status',
-    'getType': protocol + domain + '/rest/api/2/project/type',
-    'getIssuetype': protocol + domain + '/rest/api/2/issuetype',
-    'getAssignee': protocol + domain + '/rest/api/2/user/search?username=.',
-    'getPriority': protocol + domain + '/rest/api/2/priority',
-    'query': protocol + domain + '/rest/api/2/search',
-    'query_number': protocol + domain + '/rest/api/2/issue',
-    'issue': protocol + domain + '/rest/api/2/issue',
-    'search': protocol + domain + '/rest/api/2/user',
-    'getVersion': protocol + domain + '/rest/api/2/project',
-    'getSprint':protocol + domain + '/rest/agile/1.0/sprint',
-    'assign_sprint': protocol + domain + '/rest/agile/1.0/sprint'
+    'logout':
+    protocol + domain + '/rest/auth/1/session',
+    'getProject':
+    protocol + domain + '/rest/api/2/project',
+    'getBoard':
+    protocol + domain + '/rest/agile/1.0/board',
+    'getStatus':
+    protocol + domain + '/rest/api/2/status',
+    'getType':
+    protocol + domain + '/rest/api/2/project/type',
+    'getIssuetype':
+    protocol + domain + '/rest/api/2/issuetype',
+    'getAssignee':
+    protocol + domain + '/rest/api/2/user/search?username=.&project=TAN',
+    'getPriority':
+    protocol + domain + '/rest/api/2/priority',
+    'query':
+    protocol + domain + '/rest/api/2/search',
+    'query_number':
+    protocol + domain + '/rest/api/2/issue',
+    'issue':
+    protocol + domain + '/rest/api/2/issue',
+    'search':
+    protocol + domain + '/rest/api/2/user',
+    'getVersion':
+    protocol + domain + '/rest/api/2/project',
+    'getSprint':
+    protocol + domain + '/rest/agile/1.0/sprint',
+    'assign_sprint':
+    protocol + domain + '/rest/agile/1.0/sprint',
+    'mypermission':
+    protocol + domain + '/rest/api/2/mypermissions',
+    'permission':
+    protocol + domain + '/rest/api/2/permissions/project',
+    'createmeta':
+    protocol + domain + '/rest/api/2/issue/createmeta'
 }
 
 headers_book = {
+    'createmeta':{
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'cookie': ''
+    },
+    'permission':{
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'cookie': ''
+    },
+    'mypermission':{
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'cookie': ''
+    },
     'logout': {
         'Accept': 'application/json',
         'cookie': ''

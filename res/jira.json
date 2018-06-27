@@ -2,8 +2,23 @@
     {
         "type": "string",
         "title": "Default Jira Url",
-        "desc": "TODO",
+        "desc": "Defualt url to your jira application",
         "section": "Jira",
         "key": "url"
+    },
+    {
+        "type": "numeric",
+        "title": "Request Time Out",
+        "desc": "The maximum request time",
+        "section": "Jira",
+        "key": "timeout"
+    },
+    {
+        "type": "options",
+        "options": ["http", "https"],
+        "title": "Protocol",
+        "desc": "Request protocal",
+        "section": "Jira",
+        "key": "protocol"
     }
 ]

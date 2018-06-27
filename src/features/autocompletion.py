@@ -151,7 +151,6 @@ class Completable(object):
         self._stop_completion(instance)
         self.option = copy
 
-    @func_log
     def _on_space(self, instance: AdvancedTextInput) -> bool:
         """TODO: both here
         """

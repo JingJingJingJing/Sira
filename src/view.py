@@ -160,7 +160,7 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
         if self.commandText.password_mode:
             self.commandText.password_mode = False
         write_memo_log(self, self.commandText)
-        glob_dic.tips.write_file('tables.json')
+        glob_dic.tips.write_file('res/tables.json')
         return None
     
     @overrides(App)

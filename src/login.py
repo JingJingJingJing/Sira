@@ -180,13 +180,13 @@ def download():
     getAssignee()
     getPriority()
     getVersion()
-    glob_dic.tips.write_file('tables.json')
+    glob_dic.tips.write_file('res/tables.json')
     # pass
 
 
 def tryload():
     try:
-        f = open('tables.json', 'r')
+        f = open('res/tables.json', 'r')
         data = json.loads(f.read())
         f.close()
 

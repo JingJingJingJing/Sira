@@ -143,6 +143,8 @@ class tips():
             for v in value:
                 if v not in key_list:
                     self.add_new_key(key, v)
+        else:
+            self.dic[key] = [[0.5, x] for x in value]
 
     def get_value(self, key, defValue=None):
         try:

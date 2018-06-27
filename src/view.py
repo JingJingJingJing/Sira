@@ -36,6 +36,7 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
             build_settings(self, kivy.uix.settings.Settings) -> None
             on_config_change(self, config.ConfigParser, str, str, str) -> None
             on_stop(self) -> None
+            stop(self) -> (True, None)
 
         Original:
             set_controller(self, controller.SiraController) -> None
@@ -160,6 +161,14 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
             self.commandText.password_mode = False
         write_memo_log(self, self.commandText)
         glob_dic.tips.write_file('tables.json')
+        return None
+    
+    @overrides(App)
+    def stop(self) -> (True, None):
+        """TODO
+        """
+        super(SiraApp, self).stop()
+        return True, None
 
     def set_controller(self, controller: SiraController) -> None:
         """Public function to set self.controller to controller.

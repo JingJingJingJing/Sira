@@ -113,12 +113,9 @@ class Super401(Exception):
 class glob():
     def __init__(self, dic):
         self.dic = dic
-        self.set_value('domain', '10.176.111.32:8080')
         self.set_value('jira', 'lnvusjira.lenovonet.lenovo.local')
         self.set_value('cookie_path', '')
         self.set_value('cookie', '')
-        self.set_value('timeout', 5)
-        self.set_value('protocol', 'http://')
         self.tips = tips({})
 
     def set_value(self, key, value):
@@ -189,25 +186,28 @@ class tips():
                                                  else [tgt_list[0][0], key])
 
 glob_dic = glob({})
-domain = glob_dic.get_value('domain')
-protocol = glob_dic.get_value('protocol')
-address_book = {
-    'logout': protocol + domain + '/rest/auth/1/session',
-    'getProject': protocol + domain + '/rest/api/2/project',
-    'getBoard': protocol + domain + '/rest/agile/1.0/board',
-    'getStatus': protocol + domain + '/rest/api/2/status',
-    'getType': protocol + domain + '/rest/api/2/project/type',
-    'getIssuetype': protocol + domain + '/rest/api/2/issuetype',
-    'getAssignee': protocol + domain + '/rest/api/2/user/search?username=.',
-    'getPriority': protocol + domain + '/rest/api/2/priority',
-    'query': protocol + domain + '/rest/api/2/search',
-    'query_number': protocol + domain + '/rest/api/2/issue',
-    'issue': protocol + domain + '/rest/api/2/issue',
-    'search': protocol + domain + '/rest/api/2/user',
-    'getVersion': protocol + domain + '/rest/api/2/project',
-    'getSprint':protocol + domain + '/rest/agile/1.0/sprint',
-    'assign_sprint': protocol + domain + '/rest/agile/1.0/sprint'
-}
+address_book = dict()
+def reset_address_book():
+    global address_book
+    domain = glob_dic.get_value('domain')
+    protocol = glob_dic.get_value('protocol')
+    address_book = {
+        'logout': protocol + domain + '/rest/auth/1/session',
+        'getProject': protocol + domain + '/rest/api/2/project',
+        'getBoard': protocol + domain + '/rest/agile/1.0/board',
+        'getStatus': protocol + domain + '/rest/api/2/status',
+        'getType': protocol + domain + '/rest/api/2/project/type',
+        'getIssuetype': protocol + domain + '/rest/api/2/issuetype',
+        'getAssignee': protocol + domain + '/rest/api/2/user/search?username=.',
+        'getPriority': protocol + domain + '/rest/api/2/priority',
+        'query': protocol + domain + '/rest/api/2/search',
+        'query_number': protocol + domain + '/rest/api/2/issue',
+        'issue': protocol + domain + '/rest/api/2/issue',
+        'search': protocol + domain + '/rest/api/2/user',
+        'getVersion': protocol + domain + '/rest/api/2/project',
+        'getSprint':protocol + domain + '/rest/agile/1.0/sprint',
+        'assign_sprint': protocol + domain + '/rest/agile/1.0/sprint'
+    }
 
 headers_book = {
     'logout': {

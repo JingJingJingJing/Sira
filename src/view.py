@@ -40,11 +40,6 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
 
         Original:
             set_controller(self, controller.SiraController) -> None
-
-    Conventions:
-        {
-            TODO: self.commandText.last_row
-        }
     """
 
     @overrides(App)
@@ -61,7 +56,10 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
         self.config_func_dict = {
             ("Text", "cmd_identifier"): self._on_cmd_idf,
             ("Text", "font_size"): self._on_font_size,
-            ("Text", "font_name"): self._on_font_name
+            ("Text", "font_name"): self._on_font_name,
+            ("Jira", "url"): self._on_url,
+            ("Jira", "timeout"): self._on_timeout,
+            ("Jira", "protocoal"): self._on_protocol
         }
 
     @overrides(App)
@@ -111,10 +109,15 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
             "username": ""
         }
         jira = {
-            "url": "http://baidu.com"
+            "url": "10.176.111.32:8080",
+            "timeout": "5",
+            "protocol": "https"
         }
         config.setdefaults("Text", text)
         config.setdefaults("Jira", jira)
+        self._on_url(config.get("Jira", "url"))
+        self._on_timeout(config.get("Jira", "timeout"))
+        self._on_protocol(config.get("Jira", "protocol"))
 
     @overrides(App)
     def build_settings(self, settings: Settings) -> None:
@@ -155,7 +158,11 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
 
     @overrides(App)
     def on_stop(self) -> None:
-        """TODO: both here
+        """Fires on successful exit.
+
+        [ensures]:  self.commandText.password_cache = ""
+        [calls]:    utils.write_memo_log
+                    utils.glob_dic.tips.write_file
         """
         if self.commandText.password_mode:
             self.commandText.password_mode = False
@@ -165,7 +172,10 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
     
     @overrides(App)
     def stop(self) -> (True, None):
-        """TODO
+        """Public function to exit the application.
+
+        [calls]:    super(SiraApp, self).stop
+                    on_stop
         """
         super(SiraApp, self).stop()
         return True, None

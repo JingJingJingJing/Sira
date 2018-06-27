@@ -3,10 +3,15 @@ from os import F_OK, access, listdir
 import kivy.properties as kp
 from kivy.app import App
 
-from utils import asserts
+from utils import asserts, glob_dic, reset_address_book
 
 class Mutative(object):
-    """TODO
+    """Abstract class implemeted custom settings. This class must be extended
+    by a subclass extending kivy.app.App; in other words, its subclass must
+    initialize self.config as an instance of kivy.config.ConfigParser and
+    self.controller as an instance of controller.SiraController before calling
+    any other functions in this abstract class. This class can work as an
+    independent and subscrible behavioral class.
 
     Instance Variables:
         Class-scope Variables:
@@ -26,6 +31,9 @@ class Mutative(object):
         _on_cmd_idf(self, str) -> None
         _on_font_name(self, str) -> None
         _on_font_size(self, str) -> None
+        _on_protocol(self, str) -> None
+        _on_timeout(self, str) -> None
+        _on_url(self, str) -> None
         _reset_header(self, str, str) -> None
     
     Events:
@@ -39,27 +47,36 @@ class Mutative(object):
 
     Conventions:
         {
-            TODO
+            cmdreaction.CommandReactive.[convention #0.1]           #0.1
+            cmdreaction.CommandReactive.[convention #1.1]           #0.2
+            cmdreaction.CommandReactive.[convention #3.1]           #0.3
         }
     """
 
     username = kp.StringProperty(None)
     """Kivy string property to store username.
 
-    [convention #4]: {
+    [convention #1]: {
             [convention #1.1]
-        &&  (self.username = "") iff [no user is logged in]         #4.1
+        &&  (self.username = "") iff [no user is logged in]         #1.1
     }
 
     [callback]: on_username
     """
 
-    ###
     commandText = None
+    """Dummy reference to eliminate syntax error. This instance variable should
+    be initialized by subclasses before calling any other functions in Mutative.
+    """
+
     config = None
+    """Dummy reference to eliminate syntax error. This instance variable should
+    be initialized by subclasses before calling any other functions in Mutative.
+    """
 
     def __init__(self):
-        """
+        """Constructor of Mutative. This method should not be called except by
+        its subclasses' constructors.
         """
         pass
 
@@ -70,7 +87,10 @@ class Mutative(object):
                     self.commandText is not None
         [ensures]:  [self.header displays as the last part in self.commandText]
                     self.protected_text = self.header
-        [calls]:    [reset self.commandText.protected_len]
+                    [convention #3.1]
+                    self.commandText.last_row = len(self.commandText._lines) - 1
+                    [convention #0.1]
+        [calls]:    self.commandText.on_cursor
         """
         if not asserts(self.header is not None,
                        "self.header must be initialized before calling print_header."):
@@ -110,7 +130,7 @@ class Mutative(object):
         """Private function fired when cmd_identifier is changed through
         self.config.
 
-        [ensures]:  reset self.header to preserve [convention #1.1]
+        [ensures]:  reset self.header to preserve [convention #0.2]
         [calls]:    _reset_header
         """
         self._reset_header(self.username, value)
@@ -125,15 +145,50 @@ class Mutative(object):
         """Privated function fired when font_size is changed through
         self.config.
 
+        [requires]: value.isdigit()
         [ensures]:  self.commandText.font_size = int(value)
         """
+        if not asserts(value.isdigit(), "Font_size has to be an integer"):
+            return
+
         self.commandText.font_size = int(value)
+
+    def _on_protocol(self, value: str) -> None:
+        """Private function fired when protocol is changed through self.config.
+
+        [ensures]:  glob_dic.dic["protocol"] = value + "://"
+        [calls]:    utils.reset_address_book
+        """
+        glob_dic.set_value("protocol", value + "://")
+        if glob_dic.get_value("domain") and value:
+            reset_address_book()
+
+    def _on_timeout(self, value: str) -> None:
+        """Private function fired when timeout is changed through self.config.
+
+        [requires]: value.isdigit()
+        [ensures]:  glob_dic.dic["timeout"] = int(value)
+        """
+        if not asserts(value.isdigit(), "Timeout has to be an integer"):
+            return
+
+        glob_dic.set_value("timeout", int(value))
+
+    def _on_url(self, value: str) -> None:
+        """Private function fired when url is changed through self.config.
+
+        [ensures]:  glob_dic.dic["url"] = value
+        [calls]:    utils.reset_address_book
+        """
+        glob_dic.set_value("domain", value)
+        if glob_dic.get_value("protocol") and value:
+            reset_address_book()
 
     def _reset_header(self, username: str, identifier: str) -> None:
         """Private funciton to reset self.header based on username and
-        identifier to preserve [convention #1.1]
+        identifier to preserve [convention #0.2]
 
-        [ensures]:  [convention #1.1]
+        [ensures]:  [convention #0.2]
         """
         self.header = username + identifier
 
@@ -143,9 +198,9 @@ class Mutative(object):
         config files.
 
         [requires]: self.config is not None
-                    [convention #4.1] (unchecked)
+                    [convention #1.1] (unchecked)
         [ensure]:   self.config.get("Text", "username") = value
-                    [convention #1.1]
+                    [convention #0.2]
         [calls]:    _reset_header
         """
         if not asserts(self.config is not None,

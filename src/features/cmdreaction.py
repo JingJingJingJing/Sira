@@ -7,7 +7,13 @@ from utils import asserts, func_log
 
 class CommandReactive(object):
 
-    """TODO
+    """Abstract class implemeted command reactive functions. This class must be
+    extended by a subclass extending kivy.app.App; in other words, its subclass
+    must initialize self.commandText as an instance of
+    advancedtextinput.AdvancedTextInput and self.controller as an instance of
+    controller.SiraController before calling any other functions in this
+    abstract class. This class can work as an independent and subscrible
+    behavioral class.
 
     Instance Variables:
         Class-scope Variables:
@@ -19,7 +25,7 @@ class CommandReactive(object):
             (initialized by subclasses)
             commandText -- advancedtextinput.AdvancedTextInput (default None)
             controller -- controller.SiraController
-    
+
     Public Methods:
         Overrided from object:
             __init__(self) -> None
@@ -41,10 +47,12 @@ class CommandReactive(object):
 
     Property Driven Methods:
         on_info(self, advancedtextinput.AdvancedTextInput, list) -> None
-    
+
     Conventions:
         {
-            TODO
+            self.commandText.last_row_start = 
+                [text index of self.commandText last row start]
+                + self.commandText.protected_len                    #0.1
         }
     """
 
@@ -66,7 +74,6 @@ class CommandReactive(object):
 
     [convention #2]: {
             (for line in self.info: isinstance(line, str))          #2.1
-        &&  (self.info = []) after self.on_info                     #2.2
     }
 
     [callback]: on_info
@@ -77,18 +84,27 @@ class CommandReactive(object):
     command line.
 
     [convention #3]: {
-        (self.protected_text = self.commandText._lines[instance.last_row])         #3.1
+        (self.commandText.protected_len = len(self.protected_text)) #3.1
     }
 
     [callback]: self.commandText.protected_len (from res/sira.kv)
     """
 
-    ###
     commandText = None
+    """Dummy reference to eliminate syntax error. This instance variable should
+    be initialized by subclasses before calling any other functions in
+    CommandReactive.
+    """
+
     controller = None
+    """Dummy reference to eliminate syntax error. This instance variable should
+    be initialized by subclasses before calling any other functions in
+    CommandReactive.
+    """
 
     def __init__(self):
-        """TODO
+        """Constructor of CommandReactive. This method should not be called
+        except by its subclasses' constructors.
         """
         pass
 
@@ -126,6 +142,7 @@ class CommandReactive(object):
                         instance.history_stack.traversal_dummy
         [calls]:    instance.history_stack.reset_traversal
                     self.controller.processInput
+                    instance.on_cursor
         """
         string = instance._lines[instance.last_row][instance.protected_len:]
         if instance.password_mode:
@@ -162,10 +179,15 @@ class CommandReactive(object):
         this.commandText.
 
         [requires]: [convention #2.1]
-        [ensures]:  [convention #2.2]
-                    (self.commandText.text = $self.commandText.text + '\n' 
-                                             + \n'.join(info))
+        [ensures]:  self.info = []
+                    self.commandText.text = $self.commandText.text + '\n' 
+                                            + \n'.join(info)
+                    self.commandText.protected_text = info[-1]
+                    [convention #3.1]
+                    self.commandText.last_row = len(self.commandText._lines) - 1
+                    [convention #0.1]
         [calls]:    on_info (recursively once)
+                    self.commandText.on_cursor
         """
         if self.info == []:
             return

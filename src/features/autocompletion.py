@@ -25,16 +25,16 @@ class Completable(object):
             start_indices -- kivy.properties.ListProperty (default [])
             tab_index -- kp.NumericProperty (default -1)
 
-        Method-established Variables:
+        Function-established Variables:
             (initialized by subclasses)
             commandText -- advancedtextinput.AdvancedTextInput (default None)
             controller -- controller.SiraController
 
-    Public Methods:
+    Public Functions:
         Overrided from object:
             __init__(self) -> None
 
-    Private Methods:
+    Private Functions:
         _clear_options(self, advancedtextinput.AdvancedTextInput) -> None
         _display_options(self,
                             advancedtextinput.AdvancedTextInput,
@@ -48,30 +48,30 @@ class Completable(object):
         _on_tab(self, advancedtextinput.AdvancedTextInput) -> None
         _select_next_option(self, str) -> None
         _stop_completion(self, advancedtextinput.AdvancedTextInput) -> None
-    
+
     Events:
         `on_option`
             Fired when option is changed. This will print everything, one
             element per line, in the {@code info} to the command window without
             moving the cursor.
-    
-    Property Driven Methods:
+
+    Property Driven Functions:
         on_option(self, advancedtextinput.AdvancedTextInput, list) -> None
 
     Conventions:
         {
             [(self.commandText.last_row = $self.commandText.last_row)
-                after all method calls in this feature]             #0.1
+                after all function calls in this feature]           #0.1
             [(self.commandText.last_row_start
                 = $self.commandText.last_row_start)
-                after all method calls this feature]                #0.2
+                after all function calls this feature]              #0.2
         }
     """
 
     completion_start = kp.NumericProperty(0)
     """Kivy numeric property to store the start index of the completion part.
     """
-    
+
     from_space = kp.BooleanProperty(True)
     """Kivy boolean property to distinguish space and tab.
 
@@ -102,7 +102,7 @@ class Completable(object):
     page_index = kp.NumericProperty(0)
     """Kivy numeric property to store the page number in all options.
     """
-    
+
     start_indices = kp.ListProperty([])
     """Kivy numeric property to store all text indicies of displayed options.
 
@@ -129,13 +129,13 @@ class Completable(object):
     """
 
     def __init__(self):
-        """Constructor of Completable. This method should not be called except
+        """Constructor of Completable. This function should not be called except
         by its subclasses' constructors.
         """
         pass
 
     def _clear_options(self, instance: AdvancedTextInput) -> None:
-        """Private method to clear all displayed options in self.commandText.
+        """Private function to clear all displayed options in self.commandText.
 
         [requires]: instance.completion_mode
         [ensures]:  len(self.commandText._lines) = self.commandText.last_row
@@ -143,7 +143,7 @@ class Completable(object):
         """
         if not asserts(instance.completion_mode, "Not in completion mode"):
             return
-        
+
         instance.cancel_selection()
         start = instance.text.rindex('\n')
         end = len(instance.text)
@@ -152,20 +152,20 @@ class Completable(object):
 
     @func_log
     def _display_options(self,
-                            instance: AdvancedTextInput,
-                            behavior: str,
-                            option: list) -> bool:
-        """Private method to display options under self.commandText.last_row.
+                         instance: AdvancedTextInput,
+                         behavior: str,
+                         option: list) -> bool:
+        """Private function to display options under self.commandText.last_row.
         This function is fired when self.commandText.on_next_options or
-        self.commandText.on_prev_options is called. Essentially, this method
+        self.commandText.on_prev_options is called. Essentially, this function
         will display options based on behavior and calculate start indices of
         displayed options. According to behavior, there are three scenarios:
-            [Scenario 1]: When behavior == "init", the method will display the
+            [Scenario 1]: When behavior == "init", the function will display the
                 first n (n = max(self.options_per_line, [the number of remaining
                 options])) options;
-            [Scenario 2]: When behavior == "next", the method will display the
+            [Scenario 2]: When behavior == "next", the function will display the
                 next n options;
-            [Scenario 3]: When behavior == "prev", the method will display the
+            [Scenario 3]: When behavior == "prev", the function will display the
                 previous n options.
 
         [requires]: instance.completion_mode
@@ -185,15 +185,16 @@ class Completable(object):
             self._clear_options(instance)
             self.tab_index = -1
             next_index = self.page_index + self.options_per_line\
-                         if behavior == "next"\
-                         else self.page_index - self.options_per_line
+                if behavior == "next"\
+                else self.page_index - self.options_per_line
             self.page_index = max(0, next_index)\
-                              if next_index < len(option)\
-                              else self.page_index
+                if next_index < len(option)\
+                else self.page_index
         end_index = self.page_index + self.options_per_line\
-                    if self.page_index + self.options_per_line <= len(option)\
-                    else len(option)
-        instance.insert_text("\n" + " ".join(option[self.page_index:end_index]))
+            if self.page_index + self.options_per_line <= len(option)\
+            else len(option)
+        instance.insert_text(
+            "\n" + " ".join(option[self.page_index:end_index]))
         instance.cursor = cursor
         # calc start indices of displayed options
         index = 0
@@ -204,7 +205,7 @@ class Completable(object):
         return True
 
     def _on_reduce_option(self, instance: AdvancedTextInput) -> bool:
-        """Private method to reduce options based on user input. This function
+        """Private function to reduce options based on user input. This function
         is fired when self.commandText.on_reduce_option is called.
 
         [requires]: instance.completion_mode
@@ -216,19 +217,19 @@ class Completable(object):
         """
         if not asserts(instance.completion_mode, "Not in completion mode"):
             return True
-        
+
         copy = list()
         instance.do_cursor_movement("cursor_end", control=False)
         end = instance.cursor_index(instance.cursor)
         word_truc = instance.text[self.completion_start:end]
-        copy = [opt for opt in self.option\
-                    if opt.lower().startswith(word_truc.lower())]
+        copy = [opt for opt in self.option
+                if opt.lower().startswith(word_truc.lower())]
         self._stop_completion(instance)
         self.option = copy
 
     def _on_space(self, instance: AdvancedTextInput) -> bool:
-        """Private method to start completion mode by entering from space. This
-        function is fired when self.commandText._on_space is called.
+        """Private function to start completion mode by entering from space.
+        This function is fired when self.commandText._on_space is called.
 
         [ensures]:  (when this is the first space after a user-input word)
                     self.from_space
@@ -250,7 +251,7 @@ class Completable(object):
     def _on_switch_option(self,
                           instance: AdvancedTextInput,
                           direction: str) -> bool:
-        """Private method to select next option. This function is fired when
+        """Private function to select next option. This function is fired when
         self.commandText.on_left_option or self.commandText.on_right_option is
         called.
 
@@ -259,7 +260,7 @@ class Completable(object):
         """
         if not asserts(instance.completion_mode, "Not in completion mode"):
             return True
-        
+
         self._select_next_option(direction)
 
     @func_log
@@ -290,35 +291,54 @@ class Completable(object):
         return True
 
     def _select_next_option(self, direction: str) -> None:
-        """TODO
+        """Private function to replace auto-completion text and selection next
+        avaliable option. According to direction, there are three scenarios:
+            [Scenario 1]: When direction == "tab", the function will erase any
+            text from self.completion_start to the end of
+            self.commandText.last_row, and replace it with next option
+            avaliable. If the current option is the last displayed options, the
+            first option will be print and selected.
+            [Scenario 2]: When direction == "left", the function will act like
+            Scenario 1 except printing and selecting the previous avaliable
+            option. If there does not exist any previous options, this function
+            will do nothing.
+            [Scenario 3]: When direction == "right". the function will act
+            exactly like Scenario 1, except do nothing when there does not exist
+            any options avaliable.
+
+        [requires]: self.commandText.completion_mode
+        [ensures]:  [function_doc]
+                    self.tab_index in range(self.options_per_line)
         """
         instance = self.commandText
-        # update self.tab_index according to direction
+        tab_index = self.tab_index
+        # update tab_index according to direction
         if direction == "tab":
-            self.tab_index = self.tab_index + 1\
-                             if self.tab_index < len(self.start_indices) - 1\
-                             else 0
+            tab_index = tab_index + 1\
+                if tab_index < len(self.start_indices) - 1\
+                else 0
         elif direction == "left":
-            self.tab_index = self.tab_index - 1\
-                             if self.tab_index > 0\
-                             else 0
+            tab_index = max(tab_index - 1, 0)
         elif direction == "right":
-            self.tab_index = self.tab_index + 1\
-                             if self.tab_index < len(self.start_indices) - 1\
-                             else len(self.start_indices) - 1
-        # delete and insert next option
-        instance.cancel_selection()
-        start = self.completion_start
-        end = instance.last_row_start + len(instance._lines[instance.last_row])
-        instance.select_text(start, end)
-        instance.delete_selection()
-        instance.do_cursor_movement("cursor_end", control=True)
-        instance.insert_text(self.option[self.page_index + self.tab_index])
-        # select next option
-        last_char_return = instance.text.rindex("\n")
-        start = last_char_return + self.start_indices[self.tab_index] + 1
-        end = start + len(self.option[self.page_index + self.tab_index])
-        instance.select_text(start, end)
+            tab_index = min(tab_index + 1, len(self.start_indices) - 1)
+        # do nothing if tab_index does not changed
+        if tab_index != self.tab_index:
+            # delete and insert next option
+            instance.cancel_selection()
+            start = self.completion_start
+            end = instance.last_row_start + \
+                len(instance._lines[instance.last_row])
+            instance.select_text(start, end)
+            instance.delete_selection()
+            instance.do_cursor_movement("cursor_end", control=True)
+            instance.insert_text(self.option[self.page_index + tab_index])
+            # select next option
+            last_char_return = instance.text.rindex("\n")
+            start = last_char_return + self.start_indices[tab_index] + 1
+            end = start + len(self.option[self.page_index + tab_index])
+            instance.select_text(start, end)
+            # update self.tab_index
+            self.tab_index = tab_index
 
     def _stop_completion(self, instance: AdvancedTextInput) -> None:
         """Private function to stop completion mode.
@@ -357,7 +377,7 @@ class Completable(object):
         # calc the start index of the completion part
         search_start = obj.last_row_start + obj.protected_len
         search_end = obj.last_row_start\
-                     + len(obj._lines[obj.last_row])
+            + len(obj._lines[obj.last_row])
         try:
             self.completion_start = obj.text.rindex(" ",
                                                     search_start,

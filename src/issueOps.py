@@ -38,6 +38,7 @@ def issue_assign_sprint(issue, sprint):
     # sprint[1] = sprint[1].capitalize()
     # sprint = ' '.join(sprint)
     getSprint()
+    issue = issue.upper()
     for sp in glob_dic.tips.get_value('sprint'):
         if sprint.lower() == sp.lower():
             sprint = sp
@@ -71,7 +72,7 @@ def issue_create(lst):
         f, r = issue_assign_sprint(new_issue, lst[8])
         if not f:
             return False, ['Problem occured while assigning the issue to target sprint: Issue {} successfully created but not assigned to {}!'.format(
-                new_issue, lst[8]),r]
+                new_issue, lst[8])] + r
     msg = 'Issue {} successfully created!'.format(new_issue)
     mylog.debug(msg)
     return True, [msg]
@@ -133,7 +134,6 @@ lst = [status, issuetype, summary, reporter,
 def issue_display_info(issue):
     url, headers = prepare('query_number', '/{}'.format(issue.upper()))
     f, r = send_request(url, method.Get, headers, None, None)
-    # print(r)
     if not f:
         return False, [r]
     dic = r.get('fields')
@@ -158,22 +158,12 @@ def issue_display_info(issue):
 
 
 def issue_edit(lst):
-    print('Call Edit')
-    print(lst)
     issue = lst[0]
     lst = lst[1:]
-    print(lst)
     url, headers = prepare('issue', '/{}'.format(issue))
     status = lst[0]
     if not issue_transit([issue, status]):
-<<<<<<< HEAD
-        return False, 'Error occured during transit'
-    getSprint()
-    print(glob_dic.tips.get_value('sprint'))
-    print(glob_dic.tips.dic)
-=======
         return False, ['Error occured during transit']
->>>>>>> local
     issuetype = {"name": lst[1].capitalize()}
     summary = lst[2]
     reporter = {"name": lst[3]}
@@ -195,22 +185,13 @@ def issue_edit(lst):
         if lst[i]:
             dic[keys[i]] = fields[i]
     data = json.dumps({"fields": dic})
-    print('data = \r\n{}'.format(data))
     f, r = send_request(url, method.Put, headers, None, data)
     if lst[7]:
-        f, r = issue_assign_sprint(issue, lst[8])
+        f, r = issue_assign_sprint(issue, lst[7])
         if not f:
-            return False,['Problem occured while assigning the issue to target sprint: All other fields have been updated!',r]
-    print(issue_display_info(issue)[1])
+            return False,['Problem occured while assigning the issue to target sprint: All other fields have been updated!']+r
     return True, ['Edit Success']
 
-<<<<<<< HEAD
-issue_edit([
-    'TEST-77', 'done', 'epic', 'a new y', 'ysg', 'lowest', '',
-    'try  one', 'ysg', 'test sprnit 1'
-])
-=======
->>>>>>> local
 
 # issue_edit(['TEST-88', 'to do', 'bug', 'a new y', 'ysg', 'lowest', '','try  one', 'ysg', 'test sprint 1'])
 # print(issue_display_info('test-88')[1])
@@ -226,15 +207,8 @@ def issue_edit_labels(lst):
     data = json.dumps({"update": {"labels": target}})
     f, r = send_request(url, method.Put, headers, None, data)
     if not f:
-<<<<<<< HEAD
-        return False, 'Error occured while add labels\r\n{}'.format(r)
-    return True, 'label successfully {}ed'.format(mode)
-    
-
-=======
         return False, ['Error occured while add labels',r]
     return True, ['label successfully {}ed'.format(mode)]
->>>>>>> local
 
 
 # issue_edit_labels(['Test-77','remove', 'label1','label2','label3'])

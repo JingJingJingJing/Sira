@@ -54,11 +54,8 @@ class SiraController():
         """
 
         if self.updateMode and self.interactive:
-            print(string)
-            print('Entering update mode')
             self._update_special(string)
         else:
-            print('Not interactive checking if entering update')
             if not self.interactive:
                 ''' if it is not interactive mode '''
                 update = re.compile(r'\Asira update(\s(\w*-\d*\S*)*)*$')
@@ -72,7 +69,6 @@ class SiraController():
                         f, r = issueOps.issue_display_info(target)
 
                         if f:
-                            print('successfully entering update mode now in depth 2')
                             ''' displayed the issue info successfully '''
                             self.updateIssue = target
                             self.view.set_command_mode(False)
@@ -85,22 +81,18 @@ class SiraController():
 
 
                         else:
-                            print('update but issue provided not found')
                             ''' If the cmd is sira update but the given issue not found '''
                             self.view.info = r
                             return
 
                     else:
-                        print('successfully entering update mode now in depth 1')
                         ''' If issue is not provided '''
-                        print(string)
                         self.updateDepth = 1
                         self.view.set_command_mode(False)
                         self.view.info = ["Please Enter Issue's Key: "]
                         self.interactive = True
                         self.updateMode = True
                         return
-            print('do not enter update mode')
             self._cal(string)
 
         # try:
@@ -275,7 +267,6 @@ class SiraController():
             'status', 'issuetype', 'summary', 'reporter', 'priority', 'lable',
             'description', 'assignee', 'sprint'
         ]
-        print('This is in update special beginning')
         if self.updateDepth == 1:
             ''' user need to give an issue '''
             f, r = issueOps.issue_display_info(s)

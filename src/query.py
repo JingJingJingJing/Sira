@@ -246,10 +246,7 @@ if __name__ == '__main__':
     # query_project_type(['Sira', 'task'])
     # query_project_assignee(['TEST', 'Hang'])
     # query_project_sprint(['Sira', '2'])
-    # query_project_assignee(['sira', 'xp zheng'])
-
-    # query_project_assignee(['TEST', 'admin'])
-    # query_number(['TEST-88'])
+    # query_project_assignee(['sira', 'xp zheng']
     # query_sprint(['Sira Sprint 2'])
     # query_number(['test-88'])
     query_assignee(['ysg'])

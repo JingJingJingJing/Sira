@@ -113,7 +113,7 @@ class Super401(Exception):
 class glob():
     def __init__(self, dic):
         self.dic = dic
-        self.set_value('domain', '10.176.111.32:8080')
+        self.set_value('domain', '10.176.120.165:8080')
         self.set_value('jira', 'lnvusjira.lenovonet.lenovo.local')
         self.set_value('cookie_path', '')
         self.set_value('cookie', '')
@@ -192,7 +192,7 @@ address_book = {
     'getAssignee': protocol + domain + '/rest/api/2/user/search?username=.',
     'getPriority': protocol + domain + '/rest/api/2/priority',
     'query': protocol + domain + '/rest/api/2/search',
-    'query_number': protocol + domain + '/rest/api/2/issue',
+    'query_number': protocol + domain + '/rest/agile/1.0/issue',
     'issue': protocol + domain + '/rest/api/2/issue',
     'search': protocol + domain + '/rest/api/2/user',
     'getVersion': protocol + domain + '/rest/api/2/project',
@@ -242,7 +242,7 @@ headers_book = {
         'cookie': ''
     },
     'query_number': {
-        'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'cookie': ''
     },
     'issue': {

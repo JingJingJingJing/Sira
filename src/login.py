@@ -5,6 +5,7 @@ import requests
 
 from query import method, send_request
 from utils import (Super401, glob_dic, mylog, prepare)
+
 ''' lst = ['username','password'] '''
 
 
@@ -38,26 +39,27 @@ def login(lst):
                 pass
             return (
                 False,
-                'Login failed! Please make sure that your username and password are correct!'
+                ['Login failed! Please make sure that your username and password are correct!']
             )
         j = r.json()
+        print(j)
         try:
             glob_dic.set_value(
                 'cookie', j['session']['name'] + '=' + j['session']['value'])
         except KeyError:
             mylog.error('No session information from HTTP response\r\n' +
                         r.text)
-            return (False, 'session info not found!')
+            return (False, ['session info not found!'])
         f = open(glob_dic.get_value('cookie_path') + "cookie.txt", "w")
         f.write(glob_dic.get_value('cookie'))
         f.close()
         mylog.info("Successfully logged in as " + un)
         thr = Thread(target=download, args=())
         thr.start()
-        return (True, "Success")
+        return (True, ["Success"])
     except requests.exceptions.RequestException as err:
         mylog.error(err)
-        return (False, 'Login failed due to an internet error!')
+        return (False, ['Login failed due to an internet error!'])
 
 
 def logout():
@@ -66,16 +68,19 @@ def logout():
     try:
         r.raise_for_status()
     except requests.exceptions.HTTPError:
-        return (False, 'No account logged in yet')
+        return (False, ['No account logged in yet'])
     f = open(glob_dic.get_value('cookie_path') + "cookie.txt", "w")
     f.write('')
     f.close
     glob_dic.set_value('cookie', '')
     mylog.info('Successfully logged out')
-    return (True, 'Successfully logged out')
+    return (True, ['Successfully logged out'])
 
 
 def goInto(lst, key, field):
+    if not lst:
+        glob_dic.tips.set_value(key, [lst])
+        return True
     target = []
     for element in lst:
         tmp = element.get(field, '')
@@ -119,7 +124,7 @@ def getSprint():
     # print(lst)
     glob_dic.tips.set_value('sid', [{}])
     for msg in lst:
-        glob_dic.tips.get_value('sid')[0][msg['name'].lower()] = msg['id']
+        glob_dic.tips.get_value('sid')[0][msg.get('name').lower()] = msg.get('id')
     return True
 
 
@@ -181,7 +186,8 @@ def download():
     getPriority()
     getVersion()
     glob_dic.tips.write_file('tables.json')
-    # pass
+    pass
+
 
 
 def tryload():
@@ -200,16 +206,27 @@ def getIssueFromSprint():
     getSprint()
     glob_dic.set_value('issues',{})
     lst = glob_dic.tips.get_value('sprint')
+    issues = []
     for sp in lst:
-        sid = glob_dic.get_value('sid').get(sp)
+        sid = glob_dic.tips.get_value('sid')[0].get(sp.lower())
         url, headers = prepare('getSprint','/{}/issue'.format(sid))
+
         f, r = send_request(url, method.Get, headers, None, None)
         if not f:
             return False
+        issues += r.get('issues')
+        
         for issue in r.get('issues'):
             glob_dic.get_value('issues')[issue.get('key')] = sp
-    return True
 
+
+    f = open('issues.json','w')
+    f.write(json.dumps(issues))
+    f.close
+
+    return True
+# login(['admin','Ysg961130'])
+# getIssueFromSprint()
 # try:
 #     tryload()
 # except FileNotFoundError as fe:

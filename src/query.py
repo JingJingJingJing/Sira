@@ -94,41 +94,79 @@ def query(field1, field2, f):
     data = {}
     data["jql"] = '{} {}'.format(field1, field2)
     data["startAt"] = 0
-    data["maxResults"] = 10000
-    data["fields"] = [
-        "summary", "issuetype", "project", "fixVersions", "assignee", "status"
-    ]
+    data["maxResults"] = 100
+    # data["fields"] = [
+    #     "summary", "issuetype", "project", "fixVersions", "assignee", "status"
+    # ]
     data = json.dumps(data)
-    flag, r = send_request(url, method.Post, headers, None, data)
-    if not flag:
+    f, r = send_request(url, method.Post, headers, None, data)
+    if not f:
         return False, r
-    string = getString(r)
-    mylog.info(string)
-    return True, string
+    return True, getResponse(r.get('issues'))
 
 
 """ This function will return all information of issue represented by pid """
 ''' lst = ['issue name or id'] '''
 ''' add issue id after get address from address book'''
 
+def getTarget(fields, field):
+    ret = ''
+    try:
+        ret = fields.get(field)['name']
+    except KeyError:
+        try:
+            ret = fields.get(field)['key']
+        except KeyError:
+            ret = fields.get(field)
+    except TypeError:
+        ret = str(fields.get(field))
+    if ret != '':
+        return ret
+    else:
+        return 'Not available'
+    
+
+
+
+
+def getResponse(lst):
+    defaultList = [
+        'issuetype', 'assignee', 'status', 'sprint', 'fixVersions', 'summary'
+    ]
+    defaultHeader = [
+        'IssueID', 'Type', 'Assignee', 'Status', 'Sprint', 'FixVer.', 'Summary'
+    ]
+    stringLst = []
+    s = ''
+    for i in defaultHeader:
+        s += '{}'.format(i).ljust(18, ' ')
+    stringLst.append(s)
+    for i, issue in enumerate(lst):
+        s = '{}'.format(issue.get('key')).ljust(14, ' ')+ ' |  '
+        fields = issue.get('fields')
+        for j, field in enumerate(defaultList):
+            s += getTarget(fields,field).ljust(14, ' ')
+            if j != len(defaultList) - 1:
+                s +=  ' |  '
+        stringLst.append(s)
+    return stringLst
+
+                
+        
+    
+
 
 def query_number(lst):
-    issue = lst[0]
+    issue = lst[0].upper()
     url, headers = prepare('query_number', '/{}'.format(issue))
     f, r = send_request(url, method.Get, headers, None, None)
     if not f:
-        return r
-    try:
-        mylog.error(r['warningMessages'])
-        return False, r['warningMessages']
-    except KeyError:
-        try:
-            string = dtos(getField(r, None), r['key'])
-            mylog.info(string)
-            return True, string
-        except KeyError as err:
-            mylog.error(err)
-            return False, 'given field "{}" not found'.format(err)
+        return False, r
+    return True, getResponse([r])
+
+    # print(string)
+    # return True
+
 
 
 def addQuotation(s):
@@ -210,10 +248,11 @@ if __name__ == '__main__':
     # query_project_sprint(['Sira', '2'])
     # query_project_assignee(['sira', 'xp zheng'])
 
-    # query_project_assignee(['TEST', 'Hang'])
-    # query_number(['TEST-17'])
+    # query_project_assignee(['TEST', 'admin'])
+    # query_number(['TEST-88'])
     # query_sprint(['Sira Sprint 2'])
-    # query_assignee(['ysg'])
+    # query_number(['test-88'])
+    query_assignee(['ysg'])
     # query_status(['In progress'])
     # query_project_status(['sira','to do'])
     pass

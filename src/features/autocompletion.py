@@ -311,6 +311,9 @@ class Completable(object):
                     self.tab_index in range(self.options_per_line)
         """
         instance = self.commandText
+        if not asserts(instance.completion_mode, "Not in completion mode"):
+            return
+
         tab_index = self.tab_index
         # update tab_index according to direction
         if direction == "tab":

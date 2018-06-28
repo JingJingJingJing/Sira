@@ -37,7 +37,7 @@ def issue_assign_sprint(issue, sprint):
     # sprint[0] = sprint[0].upper()
     # sprint[1] = sprint[1].capitalize()
     # sprint = ' '.join(sprint)
-    getSprint()
+    # getSprint()
     issue = issue.upper()
     for sp in glob_dic.tips.get_value('sprint'):
         if sprint.lower() == sp.lower():

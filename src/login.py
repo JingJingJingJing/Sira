@@ -42,7 +42,6 @@ def login(lst):
                 ['Login failed! Please make sure that your username and password are correct!']
             )
         j = r.json()
-        print(j)
         try:
             glob_dic.set_value(
                 'cookie', j['session']['name'] + '=' + j['session']['value'])
@@ -180,7 +179,8 @@ def getVersion():
 def download():
     print('Downloading Project...')
     getProject()
-    # getSprint()
+    print('Downloading Sprint...')
+    getSprint()
     print('Downloading Type...')
     getType()
     print('Downloading Issuetype...')

@@ -5,6 +5,7 @@ import login
 import query
 import issueOps
 from prompter import Prompter
+import re
 from utils import Super401, mylog, glob_dic
 
 
@@ -38,6 +39,12 @@ class SiraController():
         self.position = self.tree   # the current position of tree
         self.prompter = Prompter()
         self.tp = {}
+        self.updateMode = False
+        self.updateDepth = 0
+        self.updateIndex = 0
+        self.updateField = ['','','','','','','','','']
+        self.updateIndexes = []
+        self.updateIssue = ''
 
     def processInput(self, string):
         """According to the xml DOM structure, parser the input from UI, exec function and display the result
@@ -45,7 +52,49 @@ class SiraController():
         *string* is the command from UI
 
         """
-        self._cal(string)
+
+        if self.updateMode and self.interactive:
+            self._update_special(string)
+        else:
+            if not self.interactive:
+                ''' if it is not interactive mode '''
+                update = re.compile(r'\Asira update(\s(\w*-\d*\S*)*)*$')
+
+                if update.search(string) is not None:
+                    ''' if it is sira update commond '''
+                    issue = re.compile(r'\w*-\d*\S*')
+                    if issue.search(string) is not None:
+                        ''' if issue is provided '''
+                        target = string.split(' ')[2]
+                        f, r = issueOps.issue_display_info(target)
+
+                        if f:
+                            ''' displayed the issue info successfully '''
+                            self.updateIssue = target
+                            self.view.set_command_mode(False)
+                            self.view.info = r
+                            self.updateDepth = 2
+                            self.interactive = True
+                            self.updateMode = True
+                            
+                            return 
+
+
+                        else:
+                            ''' If the cmd is sira update but the given issue not found '''
+                            self.view.info = r
+                            return
+
+                    else:
+                        ''' If issue is not provided '''
+                        self.updateDepth = 1
+                        self.view.set_command_mode(False)
+                        self.view.info = ["Please Enter Issue's Key: "]
+                        self.interactive = True
+                        self.updateMode = True
+                        return
+            self._cal(string)
+
         # try:
         #     self._cal(string)
         # except Exception as err:
@@ -192,7 +241,7 @@ class SiraController():
         self.view.commandText.readonly = False
         self.view.set_command_mode(True)
         if msg:
-            self.view.info = [msg]
+            self.view.info = msg
         self.view.print_header()
 
     def _clearcache(self):
@@ -211,4 +260,80 @@ class SiraController():
         #     self.args.append(s)
     def auto_complete(self, command):
         self.view.option = self.prompter.auto_complete(self.position,self.interactive,command)
-# 
+
+
+    def _update_special(self, s):
+        lst = [
+            'status', 'issuetype', 'summary', 'reporter', 'priority', 'lable',
+            'description', 'assignee', 'sprint'
+        ]
+        if self.updateDepth == 1:
+            ''' user need to give an issue '''
+            f, r = issueOps.issue_display_info(s)
+            if f:
+
+                self.updateIssue = s
+            else:
+                
+                self._quit_updateMode()
+            self.view.info = r
+
+        elif self.updateDepth == 2:
+            ''' user need to choose from 8 fields and enter numbers '''
+            valid = re.compile(r'\A[1-9](,[1-9])*$')
+            if not valid.search(s):
+                self.view.info = ['Please enter numbers separated by ",": ']
+                return
+            def decrease(e):
+                return int(e)-1
+            try:
+                self.updateIndexes = list(map(decrease,s.split(',')))
+                if not len(self.updateIndexes):
+                    return
+                self.updateIndexes.sort(reverse=True)
+                index = self.updateIndexes.pop()
+                self.updateIndex = index
+                self.view.info =['{}: '.format(lst[index])]
+                
+            except ValueError:
+                self.view.info = ['Input not valid, please enter numbers between 1 to 8 and separate them by " "']
+                return
+
+        elif (self.updateDepth > 2) and (len(self.updateIndexes) > 0):
+            ''' user start to update one by one '''
+            if not s:
+                return
+            self.updateField[self.updateIndex] = s
+            
+            index = self.updateIndexes.pop()
+            def delete_element(e):
+                if e != index:
+                    return True
+            output = lst[index]
+            self.updateIndexes = list(filter(delete_element, self.updateIndexes))
+            self.updateIndexes.sort(reverse=True)
+            self.updateIndex = index
+            
+            self.view.info = ['{}: '.format(output)]
+
+
+
+        else:
+            ''' the last updated field '''
+            self.updateField[self.updateIndex] = s
+            f, r = issueOps.issue_edit([self.updateIssue]+self.updateField)
+            self.view.info = r
+            self._quit_updateMode()
+            return
+
+        self.updateDepth += 1
+
+    def _quit_updateMode(self):
+        self.updateMode = False
+        self.updateDepth = 0
+        self.updateIndex = 0
+        self.updateField = ['','','','','','','','']
+        self.updateIndexes = []
+        self.updateIssue = ''
+        self.closeinteractive()
+        self.view.commandText.readonly = False

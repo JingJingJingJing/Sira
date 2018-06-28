@@ -109,9 +109,9 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
             "username": ""
         }
         jira = {
-            "url": "10.176.111.32:8080",
+            "url": "10.176.120.165:8080",
             "timeout": "5",
-            "protocol": "https"
+            "protocol": "http"
         }
         config.setdefaults("Text", text)
         config.setdefaults("Jira", jira)

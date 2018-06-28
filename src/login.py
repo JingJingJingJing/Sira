@@ -5,6 +5,7 @@ import requests
 
 from query import method, send_request
 from utils import (Super401, glob_dic, mylog, prepare)
+
 ''' lst = ['username','password'] '''
 
 
@@ -38,7 +39,7 @@ def login(lst):
                 pass
             return (
                 False,
-                'Login failed! Please make sure that your username and password are correct!'
+                ['Login failed! Please make sure that your username and password are correct!']
             )
         j = r.json()
         try:
@@ -47,17 +48,17 @@ def login(lst):
         except KeyError:
             mylog.error('No session information from HTTP response\r\n' +
                         r.text)
-            return (False, 'session info not found!')
+            return (False, ['session info not found!'])
         f = open(glob_dic.get_value('cookie_path') + "cookie.txt", "w")
         f.write(glob_dic.get_value('cookie'))
         f.close()
         mylog.info("Successfully logged in as " + un)
         thr = Thread(target=download, args=())
         thr.start()
-        return (True, "Success")
+        return (True, ["Success"])
     except requests.exceptions.RequestException as err:
         mylog.error(err)
-        return (False, 'Login failed due to an internet error!')
+        return (False, ['Login failed due to an internet error!'])
 
 
 def logout():
@@ -66,16 +67,19 @@ def logout():
     try:
         r.raise_for_status()
     except requests.exceptions.HTTPError:
-        return (False, 'No account logged in yet')
+        return (False, ['No account logged in yet'])
     f = open(glob_dic.get_value('cookie_path') + "cookie.txt", "w")
     f.write('')
     f.close
     glob_dic.set_value('cookie', '')
     mylog.info('Successfully logged out')
-    return (True, 'Successfully logged out')
+    return (True, ['Successfully logged out'])
 
 
 def goInto(lst, key, field):
+    if not lst:
+        glob_dic.tips.set_value(key, [lst])
+        return True
     target = []
     for element in lst:
         tmp = element.get(field, '')
@@ -119,7 +123,7 @@ def getSprint():
     # print(lst)
     glob_dic.tips.set_value('sid', [{}])
     for msg in lst:
-        glob_dic.tips.get_value('sid')[0][msg['name'].lower()] = msg['id']
+        glob_dic.tips.get_value('sid')[0][msg.get('name').lower()] = msg.get('id')
     return True
 
 
@@ -161,7 +165,8 @@ def getPriority():
 def getVersion():
     getProject()
     lst = []
-    for p in glob_dic.tips.get_value('project'):
+    for i, p in enumerate(glob_dic.tips.get_value('project')):
+        print('Iteration %d' % i)
         url, headers = prepare('getVersion')
         url += '/{}/versions'.format(p)
         f, r = send_request(url, method.Get, headers, None, None)
@@ -172,14 +177,21 @@ def getVersion():
 
 
 def download():
+    print('Downloading Project...')
     getProject()
+    print('Downloading Sprint...')
     getSprint()
+    print('Downloading Type...')
     getType()
+    print('Downloading Issuetype...')
     getIssuetype()
+    print('Downloading Status...')
     getStatus()
+    print('Downloading Assignee...')
     getAssignee()
+    print('Downloading Priority...')
     getPriority()
-    getVersion()
+    # getVersion()
     glob_dic.tips.write_file('res/tables.json')
     # pass
 
@@ -200,15 +212,60 @@ def getIssueFromSprint():
     getSprint()
     glob_dic.set_value('issues',{})
     lst = glob_dic.tips.get_value('sprint')
+    issues = []
     for sp in lst:
-        sid = glob_dic.get_value('sid').get(sp)
+        sid = glob_dic.tips.get_value('sid')[0].get(sp.lower())
         url, headers = prepare('getSprint','/{}/issue'.format(sid))
+
         f, r = send_request(url, method.Get, headers, None, None)
         if not f:
             return False
+        issues += r.get('issues')
+        
         for issue in r.get('issues'):
             glob_dic.get_value('issues')[issue.get('key')] = sp
-    return True
+
+
+
+
+def getPermission():
+    url, headers = prepare('mypermission')
+
+    print(url)
+    print(headers)
+
+    f, r = send_request(url, method.Get, headers, None, None)
+
+def getProjectKey():
+    url, headers = prepare('createmeta')
+    f, r = send_request(url, method.Get, headers, None, None)
+    if not f:
+        return False, r
+    for p in r.get('projects'):
+        print(p.get('key'))
+
+
+def getAss():
+    url, headers = prepare('query')
+    data = {}
+    data["jql"] = '{}'.format('project=TAN')
+    data["startAt"] = 0
+    data["maxResults"] = 100
+    dic = {}
+    while data.get("startAt") < 1000:
+        print('DOING {}'.format(data.get("startAt")))
+        tosend = json.dumps(data)
+        f, r = send_request(url, method.Post, headers, None, tosend)
+        print(type(r))
+        dic.update(r)
+        data["startAt"] = data.get("startAt") + 100
+    f = open('jqlexample.json','a')
+    f.write(json.dumps(r))
+    f.close
+    # print(url, headers, data)
+# getAss()
+# print(glob_dic.tips.get_value('assignee'))
+# getPermission()
 
 # try:
 #     tryload()
@@ -220,3 +277,7 @@ def getIssueFromSprint():
 # print(glob_dic.tips.get_value('assignee'))
 # getProject()
 # login(['admin', 'admin'])
+
+# login(['admin','admin'])
+# getProjectKey()
+# login(['zhengxp2', 'bvfp-6217'])

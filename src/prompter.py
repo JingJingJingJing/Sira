@@ -12,7 +12,7 @@ class Prompter:
     def auto_complete(self, position, interactive, command):
         result = []
         complete = False
-
+        print(command)
         l = len(command)
         if l > 0 and command[-1] != Prompter.blank:
             complete = True
@@ -44,10 +44,20 @@ class Prompter:
                     result.append(name)
                 elif not complete:
                     result.append(name)
+        elif complete and position.tag == "cmd":
+            option = position.getchildren()
+            for op in option:
+                name = op.attrib['name']
+                if name.startswith(command):
+                    result.append(name)
+
         else:
+            
             option = position.find("./required") if not complete else position
             if not option:
                 option = position.find("./optional")
+
+            
             if option and option.attrib['name'] in glob_dic.tips.dic:
                 result = glob_dic.tips.get_value(option.attrib['name'])
                 if complete:

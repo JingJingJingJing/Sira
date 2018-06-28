@@ -42,7 +42,7 @@ def send_request(url, method, headers, params, data):
                 verify=False)
         else:
             mylog.error('Wrong method that not suppord:' + str(method))
-            return (False, 'Unknown internal error occured')
+            return (False, ['Unknown internal error occured'])
         if r.status_code == 401:
             mylog.error("401 Unauthorized")
             raise Super401()
@@ -50,20 +50,18 @@ def send_request(url, method, headers, params, data):
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
             mylog.error(r.text)
-            s = 'Request denied!\r\nerror code: {} {}\r\n'.format(
-                str(r.status_code), str(_codes[r.status_code][0]))
+            sLst = ['Request denied!', 'error code: {} {}'.format(str(r.status_code), str(_codes[r.status_code][0]))]
             try:
                 lst = r.json().get('errorMessages', [])
                 for errors in lst:
-                    s += errors + '\r\n'
+                    sLst.append(errors)
                 dic = r.json().get('errors', {})
                 for key in dic:
-                    s += '{} '.format(dic[key]) + '\r\n'
+                    sLst.append('{} '.format(dic[key]))
             except json.JSONDecodeError:
                 pass
-            s += 'Please try again'
-            mylog.error(s)
-            return (False, s)
+            sLst.append('Please try again')
+            return (False, sLst)
         mylog.info(r)
         try:
             try:
@@ -72,7 +70,7 @@ def send_request(url, method, headers, params, data):
                 for errors in lst:
                     s += errors + '\r\n'
                 mylog.error(s)
-                return (False, s)
+                return (False, [s])
             except KeyError:
                 return (True, r.json())
             except TypeError:
@@ -82,9 +80,8 @@ def send_request(url, method, headers, params, data):
     except requests.exceptions.RequestException as err:
         mylog.error(err)
         return (False,
-                '''Internet error\r\nTry:\r\n\tChecking the network cables, 
-            modem, and route\r\n\tReconnecting to Wi-Fi\r\n\tRunning Network Diagnostics'''
-                )
+                ['Internet error','Try:','\tChecking the network cables, modem, and route','\tReconnecting to Wi-Fi','\tRunning Network Diagnostics']
+            )
 
 
 def query(field1, field2, f):
@@ -249,7 +246,7 @@ if __name__ == '__main__':
     # query_project_assignee(['sira', 'xp zheng']
     # query_sprint(['Sira Sprint 2'])
     # query_number(['test-88'])
-    query_assignee(['ysg'])
+    # query_assignee(['ysg'])
     # query_status(['In progress'])
     # query_project_status(['sira','to do'])
     pass

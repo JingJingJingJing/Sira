@@ -2,11 +2,11 @@ import re
 import threading
 import xml.etree.ElementTree as ET
 import login
-import query
+
 import issueOps
 from prompter import Prompter
 import re
-from utils import Super401, mylog, glob_dic
+from utils import Super401, func_log, glob_dic
 
 
 class SiraController():
@@ -45,7 +45,7 @@ class SiraController():
         self.updateField = ['','','','','','','','','']
         self.updateIndexes = []
         self.updateIssue = ''
-
+    @func_log
     def processInput(self, string):
         """According to the xml DOM structure, parser the input from UI, exec function and display the result
 
@@ -54,7 +54,8 @@ class SiraController():
         """
 
         if self.updateMode and self.interactive:
-            self._update_special(string)
+            self.view.commandText.readonly = True
+            threading.Thread(target=self._update_special, args=(None, string)).start()
         else:
             if not self.interactive:
                 ''' if it is not interactive mode '''
@@ -65,25 +66,10 @@ class SiraController():
                     issue = re.compile(r'\w*-\d*\S*')
                     if issue.search(string) is not None:
                         ''' if issue is provided '''
-                        target = string.split(' ')[2]
-                        f, r = issueOps.issue_display_info(target)
-
-                        if f:
-                            ''' displayed the issue info successfully '''
-                            self.updateIssue = target
-                            self.view.set_command_mode(False)
-                            self.view.info = r
-                            self.updateDepth = 2
-                            self.interactive = True
-                            self.updateMode = True
-                            
-                            return 
-
-
-                        else:
-                            ''' If the cmd is sira update but the given issue not found '''
-                            self.view.info = r
-                            return
+                        self.view.commandText.readonly = True
+                        thr = threading.Thread(target=self._display_wrapper, args=(None, string.split(' ')[2]))
+                        thr.start()
+                        return
 
                     else:
                         ''' If issue is not provided '''
@@ -241,6 +227,8 @@ class SiraController():
         self.view.commandText.readonly = False
         self.view.set_command_mode(True)
         if msg:
+            if isinstance(msg,str):
+                msg = [msg]
             self.view.info = msg
         self.view.print_header()
 
@@ -262,7 +250,7 @@ class SiraController():
         self.view.option = self.prompter.auto_complete(self.position,self.interactive,command)
 
 
-    def _update_special(self, s):
+    def _update_special(self, dum, s):
         lst = [
             'status', 'issuetype', 'summary', 'reporter', 'priority', 'lable',
             'description', 'assignee', 'sprint'
@@ -271,17 +259,18 @@ class SiraController():
             ''' user need to give an issue '''
             f, r = issueOps.issue_display_info(s)
             if f:
-
                 self.updateIssue = s
             else:
-                
-                self._quit_updateMode()
+                self._quit_updateMode(r)
+                return
+            self.view.commandText.readonly = False
             self.view.info = r
 
         elif self.updateDepth == 2:
             ''' user need to choose from 8 fields and enter numbers '''
             valid = re.compile(r'\A[1-9](,[1-9])*$')
             if not valid.search(s):
+                self.view.commandText.readonly = False
                 self.view.info = ['Please enter numbers separated by ",": ']
                 return
             def decrease(e):
@@ -289,19 +278,23 @@ class SiraController():
             try:
                 self.updateIndexes = list(map(decrease,s.split(',')))
                 if not len(self.updateIndexes):
+                    self.view.commandText.readonly = False
                     return
                 self.updateIndexes.sort(reverse=True)
                 index = self.updateIndexes.pop()
                 self.updateIndex = index
+                self.view.commandText.readonly = False
                 self.view.info =['{}: '.format(lst[index])]
                 
             except ValueError:
+                self.view.commandText.readonly = False
                 self.view.info = ['Input not valid, please enter numbers between 1 to 8 and separate them by " "']
                 return
 
         elif (self.updateDepth > 2) and (len(self.updateIndexes) > 0):
             ''' user start to update one by one '''
             if not s:
+                self.view.commandText.readonly = False
                 return
             self.updateField[self.updateIndex] = s
             
@@ -313,7 +306,7 @@ class SiraController():
             self.updateIndexes = list(filter(delete_element, self.updateIndexes))
             self.updateIndexes.sort(reverse=True)
             self.updateIndex = index
-            
+            self.view.commandText.readonly = False
             self.view.info = ['{}: '.format(output)]
 
 
@@ -321,19 +314,40 @@ class SiraController():
         else:
             ''' the last updated field '''
             self.updateField[self.updateIndex] = s
-            f, r = issueOps.issue_edit([self.updateIssue]+self.updateField)
-            self.view.info = r
-            self._quit_updateMode()
+            # self.view.commandText.readonly = True
+            # lst = [self.updateIssue]+self.updateField
+            # thr = threading.Thread(target=self._update_special_wrapper, args=(self, lst))
+            # thr.start()
+            self._quit_updateMode(issueOps.issue_edit([self.updateIssue]+self.updateField)[1])
             return
 
         self.updateDepth += 1
 
-    def _quit_updateMode(self):
+    def _display_wrapper(self, dum, issue):
+        f, r = issueOps.issue_display_info(issue)
+        if f:
+            ''' displayed the issue info successfully '''
+            self.view.commandText.readonly = False
+            self.updateIssue = issue
+            self.view.set_command_mode(False)
+            self.view.info = r
+            self.updateDepth = 2
+            self.interactive = True
+            self.updateMode = True
+            return 
+
+
+        else:
+            ''' If the cmd is sira update but the given issue not found '''
+            self._quit_updateMode(r)
+            return
+
+
+    def _quit_updateMode(self, msg):
         self.updateMode = False
         self.updateDepth = 0
         self.updateIndex = 0
-        self.updateField = ['','','','','','','','']
+        self.updateField = ['','','','','','','','','']
         self.updateIndexes = []
         self.updateIssue = ''
-        self.closeinteractive()
-        self.view.commandText.readonly = False
+        self._sendinfo(msg)

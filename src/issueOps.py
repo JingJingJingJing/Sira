@@ -53,7 +53,7 @@ def issue_assign_sprint(issue, sprint):
     if not f:
         mylog.error('Problem occured during assigning sprint\r\n{}'.format(r))
         return False, ['Issue {} failed to assigned to {}'.format(
-            issue, sprint), r]
+            issue, sprint)] + r
     return True, ['Issue {} successfully assigned to {}'.format(issue, sprint)]
 
 
@@ -66,7 +66,7 @@ def issue_create(lst):
     data = json.dumps({"fields": addfield(field, lst[3:8])})
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
-        return False, [r]
+        return False, r
     new_issue = r.get('key')
     if lst[8] is not '':
         f, r = issue_assign_sprint(new_issue, lst[8])
@@ -102,7 +102,7 @@ def issue_transit(lst):
     data = json.dumps({"transition": transition})
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
-        return False, 'Error occured durin transit\r\n{}'.format(r)
+        return False, ['Error occured durin transit'] + r
     msg = 'Status of {} has been changed to {}'.format(issue, status)
     mylog.info(msg)
     return True, [msg]
@@ -135,7 +135,7 @@ def issue_display_info(issue):
     url, headers = prepare('query_number', '/{}'.format(issue.upper()))
     f, r = send_request(url, method.Get, headers, None, None)
     if not f:
-        return False, [r]
+        return False, r
     dic = r.get('fields')
     lst = [
         'status', 'issuetype', 'summary', 'reporter', 'priority', 'lable',
@@ -186,6 +186,8 @@ def issue_edit(lst):
             dic[keys[i]] = fields[i]
     data = json.dumps({"fields": dic})
     f, r = send_request(url, method.Put, headers, None, data)
+    if not f:
+        return False, r
     if lst[7]:
         f, r = issue_assign_sprint(issue, lst[7])
         if not f:
@@ -207,7 +209,7 @@ def issue_edit_labels(lst):
     data = json.dumps({"update": {"labels": target}})
     f, r = send_request(url, method.Put, headers, None, data)
     if not f:
-        return False, ['Error occured while add labels',r]
+        return False, ['Error occured while add labels'] + r
     return True, ['label successfully {}ed'.format(mode)]
 
 
@@ -240,7 +242,7 @@ def issue_assign(lst):
 
     f, r = send_request(url, method.Put, headers, None, data)
     if not f:
-        return False, [r]
+        return False, r
     msg = '{} successfully assigned to {}'.format(issue, assignee)
     mylog.info(msg)
     return True, [msg]
@@ -252,7 +254,7 @@ def issue_getComment(lst):
 
     f, r = send_request(url, method.Get, headers, None, None)
     if not f:
-        return False,[r]
+        return False,r
 
     comments = r.get('comments', [])
     if len(comments) > 0:
@@ -277,7 +279,7 @@ def issue_addComment(lst):
     #     data = json.dumps(data)
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
-        return False, [r]
+        return False, r
     mylog.info(r)
     return True, ['Comment(ID: ' + r['id'] + ')added']
 
@@ -288,7 +290,7 @@ def issue_delComment(lst):
     url, headers = prepare('issue', '/{}{}{}'.format(issue, '/comment/', cid))
     f, r = send_request(url, method.Delete, headers, None, None)
     if not f:
-        return False, [r]
+        return False, r
     mylog.info('Comment {} deleted'.format(cid))
     return True, ['Comment deleted']
 

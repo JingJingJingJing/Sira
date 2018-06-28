@@ -59,7 +59,7 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
             ("Text", "font_name"): self._on_font_name,
             ("Jira", "url"): self._on_url,
             ("Jira", "timeout"): self._on_timeout,
-            ("Jira", "protocoal"): self._on_protocol
+            ("Jira", "protocol"): self._on_protocol
         }
 
     @overrides(App)
@@ -86,6 +86,9 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
                            self.config.get("Text", "cmd_identifier"))
         self.protected_text = self.header
         self.commandText = Builder.load_file("res/sira.kv")
+        self._on_url(self.config.get("Jira", "url"))
+        self._on_timeout(self.config.get("Jira", "timeout"))
+        self._on_protocol(self.config.get("Jira", "protocol"))
         return self.commandText
 
     @overrides(App)
@@ -97,9 +100,13 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
         [ensures]:  self.config is not None
                     [self.config has all attributes in its source file]
                     [At least, the following attributes exist:
-                        "Text", "user_name"
-                        "Text", "cmd_identifier"
-                        "Text", "font_size"
+                        ("Text", "user_name"),
+                        ("Text", "cmd_identifier"),
+                        ("Text", "font_size"),
+                        ("Text", "font_name"),
+                        ("Jira", "url"),
+                        ("Jira", "timeout"),
+                        ("Jira", "protocol")
                     ]
         """
         text = {
@@ -115,9 +122,6 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
         }
         config.setdefaults("Text", text)
         config.setdefaults("Jira", jira)
-        self._on_url(config.get("Jira", "url"))
-        self._on_timeout(config.get("Jira", "timeout"))
-        self._on_protocol(config.get("Jira", "protocol"))
 
     @overrides(App)
     def build_settings(self, settings: Settings) -> None:

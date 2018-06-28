@@ -101,5 +101,11 @@
                 </required>
             </required>
         </keyword>
+        <keyword name="update"/>
+            <!-- <interactive>issueId/Key:</interactive>
+            <required name="issueId">
+                <function multi-thread="True" object="issueOps" name="issue_display_info" para="issueId"/>
+            </required>
+        </keyword> -->
     </keyword>
 </cmd>

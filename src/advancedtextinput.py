@@ -438,11 +438,10 @@ class AdvancedTextInput(TextInput):
     def on_cursor(self, instance, value):
         # When the cursor is moved, reset cursor blinking to keep it showing,
         # and update all the graphics.
+        col, row = value
         if self.focus:
             self._trigger_cursor_reset()
-            if self._get_cursor_row() != self.last_row or \
-                    self._get_cursor_col() < self.protected_len:
-                # import pdb; pdb.set_trace()
+            if row != self.last_row or col < self.protected_len:
                 self._editable = False
             else:
                 self._editable = True
@@ -482,12 +481,16 @@ class AdvancedTextInput(TextInput):
         ### changes end here
 
     @overrides(TextInput)
-    def _trigger_refresh_text(self, *largs):
-        super(AdvancedTextInput, self)._trigger_refresh_text(*largs)
+    def _trigger_refresh_text(self, *args):
+        super(AdvancedTextInput, self)._trigger_refresh_text(*args)
         self._reset_last_line_ev = Clock.schedule_once(
             lambda dt: self._reset_last_line()
         )
-        
+
+    @overrides(TextInput)
+    def insert_text(self, substring, from_undo=False):
+        super(AdvancedTextInput, self).insert_text(substring, from_undo=False)
+
     ### custom functions:
     def _reset_last_line(self):
         self.last_row = len(self._lines) - 1

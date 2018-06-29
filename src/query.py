@@ -3,8 +3,6 @@ from enum import Enum
 
 import requests
 from requests.status_codes import _codes
-
-from extract import dtos, getField, getString
 from utils import Super401, glob_dic, mylog, prepare, read_cookie
 """ This function returns all issue assigned to the user 'user' """
 
@@ -42,7 +40,7 @@ def send_request(url, method, headers, params, data):
                 verify=False)
         else:
             mylog.error('Wrong method that not suppord:' + str(method))
-            return (False, 'Unknown internal error occured')
+            return (False, ['Unknown internal error occured'])
         if r.status_code == 401:
             mylog.error("401 Unauthorized")
             raise Super401()
@@ -50,20 +48,18 @@ def send_request(url, method, headers, params, data):
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
             mylog.error(r.text)
-            s = 'Request denied!\r\nerror code: {} {}\r\n'.format(
-                str(r.status_code), str(_codes[r.status_code][0]))
+            sLst = ['Request denied!', 'error code: {} {}'.format(str(r.status_code), str(_codes[r.status_code][0]))]
             try:
                 lst = r.json().get('errorMessages', [])
                 for errors in lst:
-                    s += errors + '\r\n'
+                    sLst.append(errors)
                 dic = r.json().get('errors', {})
                 for key in dic:
-                    s += '{} '.format(dic[key]) + '\r\n'
+                    sLst.append('{} '.format(dic[key]))
             except json.JSONDecodeError:
                 pass
-            s += 'Please try again'
-            mylog.error(s)
-            return (False, s)
+            sLst.append('Please try again')
+            return (False, sLst)
         mylog.info(r)
         try:
             try:
@@ -72,7 +68,7 @@ def send_request(url, method, headers, params, data):
                 for errors in lst:
                     s += errors + '\r\n'
                 mylog.error(s)
-                return (False, s)
+                return (False, [s])
             except KeyError:
                 return (True, r.json())
             except TypeError:
@@ -82,27 +78,9 @@ def send_request(url, method, headers, params, data):
     except requests.exceptions.RequestException as err:
         mylog.error(err)
         return (False,
-                '''Internet error\r\nTry:\r\n\tChecking the network cables, 
-            modem, and route\r\n\tReconnecting to Wi-Fi\r\n\tRunning Network Diagnostics'''
-                )
+                ['Internet error','Try:','\tChecking the network cables, modem, and route','\tReconnecting to Wi-Fi','\tRunning Network Diagnostics']
+            )
 
-
-def query(field1, field2, f):
-    url, headers = prepare('query')
-    if field2:
-        field2 = 'and ' + field2
-    data = {}
-    data["jql"] = '{} {}'.format(field1, field2)
-    data["startAt"] = 0
-    data["maxResults"] = 100
-    # data["fields"] = [
-    #     "summary", "issuetype", "project", "fixVersions", "assignee", "status"
-    # ]
-    data = json.dumps(data)
-    f, r = send_request(url, method.Post, headers, None, data)
-    if not f:
-        return False, r
-    return True, getResponse(r.get('issues'))
 
 
 """ This function will return all information of issue represented by pid """
@@ -130,6 +108,8 @@ def getTarget(fields, field):
 
 
 def getResponse(lst):
+    if not lst:
+        return ['Issue Not Found']
     defaultList = [
         'issuetype', 'assignee', 'status', 'sprint', 'fixVersions', 'summary'
     ]
@@ -141,7 +121,7 @@ def getResponse(lst):
     for i in defaultHeader:
         s += '{}'.format(i).ljust(18, ' ')
     stringLst.append(s)
-    for i, issue in enumerate(lst):
+    for issue in lst:
         s = '{}'.format(issue.get('key')).ljust(14, ' ')+ ' |  '
         fields = issue.get('fields')
         for j, field in enumerate(defaultList):
@@ -150,10 +130,6 @@ def getResponse(lst):
                 s +=  ' |  '
         stringLst.append(s)
     return stringLst
-
-                
-        
-    
 
 
 def query_number(lst):
@@ -164,9 +140,19 @@ def query_number(lst):
         return False, r
     return True, getResponse([r])
 
-    # print(string)
-    # return True
-
+def query(field1, field2, f):
+    url, headers = prepare('query')
+    if field2:
+        field2 = 'and ' + field2
+    data = {}
+    data["jql"] = '{} {}'.format(field1, field2)
+    data["startAt"] = 0
+    data["maxResults"] = 100
+    data = json.dumps(data)
+    f, r = send_request(url, method.Post, headers, None, data)
+    if not f:
+        return False, r
+    return True, getResponse(r.get('issues'))
 
 
 def addQuotation(s):
@@ -249,7 +235,7 @@ if __name__ == '__main__':
     # query_project_assignee(['sira', 'xp zheng']
     # query_sprint(['Sira Sprint 2'])
     # query_number(['test-88'])
-    query_assignee(['ysg'])
+    # query_assignee(['ysg'])
     # query_status(['In progress'])
     # query_project_status(['sira','to do'])
     pass

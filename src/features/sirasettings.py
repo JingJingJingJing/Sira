@@ -5,6 +5,7 @@ from kivy.app import App
 
 from utils import asserts, glob_dic, reset_address_book
 
+
 class Mutative(object):
     """Abstract class implemeted custom settings. This class must be extended
     by a subclass extending kivy.app.App; in other words, its subclass must
@@ -21,7 +22,7 @@ class Mutative(object):
             (initialized by subclasses)
             commandText -- advancedtextinput.AdvancedTextInput (default None)
             config -- kivy.config.ConfigParser
-    
+
     Public Methods:
         Original:
             print_header(self) -> None
@@ -35,7 +36,7 @@ class Mutative(object):
         _on_timeout(self, str) -> None
         _on_url(self, str) -> None
         _reset_header(self, str, str) -> None
-    
+
     Events:
         `on_username`
             Fired when username is changed. This will change and write the
@@ -74,6 +75,11 @@ class Mutative(object):
     be initialized by subclasses before calling any other functions in Mutative.
     """
 
+    space_completion = None
+    """Dummy reference to eliminate syntax error. This instance variable should
+    be initialized by subclasses before calling any other functions in Mutative.
+    """
+
     def __init__(self):
         """Constructor of Mutative. This method should not be called except by
         its subclasses' constructors.
@@ -103,10 +109,9 @@ class Mutative(object):
 
         obj.insert_text("\n" + self.header)
         self.protected_text = self.header
-        obj.last_row = len(obj._lines) - 1
-        obj.last_row_start = len(obj.text) - len(obj._lines[obj.last_row])
+        obj._reset_last_line()
         obj.on_cursor(obj, obj.cursor)
-    
+
     def _get_font_path(self, font_name) -> str:
         """Private function to search the path of font file based on font_name.
 
@@ -162,6 +167,12 @@ class Mutative(object):
         glob_dic.set_value("protocol", value + "://")
         if glob_dic.get_value("domain") and value:
             reset_address_book()
+
+    def _on_space_completion(self, value: str) -> None:
+        """TODO: both here and class doc
+        """
+        self.space_completion = True if self.config.get(
+            "Option", "space_completion") == "1" else False
 
     def _on_timeout(self, value: str) -> None:
         """Private function fired when timeout is changed through self.config.

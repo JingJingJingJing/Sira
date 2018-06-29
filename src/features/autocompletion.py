@@ -22,6 +22,7 @@ class Completable(object):
             option -- kivy.properties.ListProperty (default [])
             options_per_line -- kivy.properties.NumericProperty (default 7)
             page_index -- kivy.properties.NumericProperty (default 0)
+            space_completion -- kivy.properties.BooleanProperty (default None)
             start_indices -- kivy.properties.ListProperty (default [])
             tab_index -- kp.NumericProperty (default -1)
 
@@ -103,6 +104,10 @@ class Completable(object):
     """Kivy numeric property to store the page number in all options.
     """
 
+    space_completion = kp.BooleanProperty()
+    """Kivy numeric property to store whether use completion on space.
+    """
+
     start_indices = kp.ListProperty([])
     """Kivy numeric property to store all text indicies of displayed options.
 
@@ -138,7 +143,7 @@ class Completable(object):
         """Private function to clear all displayed options in self.commandText.
 
         [requires]: instance.completion_mode
-        [ensures]:  len(self.commandText._lines) = self.commandText.last_row
+        [ensures]:  len(self.commandText._lines) - 1 = self.commandText.last_row
                     [erase all text below self.commandText.last_row]
         """
         if not asserts(instance.completion_mode, "Not in completion mode"):
@@ -195,7 +200,9 @@ class Completable(object):
             else len(option)
         instance.insert_text(
             "\n" + " ".join(option[self.page_index:end_index]))
+        instance._reset_last_line()
         instance.cursor = cursor
+        instance.on_cursor(instance, instance.cursor)
         # calc start indices of displayed options
         index = 0
         self.start_indices.clear()
@@ -239,11 +246,17 @@ class Completable(object):
                     (otherwise, do nothing)
         """
         if instance.completion_mode:
+            cursor = instance.cursor
             self._stop_completion(instance)
+            instance.cursor = cursor
+            return True
+        if not self.space_completion:
+            return True
         c_index = instance.cursor_index(instance.cursor) - 1
         if instance.last_row_start + instance.protected_len != c_index\
                 and instance.text[c_index - 1] != " ":
-            string = instance._lines[instance.last_row][instance.protected_len:]
+            string = instance.text[instance.last_row_start
+                                   + instance.protected_len:]
             self.from_space = True
             self.controller.auto_complete(string)
         return True
@@ -285,7 +298,8 @@ class Completable(object):
         if instance.completion_mode:
             self._select_next_option("tab")
         else:
-            string = instance._lines[instance.last_row][instance.protected_len:]
+            string = instance.text[instance.last_row_start
+                                   + instance.protected_len:]
             self.from_space = False
             self.controller.auto_complete(string)
         return True
@@ -329,12 +343,13 @@ class Completable(object):
             # delete and insert next option
             instance.cancel_selection()
             start = self.completion_start
-            end = instance.last_row_start + \
-                len(instance._lines[instance.last_row])
+            end = instance.find_last_return(0, len(instance.text))
             instance.select_text(start, end)
             instance.delete_selection()
             instance.do_cursor_movement("cursor_end", control=True)
             instance.insert_text(self.option[self.page_index + tab_index])
+            instance._reset_last_line()
+            instance.on_cursor(instance, instance.cursor)
             # select next option
             last_char_return = instance.text.rindex("\n")
             start = last_char_return + self.start_indices[tab_index] + 1
@@ -357,6 +372,7 @@ class Completable(object):
             return
         self._clear_options(instance)
         instance.completion_mode = False
+        instance._reset_last_line()
         self.tab_index = -1
         self.option = []
         self.start_indices = []
@@ -376,16 +392,15 @@ class Completable(object):
             obj.completion_mode = False
             return
         obj.completion_mode = True
-        self._display_options(obj, "init", option)
         # calc the start index of the completion part
         search_start = obj.last_row_start + obj.protected_len
-        search_end = obj.last_row_start\
-            + len(obj._lines[obj.last_row])
+        search_end = len(obj.text)
         try:
             self.completion_start = obj.text.rindex(" ",
                                                     search_start,
                                                     search_end) + 1
         except ValueError:
             self.completion_start = search_start
+        self._display_options(obj, "init", option)
         if not self.from_space:
             self._select_next_option("tab")

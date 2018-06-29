@@ -144,7 +144,8 @@ class CommandReactive(object):
                     self.controller.processInput
                     instance.on_cursor
         """
-        string = instance._lines[instance.last_row][instance.protected_len:]
+        string = instance.text[instance.last_row_start
+                               + instance.protected_len:]
         if instance.password_mode:
             string = instance.password_cache
             instance.password_mode = False
@@ -200,7 +201,6 @@ class CommandReactive(object):
         self.protected_text = info[-1]
         for s in info:
             obj.insert_text("\n" + str(s))
-        obj.last_row = len(obj._lines) - 1
-        obj.last_row_start = len(obj.text) - len(obj._lines[obj.last_row])
+        obj._reset_last_line()
         obj.on_cursor(obj, obj.cursor)
         self.info = []

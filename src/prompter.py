@@ -12,7 +12,6 @@ class Prompter:
     def auto_complete(self, position, interactive, command):
         result = []
         complete = False
-        print(command)
         l = len(command)
         if l > 0 and command[-1] != Prompter.blank:
             complete = True

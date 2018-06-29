@@ -3,8 +3,6 @@ from enum import Enum
 
 import requests
 from requests.status_codes import _codes
-
-from extract import dtos, getField, getString
 from utils import Super401, glob_dic, mylog, prepare, read_cookie
 """ This function returns all issue assigned to the user 'user' """
 
@@ -84,23 +82,6 @@ def send_request(url, method, headers, params, data):
             )
 
 
-def query(field1, field2, f):
-    url, headers = prepare('query')
-    if field2:
-        field2 = 'and ' + field2
-    data = {}
-    data["jql"] = '{} {}'.format(field1, field2)
-    data["startAt"] = 0
-    data["maxResults"] = 100
-    # data["fields"] = [
-    #     "summary", "issuetype", "project", "fixVersions", "assignee", "status"
-    # ]
-    data = json.dumps(data)
-    f, r = send_request(url, method.Post, headers, None, data)
-    if not f:
-        return False, r
-    return True, getResponse(r.get('issues'))
-
 
 """ This function will return all information of issue represented by pid """
 ''' lst = ['issue name or id'] '''
@@ -127,6 +108,8 @@ def getTarget(fields, field):
 
 
 def getResponse(lst):
+    if not lst:
+        return ['Issue Not Found']
     defaultList = [
         'issuetype', 'assignee', 'status', 'sprint', 'fixVersions', 'summary'
     ]
@@ -138,7 +121,7 @@ def getResponse(lst):
     for i in defaultHeader:
         s += '{}'.format(i).ljust(18, ' ')
     stringLst.append(s)
-    for i, issue in enumerate(lst):
+    for issue in lst:
         s = '{}'.format(issue.get('key')).ljust(14, ' ')+ ' |  '
         fields = issue.get('fields')
         for j, field in enumerate(defaultList):
@@ -147,10 +130,6 @@ def getResponse(lst):
                 s +=  ' |  '
         stringLst.append(s)
     return stringLst
-
-                
-        
-    
 
 
 def query_number(lst):
@@ -161,9 +140,19 @@ def query_number(lst):
         return False, r
     return True, getResponse([r])
 
-    # print(string)
-    # return True
-
+def query(field1, field2, f):
+    url, headers = prepare('query')
+    if field2:
+        field2 = 'and ' + field2
+    data = {}
+    data["jql"] = '{} {}'.format(field1, field2)
+    data["startAt"] = 0
+    data["maxResults"] = 100
+    data = json.dumps(data)
+    f, r = send_request(url, method.Post, headers, None, data)
+    if not f:
+        return False, r
+    return True, getResponse(r.get('issues'))
 
 
 def addQuotation(s):

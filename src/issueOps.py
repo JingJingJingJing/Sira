@@ -33,11 +33,6 @@ lst = [project, issuetype, summary, reporter,
 
 
 def issue_assign_sprint(issue, sprint):
-    # sprint = sprint.split(' ')
-    # sprint[0] = sprint[0].upper()
-    # sprint[1] = sprint[1].capitalize()
-    # sprint = ' '.join(sprint)
-    # getSprint()
     issue = issue.upper()
     for sp in glob_dic.tips.get_value('sprint'):
         if sprint.lower() == sp.lower():
@@ -52,8 +47,9 @@ def issue_assign_sprint(issue, sprint):
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
         mylog.error('Problem occured during assigning sprint\r\n{}'.format(r))
-        return False, ['Issue {} failed to assigned to {}'.format(
-            issue, sprint)] + r
+        return False, [
+            'Issue {} failed to assigned to {}'.format(issue, sprint)
+        ] + r
     return True, ['Issue {} successfully assigned to {}'.format(issue, sprint)]
 
 
@@ -71,14 +67,15 @@ def issue_create(lst):
     if lst[8] is not '':
         f, r = issue_assign_sprint(new_issue, lst[8])
         if not f:
-            return False, ['Problem occured while assigning the issue to target sprint: Issue {} successfully created but not assigned to {}!'.format(
-                new_issue, lst[8])] + r
+            return False, [
+                'Problem occured while assigning the issue to target sprint: Issue {} successfully created but not assigned to {}!'.
+                format(new_issue, lst[8])
+            ] + r
     msg = 'Issue {} successfully created!'.format(new_issue)
     mylog.debug(msg)
     return True, [msg]
-# issue_create(['SIRA', 'Story', 'Thisissummary','','','','','',''])
 
-# issue_create(['Test','Story','Summary here','','','','','',''])
+
 def issue_get_tansition(issue, dic):
     url, headers = prepare('issue', '/{}/transitions'.format(issue))
     f, r = send_request(url, method.Get, headers, None, None)
@@ -114,23 +111,6 @@ lst = [status, issuetype, summary, reporter,
 '''
 
 
-# def query_number(lst):
-#     issue = lst[0]
-#     url, headers = prepare('query_number', '/{}'.format(issue))
-#     f, r = send_request(url, method.Get, headers, None, None)
-#     if not f:
-#         return r
-#     try:
-#         mylog.error(r['warningMessages'])
-#         return r['warningMessages']
-#     except KeyError:
-#         try:
-#             string = dtos(getField(r, None), r['key'])
-#             mylog.info(string)
-#             return string
-#         except KeyError as err:
-#             mylog.error(err)
-#             return 'given field "{}" not found'.format(err)
 def issue_display_info(issue):
     url, headers = prepare('query_number', '/{}'.format(issue.upper()))
     f, r = send_request(url, method.Get, headers, None, None)
@@ -139,18 +119,20 @@ def issue_display_info(issue):
     dic = r.get('fields')
     lst = [
         'status', 'issuetype', 'summary', 'reporter', 'priority', 'lable',
-        'description', 'assignee','sprint'
+        'description', 'assignee', 'sprint'
     ]
     s = 'Here are the information of {}: '.format(issue)
     stringLst = [s]
     for i, field in enumerate(lst):
         obj = dic.get(field)
         if isinstance(obj, dict):
-            s = '{}.{}: {}'.format(i+1,field, obj.get('name'))
+            s = '{}.{}: {}'.format(i + 1, field, obj.get('name'))
         else:
-            s = '{}.{}: {}'.format(i+1,field, dic.get(field))
+            s = '{}.{}: {}'.format(i + 1, field, dic.get(field))
         stringLst.append(s)
-    stringLst.append('Please enter the corresponding number of the field you want to edit, separated by comma: ')
+    stringLst.append(
+        'Please enter the corresponding number of the field you want to edit, separated by comma: '
+    )
     return True, stringLst
 
 
@@ -181,7 +163,6 @@ def issue_edit(lst):
     ]
     dic = {}
     for i in range(0, len(fields)):
-        # print('iteration {} {}:{}'.format(i,keys[i],fields[i]))
         if lst[i]:
             dic[keys[i]] = fields[i]
     data = json.dumps({"fields": dic})
@@ -191,12 +172,14 @@ def issue_edit(lst):
     if lst[7]:
         f, r = issue_assign_sprint(issue, lst[7])
         if not f:
-            return False,['Problem occured while assigning the issue to target sprint: All other fields have been updated!']+r
+            return False, [
+                'Problem occured while assigning the issue to target sprint: All other fields have been updated!'
+            ] + r
     return True, ['Edit Success']
 
 
-# issue_edit(['TEST-88', 'to do', 'bug', 'a new y', 'ysg', 'lowest', '','try  one', 'ysg', 'test sprint 1'])
-# print(issue_display_info('test-88')[1])
+
+
 
 def issue_edit_labels(lst):
     issue = lst[0]
@@ -211,27 +194,6 @@ def issue_edit_labels(lst):
     if not f:
         return False, ['Error occured while add labels'] + r
     return True, ['label successfully {}ed'.format(mode)]
-
-
-# issue_edit_labels(['Test-77','remove', 'label1','label2','label3'])
-
-
-# def issue_delete(lst):
-#     msg = ''
-#     for issue in lst:
-#         msg += '{}\r\n'.format(issue_delete_helper(issue))
-#     msg += 'Done!'
-#     return msg
-
-
-# def issue_delete_helper(issue):
-#     url, headers = prepare('issue', '/{}'.format(issue))
-#     f, r = send_request(url, method.Delete, headers, None, None)
-#     if not f:
-#         return False, 'DOING {}\r\n{}'.format(issue, r)
-#     msg = '{} successfully deleted!'.format(issue)
-#     mylog.info(msg)
-#     return True, msg
 
 
 def issue_assign(lst):
@@ -254,7 +216,7 @@ def issue_getComment(lst):
 
     f, r = send_request(url, method.Get, headers, None, None)
     if not f:
-        return False,r
+        return False, r
 
     comments = r.get('comments', [])
     if len(comments) > 0:
@@ -306,53 +268,3 @@ def issue_delComment(lst):
 # issue_getComment(['Test-77'])
 # issue_assign(['Test-01','testuser1'])
 # issue_transit(['TEST-72', 'Done'])
-def tranform_issue():
-    f = open('issues.json', 'r')
-    s = f.read()
-    issues = json.loads(s)
-
-    '''
-    lst = [project, issuetype, summary, reporter, 
-        priority, lable, description, assignee, sprint]
-    '''
-
-    for issue in issues:
-        # print(issue.get('key'), issue.get('fields').get('issuetype').get('name'),issue.get('fields').get('project').get('key'))
-        # print(issue.get('fields').get('summary'))
-        # try:
-        #     print(issue.get('fields')['sprint'].get('name'))
-        # except KeyError:
-        #     print('')
-        # print(issue.get('fields').get('labels'))
-        # print(issue.get('fields').get('priority').get('name'))
-        # project = issue.get('fields').get('project').get('key')
-        # print(issue.get('fields').get('description'))
-        project = issue.get('fields').get('project').get('key')
-        issuetype = issue.get('fields').get('issuetype').get('name')
-        summary = issue.get('fields').get('summary')
-        # reporter = issue.get('fields').get('reporter').get('name')
-        reporter = ''
-        priority = issue.get('fields').get('priority').get('name')
-
-        labels = issue.get('fields').get('labels')
-        s = ''
-        for i, label in enumerate(labels):
-            if i == len(labels) - 1:
-                s += label
-            else:
-                s += label + ' '
-        description = issue.get('fields').get('description')
-        assignee = ''
-        # try:
-        #     assignee = issue.get('fields').get('assignee').get('name')
-        # except AttributeError:
-        #     assignee = ''
-        sprint = ''
-        try:
-            sprint = issue.get('fields').get('sprint').get('name')
-        except AttributeError:
-            sprint = ''
-        info = [project, issuetype, summary, reporter, priority, s, description, assignee, sprint]
-        issue_create(info)
-
-# tranform_issue()

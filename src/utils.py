@@ -30,8 +30,8 @@ def read_cookie():
 log_directory = "log/"
 if not access(log_directory, F_OK):
     mkdir(log_directory)
-time_format = '%H-%M-%S %d(%b)%Y'
-logformat = '%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]\r%(message)s\r\n'
+time_format = '%d(%b)%Y %H-%M-%S'
+logformat = '%(asctime)s.%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d]\r\t%(message)s\r\n'
 min_time = localtime()
 logging.basicConfig(
     filename='{}{}.log'.format(log_directory,
@@ -54,13 +54,13 @@ mylog = logging.getLogger(__name__)
 mylog.setLevel(logging.DEBUG)
 
 func_enter_log_format = \
-"""\tEntered method {}.{} with the following positional arguments:
+"""Entered method {}.{} with the following positional arguments:
 \t\t{},
 \tand the following keyword arguments:
 \t\t{}"""
 
 func_return_log_format = \
-"""\tExited method {}.{} with the following return value(s):
+"""Exited method {}.{} with the following return value(s):
 \t\t{}"""
 
 def func_log(method):
@@ -94,8 +94,8 @@ def asserts(expression, msg):
     return True
 
 def write_memo_log(*args):
-    info = "Program exited with the following attributes:"
-    info_line = "{}:\n\t\t{}\n"
+    info = "Program exited with the following attributes:\n"
+    info_line = "\t{}:\n\t\t{}\n"
     for cls in args:
         for attr in dir(cls):
             value = getattr(cls, attr)
@@ -113,12 +113,9 @@ class Super401(Exception):
 class glob():
     def __init__(self, dic):
         self.dic = dic
-        self.set_value('domain', '10.176.120.165:8080')
         self.set_value('jira', 'lnvusjira.lenovonet.lenovo.local')
         self.set_value('cookie_path', '')
         self.set_value('cookie', '')
-        self.set_value('timeout', 10)
-        self.set_value('protocol', 'https://')
         self.tips = tips({})
 
     def set_value(self, key, value):
@@ -130,13 +127,21 @@ class glob():
         except KeyError:
             return defValue
 
+asce_para = 1.15
+desc_para = 0.95
 
 class tips():
     def __init__(self, dic):
         self.dic = dic
 
     def set_value(self, key, value):
-        self.dic[key] = [[0.5, x] for x in value]
+        key_list = self.get_value(key)
+        if key_list:
+            for v in value:
+                if v not in key_list:
+                    self.add_new_key(key, v)
+        else:
+            self.dic[key] = [[0.5, x] for x in value]
 
     def get_value(self, key, defValue=None):
         try:
@@ -149,10 +154,10 @@ class tips():
         index = -1
         for i in range(len(tgt_list)):
             if tgt_list[i][1] == key:
-                tgt_list[i][0] = min(tgt_list[i][0] * 1.1, 1)
+                tgt_list[i][0] = min(tgt_list[i][0] * asce_para, 1)
                 index = i
             else:
-                tgt_list[i][0] = max(tgt_list[i][0] * 0.95, 0.1)
+                tgt_list[i][0] = max(tgt_list[i][0] * desc_para, 0.1)
         if index == -1:
             self.add_new_key(section, key)
             return
@@ -177,29 +182,33 @@ class tips():
 
     def add_new_key(self, section, key):
         tgt_list = self.dic[section]
-        tgt_list.insert(1, [tgt_list[1][0], key])
+        tgt_list.insert(1, [tgt_list[1][0], key] if len(tgt_list) > 1\
+                                                 else [tgt_list[0][0], key])
 
 
 glob_dic = glob({})
-domain = glob_dic.get_value('jira')
-protocol = glob_dic.get_value('protocol')
-address_book = {
-    'logout': protocol + domain + '/rest/auth/1/session',
-    'getProject': protocol + domain + '/rest/api/2/project',
-    'getBoard': protocol + domain + '/rest/agile/1.0/board',
-    'getStatus': protocol + domain + '/rest/api/2/status',
-    'getType': protocol + domain + '/rest/api/2/project/type',
-    'getIssuetype': protocol + domain + '/rest/api/2/issuetype',
-    'getAssignee': protocol + domain + '/rest/api/2/user/search?username=.',
-    'getPriority': protocol + domain + '/rest/api/2/priority',
-    'query': protocol + domain + '/rest/api/2/search',
-    'query_number': protocol + domain + '/rest/agile/1.0/issue',
-    'issue': protocol + domain + '/rest/api/2/issue',
-    'search': protocol + domain + '/rest/api/2/user',
-    'getVersion': protocol + domain + '/rest/api/2/project',
-    'getSprint':protocol + domain + '/rest/agile/1.0/sprint',
-    'assign_sprint': protocol + domain + '/rest/agile/1.0/sprint',
-}
+address_book = dict()
+def reset_address_book():
+    global address_book
+    domain = glob_dic.get_value('jira')
+    protocol = glob_dic.get_value('protocol')
+    address_book = {
+        'logout': protocol + domain + '/rest/auth/1/session',
+        'getProject': protocol + domain + '/rest/api/2/project',
+        'getBoard': protocol + domain + '/rest/agile/1.0/board',
+        'getStatus': protocol + domain + '/rest/api/2/status',
+        'getType': protocol + domain + '/rest/api/2/project/type',
+        'getIssuetype': protocol + domain + '/rest/api/2/issuetype',
+        'getAssignee': protocol + domain + '/rest/api/2/user/search?username=.',
+        'getPriority': protocol + domain + '/rest/api/2/priority',
+        'query': protocol + domain + '/rest/api/2/search',
+        'query_number': protocol + domain + '/rest/agile/1.0/issue',
+        'issue': protocol + domain + '/rest/api/2/issue',
+        'search': protocol + domain + '/rest/api/2/user',
+        'getVersion': protocol + domain + '/rest/api/2/project',
+        'getSprint':protocol + domain + '/rest/agile/1.0/sprint',
+        'assign_sprint': protocol + domain + '/rest/agile/1.0/sprint',
+    }
 
 headers_book = {
     'createmeta':{

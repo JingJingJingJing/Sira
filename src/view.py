@@ -59,7 +59,8 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
             ("Text", "font_name"): self._on_font_name,
             ("Jira", "url"): self._on_url,
             ("Jira", "timeout"): self._on_timeout,
-            ("Jira", "protocoal"): self._on_protocol
+            ("Jira", "protocol"): self._on_protocol,
+            ("Option", "space_completion"): self._on_space_completion
         }
 
     @overrides(App)
@@ -82,10 +83,15 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
 
         self.settings_cls = SettingsWithSidebar
         self.username = self.config.get("Text", "username")
+        self.space_completion = True if self.config.get(
+            "Option", "space_completion") == "1" else False
         self._reset_header(self.username,
                            self.config.get("Text", "cmd_identifier"))
         self.protected_text = self.header
         self.commandText = Builder.load_file("res/sira.kv")
+        self._on_url(self.config.get("Jira", "url"))
+        self._on_timeout(self.config.get("Jira", "timeout"))
+        self._on_protocol(self.config.get("Jira", "protocol"))
         return self.commandText
 
     @overrides(App)
@@ -97,9 +103,15 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
         [ensures]:  self.config is not None
                     [self.config has all attributes in its source file]
                     [At least, the following attributes exist:
-                        "Text", "user_name"
-                        "Text", "cmd_identifier"
-                        "Text", "font_size"
+                        ("Text", "user_name"),
+                        ("Text", "cmd_identifier"),
+                        ("Text", "font_size"),
+                        ("Text", "font_name"),
+                        ("Jira", "url"),
+                        ("Jira", "timeout"),
+                        ("Jira", "protocol"),
+                        ("Option", "space_completion"),
+                        ("Option", "tab_completion")
                     ]
         """
         text = {
@@ -113,11 +125,13 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
             "timeout": "5",
             "protocol": "http"
         }
+        option = {
+            "space_completion": "1",
+            "tab_completion": "1"
+        }
         config.setdefaults("Text", text)
         config.setdefaults("Jira", jira)
-        self._on_url(config.get("Jira", "url"))
-        self._on_timeout(config.get("Jira", "timeout"))
-        self._on_protocol(config.get("Jira", "protocol"))
+        config.setdefaults("Option", option)
 
     @overrides(App)
     def build_settings(self, settings: Settings) -> None:
@@ -130,8 +144,8 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
         if not asserts(isinstance(self.config, ConfigParser),
                        "self.config is not initialized."):
             return
-        settings.add_json_panel("Text", self.config,
-                                filename="res/text.json")
+        settings.add_json_panel("Sira", self.config,
+                                filename="res/sira.json")
         settings.add_json_panel("Jira", self.config,
                                 filename="res/jira.json")
 
@@ -169,7 +183,7 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
         write_memo_log(self, self.commandText)
         glob_dic.tips.write_file('res/tables.json')
         return None
-    
+
     @overrides(App)
     def stop(self) -> (True, None):
         """Public function to exit the application.

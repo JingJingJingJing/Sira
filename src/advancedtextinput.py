@@ -27,8 +27,8 @@ class AdvancedTextInput(TextInput):
     completion_mode = kp.BooleanProperty(False)
 
     last_row = kp.NumericProperty(0)
-    
-    last_row_start = kp.NumericProperty(0)
+
+    last_row_start = kp.NumericProperty()
 
     __events__ = ('on_text_validate', 'on_double_tap', 'on_triple_tap',
                   'on_quad_touch', 'on_tab', 'on_ctrl_c', 'on_stop_completion',
@@ -110,28 +110,28 @@ class AdvancedTextInput(TextInput):
                                         self).keyboard_on_key_down(window, keycode, text, modifiers):
             return True
 
-        ### changes start here
+        # changes start here
         if self.completion_mode\
                 and key not in (9, 275, 276, 280, 281)\
                 and not text:
             self.dispatch('on_stop_completion')
-        ### changes end here
+        # changes end here
 
         if not self._editable and key != 282:
             # duplicated but faster testing for non-editable keys
             if text and not is_interesting_key:
                 if is_shortcut and key == ord('c'):
-                    ### changes start here
+                    # changes start here
                     self.dispatch("on_ctrl_c")
                 elif is_shortcut and key == ord('a'):
                     self.select_all()
             elif key == 27:
                 self.focus = False
-            ### changes start here
+            # changes start here
             #     backspace   delete          _selection is True
             elif (key == 8 or key == 127) and self._selection:
                 self.delete_lastchar()
-            ### changes end here
+            # changes end here
             return True
 
         if text and not is_interesting_key:
@@ -190,13 +190,13 @@ class AdvancedTextInput(TextInput):
 
             if is_shortcut:
                 if key == ord('x'):  # cut selection
-                    ### changes start here
+                    # changes start here
                     pass
-                    ### changes end here
+                    # changes end here
                 elif key == ord('c'):  # copy selection
-                    ### changes start here
+                    # changes start here
                     self.dispatch("on_ctrl_c")
-                    ### changes start here
+                    # changes start here
                 elif key == ord('v'):  # paste selection
                     self.paste()
                 elif key == ord('a'):  # select all
@@ -238,17 +238,17 @@ class AdvancedTextInput(TextInput):
         '''
         if self.readonly:
             return
-        ### changes start from here
+        # changes start from here
 
         # If the selection includes protected parts, cancel selection.
         index = 0 if self.last_row < 1 else self.last_row_start
 
-        ### when user selected both protected texts and the command
+        # when user selected both protected texts and the command
         if self.selection_from < index + self.protected_len:
             self.delete_lastchar()
             return
 
-        ### changes end here
+        # changes end here
         self._hide_handles(EventLoop.window)
         scrl_x = self.scroll_x
         scrl_y = self.scroll_y
@@ -320,20 +320,20 @@ class AdvancedTextInput(TextInput):
                 self.history_stack.step_forward()
                 col, row = self.display_command(self.history_stack.peak())
         elif action == 'cursor_left':
-            ### changes in the next line
+            # changes in the next line
             if not self.password_mode and control:
                 col, row = self._move_cursor_word_left()
-            ### changes in the next two lines
+            # changes in the next two lines
             elif self.completion_mode:
                 self.dispatch("on_left_option")
                 col, row = self.cursor
             elif self._get_cursor_col() > self.protected_len:
                 col, row = col - 1, row
         elif action == 'cursor_right':
-            ### changes in the next line
+            # changes in the next line
             if not self.password_mode and control:
                 col, row = self._move_cursor_word_right()
-            ### changes in the next two lines
+            # changes in the next two lines
             elif self.completion_mode:
                 self.dispatch("on_right_option")
                 col, row = self.cursor
@@ -353,23 +353,23 @@ class AdvancedTextInput(TextInput):
                 row = self.last_row
             col = len(self._lines[row])
         elif action == 'cursor_pgup':
-            ### changes start here
+            # changes start here
             if self.completion_mode:
                 self.dispatch("on_prev_options")
             else:
                 row = max(0, row - pgmove_speed)
                 col = min(len(self._lines[row]), col)
-            ### changes end here
+            # changes end here
         elif action == 'cursor_pgdown':
-            ### changes start here
+            # changes start here
             if self.completion_mode:
                 self.dispatch("on_next_options")
             else:
                 row = min(row + pgmove_speed, self.last_row)
                 col = min(len(self._lines[row]), col)
-            ### changes end here
+            # changes end here
         self.cursor = (col, row)
-    
+
     def on_touch_down(self, touch):
         if self.disabled:
             return
@@ -397,7 +397,7 @@ class AdvancedTextInput(TextInput):
                     self.scroll_x -= self.line_height
             if scroll_type == 'up':
                 if self.multiline:
-                    ### changes in the next two lines
+                    # changes in the next two lines
                     if (self.scroll_y + self.line_height - 1 >=
                             (self.last_row) * self.line_height):
                         return
@@ -428,10 +428,10 @@ class AdvancedTextInput(TextInput):
             self._selection_touch = touch
             self._selection_from = self._selection_to = self.cursor_index()
             self._update_selection()
-        
-        ### added one line here
+
+        # added one line here
         self.cancel_selection()
-        ### deleted four lines here
+        # deleted four lines here
 
         return False
 
@@ -441,14 +441,22 @@ class AdvancedTextInput(TextInput):
         col, row = value
         if self.focus:
             self._trigger_cursor_reset()
-            if row != self.last_row or col < self.protected_len:
+            if row != self.last_row:
                 self._editable = False
+            elif self._lines_flags[row] == 1:
+                self._editable = False if col < self.protected_len else True
             else:
-                self._editable = True
+                count = col
+                index = row - 1
+                while self._lines_flags[index] != 1 and index > 0:
+                    count += len(self._lines[index])
+                    index -= 1
+                count += len(self._lines[index])
+                self._editable = False if count < self.protected_len else True
         self._trigger_update_graphics()
 
     def keyboard_on_textinput(self, window, text):
-        ### changes start here
+        # changes start here
         if self._selection:
             self.cancel_selection()
         if not self._editable:
@@ -461,7 +469,7 @@ class AdvancedTextInput(TextInput):
             self.dispatch("on_space")
         elif self.completion_mode:
             self.dispatch("on_reduce_option")
-        ### changes end here
+        # changes end here
         return
 
     def select_all(self):
@@ -469,7 +477,7 @@ class AdvancedTextInput(TextInput):
 
         .. versionadded:: 1.4.0
         '''
-        ### changes start here
+        # changes start here
         text_end = len(self.text)
         line_start = text_end - (len(self._lines[-1]) - self.protected_len)
         if self._selection and self.selection_from == line_start\
@@ -478,7 +486,7 @@ class AdvancedTextInput(TextInput):
             self.select_text(0, text_end)
         else:
             self.select_text(line_start, text_end)
-        ### changes end here
+        # changes end here
 
     @overrides(TextInput)
     def _trigger_refresh_text(self, *args):
@@ -491,9 +499,29 @@ class AdvancedTextInput(TextInput):
     def insert_text(self, substring, from_undo=False):
         super(AdvancedTextInput, self).insert_text(substring, from_undo=False)
 
-    ### custom functions:
+    # custom functions:
+    def find_last_return(self, start, end):
+        try:
+            return self.text.rindex("\n", start, end)
+        except ValueError:
+            return -1
+
     def _reset_last_line(self):
-        self.last_row = len(self._lines) - 1
+        # calculate last carriage return last_new_row, last_new_row_index
+        last_return_index = self.find_last_return(0, len(self.text))
+        # reset last_row and last_row_start
+        if self.completion_mode:
+            last_new_row = 0
+            for i in range(len(self._lines_flags) - 1, 0, -1):
+                if self._lines_flags[i] == 1:
+                    last_new_row = i
+                    break
+            self.last_row = last_new_row - 1
+            self.last_row_start = self.find_last_return(
+                0, last_return_index) + 1
+        else:
+            self.last_row = len(self._lines) - 1
+            self.last_row_start = last_return_index + 1
 
     def display_command(self, text):
         self.cancel_selection()
@@ -515,13 +543,13 @@ class AdvancedTextInput(TextInput):
 
     def on_ctrl_c(self):
         pass
-    
+
     def on_left_option(self):
         pass
-    
+
     def on_next_options(self):
         pass
-    
+
     def on_prev_options(self):
         pass
 
@@ -536,7 +564,7 @@ class AdvancedTextInput(TextInput):
 
     def on_right_option(self):
         pass
-    
+
     def delete_lastchar(self):
         self.cancel_selection()
         self.do_cursor_movement("cursor_end", control=True)

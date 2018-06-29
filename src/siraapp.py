@@ -9,7 +9,7 @@ def main():
     controller = SiraController(view, model)
     view.set_controller(controller)
     view.run()
-
+    
 
 if __name__ == '__main__':
     main()

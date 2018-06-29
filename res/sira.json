@@ -1,5 +1,9 @@
 [
     {
+        "type": "title",
+        "title": "Text Options"
+    },
+    {
         "type": "string",
         "title": "Command Identifier",
         "desc": "The string of characters right before your commands",
@@ -21,5 +25,16 @@
         "desc": "Choose the font name",
         "section": "Text",
         "key": "font_name"
+    },
+    {
+        "type": "title",
+        "title": "Features"
+    },
+    {
+        "type": "bool",
+        "title": "Space Completion",
+        "desc": "Display optional keywords on every space",
+        "section": "Option",
+        "key": "space_completion"
     }
 ]

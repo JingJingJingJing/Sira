@@ -6,11 +6,10 @@ import query
 import issueOps
 from prompter import Prompter
 import re
-from utils import Super401, mylog, glob_dic
+from utils import Super401, func_log, glob_dic
 
 
 class SiraController():
-
     """The controller class which can handle input command and pass the corresponding function result
 
     public methods:
@@ -32,20 +31,21 @@ class SiraController():
         self.view = view
         self.model = model
         login.tryload()
-        self.separater = re.compile("\\s+")    # command separater
-        self.args = []         # hold the args of command
+        self.separater = re.compile("\\s+")  # command separater
+        self.args = []  # hold the args of command
         self.interactive = False
         self.tree = ET.parse("res/glossary.xml").getroot()
-        self.position = self.tree   # the current position of tree
+        self.position = self.tree  # the current position of tree
         self.prompter = Prompter()
         self.tp = {}
         self.updateMode = False
         self.updateDepth = 0
         self.updateIndex = 0
-        self.updateField = ['','','','','','','','','']
+        self.updateField = ['', '', '', '', '', '', '', '', '']
         self.updateIndexes = []
         self.updateIssue = ''
 
+    @func_log
     def processInput(self, string):
         """According to the xml DOM structure, parser the input from UI, exec function and display the result
 
@@ -54,7 +54,9 @@ class SiraController():
         """
 
         if self.updateMode and self.interactive:
-            self._update_special(string)
+            self.view.commandText.readonly = True
+            threading.Thread(
+                target=self._update_special, args=(None, string)).start()
         else:
             if not self.interactive:
                 ''' if it is not interactive mode '''
@@ -65,25 +67,12 @@ class SiraController():
                     issue = re.compile(r'\w*-\d*\S*')
                     if issue.search(string) is not None:
                         ''' if issue is provided '''
-                        target = string.split(' ')[2]
-                        f, r = issueOps.issue_display_info(target)
-
-                        if f:
-                            ''' displayed the issue info successfully '''
-                            self.updateIssue = target
-                            self.view.set_command_mode(False)
-                            self.view.info = r
-                            self.updateDepth = 2
-                            self.interactive = True
-                            self.updateMode = True
-                            
-                            return 
-
-
-                        else:
-                            ''' If the cmd is sira update but the given issue not found '''
-                            self.view.info = r
-                            return
+                        self.view.commandText.readonly = True
+                        thr = threading.Thread(
+                            target=self._display_wrapper,
+                            args=(None, string.split(' ')[2]))
+                        thr.start()
+                        return
 
                     else:
                         ''' If issue is not provided '''
@@ -107,15 +96,16 @@ class SiraController():
         This function only work in interactive mode.
 
         """
-        if(self.position is None or self.position == self.tree):
+        if (self.position is None or self.position == self.tree):
             pass
+        self._quit_updateMode('', True)
         self._clearcache()
         self.view.set_command_mode(True)
         self.view.commandText.readonly = False
         self.view.info = ["interactive mode closed"]
         self.view.print_header()
-    
-    def _cal(self, command): 
+
+    def _cal(self, command):
         # pass when command is empty in non-interactive mode
         if len(command) <= 0:
             if self.position == self.tree:
@@ -124,29 +114,33 @@ class SiraController():
 
         tokens = self.separater.split(command.strip())
         for i, token in enumerate(tokens):
-            pre_position = self.position        
+            pre_position = self.position
             for child in self.position.getchildren():
-                if child.tag == "keyword" and child.attrib['name'] == token:    # 如果在keyword里找到func
+                if child.tag == "keyword" and child.attrib['name'] == token:  # 如果在keyword里找到func
                     # exclude keywords need to login
-                    if (not self.view.username) and (token not in self.no_need_login):
+                    if (not self.view.username) and (
+                            token not in self.no_need_login):
                         self._sendinfo("Please login first")
                         return
                     # exclude login keyword if have logged in
                     elif self.view.username and token == "login":
-                        self._sendinfo("already logged in as " + self.view.username)
+                        self._sendinfo("already logged in as " +
+                                       self.view.username)
                         return
                     else:
                         self.position = child
                         break
-                elif child.tag == "optional" or child.tag == "required":    # 如果child是optional或者required
+                elif child.tag == "optional" or child.tag == "required":  # 如果child是optional或者required
                     # required field can't be empty
-                    if child.tag == "required" and not token:       # 如果required field 没有填
+                    if child.tag == "required" and not token:  # 如果required field 没有填
                         return
-                    if pre_position.tag != "keyword" and self.interactive and i != 0:   #
+                    if pre_position.tag != "keyword" and self.interactive and i != 0:  #
                         break
                     else:
                         self.position = child
-                        self.tp[token] = self.position.attrib.get('name') if token not in self.tp.keys() else self.tp[token]
+                        self.tp[token] = self.position.attrib.get(
+                            'name') if token not in self.tp.keys(
+                            ) else self.tp[token]
                         self.args.append(token)
                     break
             # do not extend deep
@@ -157,21 +151,23 @@ class SiraController():
                     self._sendinfo("error command")
                     return
         # pass if has sub-node ,exec function if has't
-        if self.position.find("./required") or self.position.find("./optional"):
+        if self.position.find("./required") or self.position.find(
+                "./optional"):
             # call function first if exist
             func = self.position.find("./function")
             if func is not None:
                 if func.attrib['object']:
-                    getattr(eval(func.attrib['object']),func.attrib['name'])()
+                    getattr(eval(func.attrib['object']), func.attrib['name'])()
                 else:
-                    getattr(self,func.attrib['name'])()
+                    getattr(self, func.attrib['name'])()
             # display intseractive text
             interactive = self.position.find("./interactive")
             self.interactive = True
             self.view.set_command_mode(False)
-            self.view.info = [interactive.text] if interactive is not None else [""]
+            self.view.info = [interactive.text
+                              ] if interactive is not None else [""]
 
-        elif self.position.find("./keyword"):   # 交互模式
+        elif self.position.find("./keyword"):  # 交互模式
             # display intseractive text
             interactive = self.position.find("./interactive")
             if interactive is not None:
@@ -184,7 +180,7 @@ class SiraController():
             self.view.commandText.readonly = True
             functag = self.position.find("./function")
             if functag.attrib['multi-thread'] == 'True':
-                threading.Thread(None,self._execfunc).start()
+                threading.Thread(None, self._execfunc).start()
             else:
                 if functag.attrib['name'] == "on_clear":
                     self.view.commandText.readonly = False
@@ -205,7 +201,6 @@ class SiraController():
             functag = self.position.find("./function")
             obj = functag.attrib['object']
             name = functag.attrib['name']
-            # print(functag,obj, name, self.position.find('..'), self.position.attrib['name'])
             if self.args:
                 f, result = getattr(eval(obj), name)(self.args)
             else:
@@ -241,6 +236,8 @@ class SiraController():
         self.view.commandText.readonly = False
         self.view.set_command_mode(True)
         if msg:
+            if isinstance(msg, str):
+                msg = [msg]
             self.view.info = msg
         self.view.print_header()
 
@@ -255,85 +252,135 @@ class SiraController():
         arg = self.args.pop()
         arg = arg + " " + s
         self.args.append(arg)
-        self.tp[arg] = self.position.attrib.get('name') if arg not in self.tp.keys() else self.tp[arg]
+        self.tp[arg] = self.position.attrib.get(
+            'name') if arg not in self.tp.keys() else self.tp[arg]
         # else:
         #     self.args.append(s)
     def auto_complete(self, command):
-        self.view.option = self.prompter.auto_complete(self.position,self.interactive,command)
+        if not self.updateMode:
+            self.view.option = self.prompter.auto_complete(
+                self.position, self.interactive, command)
+        else:
+            if self.updateDepth > 2:
+                try:
+                    lst = [
+                        'status', 'issuetype', 'summary', 'reporter',
+                        'priority', 'lable', 'description', 'assignee',
+                        'sprint'
+                    ]
+                    info = []
+                    for tips in eval(lst[self.updateIndex], glob_dic.tips.dic):
+                        if tips[1].startswith(command):
+                            info.append(tips[1])
+                    if info:
+                        self.view.option = info
+                except NameError:
+                    pass
 
-
-    def _update_special(self, s):
+    def _update_special(self, dum, s):
         lst = [
             'status', 'issuetype', 'summary', 'reporter', 'priority', 'lable',
             'description', 'assignee', 'sprint'
         ]
+        x = s.split(' ')
+        try:
+            s = ' '.join(list(filter(list.remove(x, ''), x)))
+        except ValueError:
+            s = ' '.join(x)
         if self.updateDepth == 1:
             ''' user need to give an issue '''
             f, r = issueOps.issue_display_info(s)
             if f:
-
                 self.updateIssue = s
             else:
-                
-                self._quit_updateMode()
+                self._quit_updateMode(r)
+                return
+            self.view.commandText.readonly = False
             self.view.info = r
 
         elif self.updateDepth == 2:
             ''' user need to choose from 8 fields and enter numbers '''
             valid = re.compile(r'\A[1-9](,[1-9])*$')
             if not valid.search(s):
+                self.view.commandText.readonly = False
                 self.view.info = ['Please enter numbers separated by ",": ']
                 return
+
             def decrease(e):
-                return int(e)-1
+                return int(e) - 1
+
             try:
-                self.updateIndexes = list(map(decrease,s.split(',')))
+                self.updateIndexes = list(map(decrease, s.split(',')))
                 if not len(self.updateIndexes):
+                    self.view.commandText.readonly = False
                     return
                 self.updateIndexes.sort(reverse=True)
                 index = self.updateIndexes.pop()
                 self.updateIndex = index
-                self.view.info =['{}: '.format(lst[index])]
-                
+                self.view.commandText.readonly = False
+                self.view.info = ['{}: '.format(lst[index])]
+
             except ValueError:
-                self.view.info = ['Input not valid, please enter numbers between 1 to 8 and separate them by " "']
+                self.view.commandText.readonly = False
+                self.view.info = [
+                    'Input not valid, please enter numbers between 1 to 8 and separate them by " "'
+                ]
                 return
 
         elif (self.updateDepth > 2) and (len(self.updateIndexes) > 0):
             ''' user start to update one by one '''
             if not s:
+                self.view.commandText.readonly = False
                 return
             self.updateField[self.updateIndex] = s
-            
+
             index = self.updateIndexes.pop()
+
             def delete_element(e):
                 if e != index:
                     return True
+
             output = lst[index]
-            self.updateIndexes = list(filter(delete_element, self.updateIndexes))
+            self.updateIndexes = list(
+                filter(delete_element, self.updateIndexes))
             self.updateIndexes.sort(reverse=True)
             self.updateIndex = index
-            
+            self.view.commandText.readonly = False
             self.view.info = ['{}: '.format(output)]
-
-
 
         else:
             ''' the last updated field '''
             self.updateField[self.updateIndex] = s
-            f, r = issueOps.issue_edit([self.updateIssue]+self.updateField)
-            self.view.info = r
-            self._quit_updateMode()
+            self._quit_updateMode(
+                issueOps.issue_edit([self.updateIssue] + self.updateField)[1])
             return
 
         self.updateDepth += 1
 
-    def _quit_updateMode(self):
+    def _display_wrapper(self, dum, issue):
+        f, r = issueOps.issue_display_info(issue)
+        if f:
+            ''' displayed the issue info successfully '''
+            self.view.commandText.readonly = False
+            self.updateIssue = issue
+            self.view.set_command_mode(False)
+            self.view.info = r
+            self.updateDepth = 2
+            self.interactive = True
+            self.updateMode = True
+            return
+
+        else:
+            ''' If the cmd is sira update but the given issue not found '''
+            self._quit_updateMode(r)
+            return
+
+    def _quit_updateMode(self, msg, c=False):
         self.updateMode = False
         self.updateDepth = 0
         self.updateIndex = 0
-        self.updateField = ['','','','','','','','']
+        self.updateField = ['', '', '', '', '', '', '', '', '']
         self.updateIndexes = []
         self.updateIssue = ''
-        self.closeinteractive()
-        self.view.commandText.readonly = False
+        if not c:
+            self._sendinfo(msg)

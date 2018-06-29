@@ -152,7 +152,10 @@ def getAssignee():
     url, headers = prepare('getAssignee')
     f, r = send_request(url, method.Get, headers, None, None)
     if f:
-        return goInto(r, 'assignee', 'key')
+        if goInto(r, 'assignee', 'key'):
+            return goInto(r, 'reporter', 'key')
+        else: 
+            return False
 
 
 def getPriority():
@@ -207,6 +210,10 @@ def tryload():
     except FileNotFoundError as err:
         mylog.error(err)
         return False
+    except json.decoder.JSONDecodeError as err:
+        mylog.error(err)
+        return False
+
 
 def getIssueFromSprint():
     getSprint()

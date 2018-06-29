@@ -63,11 +63,9 @@ def login(lst):
 
 def logout():
     url, headers = prepare('logout')
-    r = requests.delete(url, headers=headers)
-    try:
-        r.raise_for_status()
-    except requests.exceptions.HTTPError:
-        return (False, ['No account logged in yet'])
+    flag, r = send_request(url, method.Delete, headers, None, None)
+    if not flag:
+        return r
     f = open(glob_dic.get_value('cookie_path') + "cookie.txt", "w")
     f.write('')
     f.close
@@ -104,25 +102,35 @@ def getBoard():
     if f:
         return goInto(r.get('values'), 'board', 'id')
 
+def thread_download(url,headers,lst):
+    f, r = send_request(url, method.Get, headers, None, None)
+    if f:
+        lst += r.get("values")
 
-def getSprint():
-    headers = prepare('getSprint')[1]
-    lst = []
 
+
+def getBoardRelated():
     if not getBoard():
         return False
+    thrSprint = Thread()
+    thrVersion = Thread()
+    lstVersion = []
+    lstSprint = []
     for boardid in glob_dic.tips.get_value('board'):
-        url = 'http://' + glob_dic.get_value(
-            'domain') + '/rest/agile/1.0/board/' + str(boardid) + '/sprint'
-        f, r = send_request(url, method.Get, headers, None, None)
-        if not f:
-            return False
-        lst += r.get("values")
-    if not goInto(lst, 'sprint', 'name'):
+        url, headers = prepare('getBoard','/{}/sprint'.format(str(boardid)))
+        thrSprint = Thread(target = thread_download, args = (url,headers,lstSprint))
+        thrSprint.start()
+        url, headers = prepare('getBoard','/{}/version'.format(str(boardid)))
+        thrVersion = Thread(target = thread_download, args = (url,headers,lstVersion))
+        thrVersion.start()
+    thrSprint.join()
+    if not goInto(lstSprint, 'sprint', 'name'):
         return False
-    # print(lst)
+    thrVersion.join()
+    if not goInto(lstVersion, 'versions', 'name'):
+        return False
     glob_dic.tips.set_value('sid', [{}])
-    for msg in lst:
+    for msg in lstSprint:
         glob_dic.tips.get_value('sid')[0][msg.get('name').lower()] = msg.get('id')
     return True
 
@@ -170,8 +178,8 @@ def getVersion():
     lst = []
     for i, p in enumerate(glob_dic.tips.get_value('project')):
         print('Iteration %d' % i)
-        url, headers = prepare('getVersion')
-        url += '/{}/versions'.format(p)
+        url, headers = prepare('getVersion','/{}/versions'.format(p))
+        
         f, r = send_request(url, method.Get, headers, None, None)
         if not f:
             return False
@@ -183,7 +191,7 @@ def download():
     print('Downloading Project...')
     getProject()
     print('Downloading Sprint...')
-    getSprint()
+    getBoardRelated()
     print('Downloading Type...')
     getType()
     print('Downloading Issuetype...')
@@ -218,22 +226,22 @@ def tryload():
         return False
 
 
-def getIssueFromSprint():
-    getSprint()
-    glob_dic.set_value('issues',{})
-    lst = glob_dic.tips.get_value('sprint')
-    issues = []
-    for sp in lst:
-        sid = glob_dic.tips.get_value('sid')[0].get(sp.lower())
-        url, headers = prepare('getSprint','/{}/issue'.format(sid))
+# def getIssueFromSprint():
+#     getSprint()
+#     glob_dic.set_value('issues',{})
+#     lst = glob_dic.tips.get_value('sprint')
+#     issues = []
+#     for sp in lst:
+#         sid = glob_dic.tips.get_value('sid')[0].get(sp.lower())
+#         url, headers = prepare('getSprint','/{}/issue'.format(sid))
 
-        f, r = send_request(url, method.Get, headers, None, None)
-        if not f:
-            return False
-        issues += r.get('issues')
+#         f, r = send_request(url, method.Get, headers, None, None)
+#         if not f:
+#             return False
+#         issues += r.get('issues')
         
-        for issue in r.get('issues'):
-            glob_dic.get_value('issues')[issue.get('key')] = sp
+#         for issue in r.get('issues'):
+#             glob_dic.get_value('issues')[issue.get('key')] = sp
 
 
 

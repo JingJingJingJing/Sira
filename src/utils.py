@@ -118,7 +118,7 @@ class glob():
         self.set_value('cookie_path', '')
         self.set_value('cookie', '')
         self.set_value('timeout', 10)
-        self.set_value('protocol', 'http://')
+        self.set_value('protocol', 'https://')
         self.tips = tips({})
 
     def set_value(self, key, value):
@@ -181,7 +181,7 @@ class tips():
 
 
 glob_dic = glob({})
-domain = glob_dic.get_value('domain')
+domain = glob_dic.get_value('jira')
 protocol = glob_dic.get_value('protocol')
 address_book = {
     'logout': protocol + domain + '/rest/auth/1/session',
@@ -198,7 +198,7 @@ address_book = {
     'search': protocol + domain + '/rest/api/2/user',
     'getVersion': protocol + domain + '/rest/api/2/project',
     'getSprint':protocol + domain + '/rest/agile/1.0/sprint',
-    'assign_sprint': protocol + domain + '/rest/agile/1.0/sprint'
+    'assign_sprint': protocol + domain + '/rest/agile/1.0/sprint',
 }
 
 headers_book = {

@@ -2,7 +2,7 @@ import json
 
 import requests
 
-from login import getIssueFromSprint, getSprint, goInto, login
+from login import getBoardRelated, goInto, login
 from query import method, read_cookie, send_request
 from utils import glob_dic, mylog, prepare
 

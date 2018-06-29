@@ -1,0 +1,40 @@
+[
+    {
+        "type": "title",
+        "title": "Text Options"
+    },
+    {
+        "type": "string",
+        "title": "Command Identifier",
+        "desc": "The string of characters right before your commands",
+        "section": "Text",
+        "key": "cmd_identifier"
+    },
+    {
+        "type": "options",
+        "options": ["10", "11", "12", "14", "16", "17", "18", "20"],
+        "title": "Font Size",
+        "desc": "Choose the font size",
+        "section": "Text",
+        "key": "font_size"
+    },
+    {
+        "type": "options",
+        "options": ["Arial", "Cour", "DejaVu Sans Mono", "Menlo", "Monaco", "Times New Roman"],
+        "title": "Font",
+        "desc": "Choose the font name",
+        "section": "Text",
+        "key": "font_name"
+    },
+    {
+        "type": "title",
+        "title": "Features"
+    },
+    {
+        "type": "bool",
+        "title": "Space Completion",
+        "desc": "Display optional keywords on every space",
+        "section": "Option",
+        "key": "space_completion"
+    }
+]

@@ -190,7 +190,7 @@ glob_dic = glob({})
 address_book = dict()
 def reset_address_book():
     global address_book
-    domain = glob_dic.get_value('jira')
+    domain = glob_dic.get_value('domain')
     protocol = glob_dic.get_value('protocol')
     address_book = {
         'logout': protocol + domain + '/rest/auth/1/session',
@@ -199,7 +199,7 @@ def reset_address_book():
         'getStatus': protocol + domain + '/rest/api/2/status',
         'getType': protocol + domain + '/rest/api/2/project/type',
         'getIssuetype': protocol + domain + '/rest/api/2/issuetype',
-        'getAssignee': protocol + domain + '/rest/api/2/user/search?username=.',
+        'getAssignee': protocol + domain + '/rest/api/2/user/search?',
         'getPriority': protocol + domain + '/rest/api/2/priority',
         'query': protocol + domain + '/rest/api/2/search',
         'query_number': protocol + domain + '/rest/agile/1.0/issue',
@@ -209,6 +209,28 @@ def reset_address_book():
         'getSprint':protocol + domain + '/rest/agile/1.0/sprint',
         'assign_sprint': protocol + domain + '/rest/agile/1.0/sprint',
     }
+
+# domain ='lnvusjira.lenovonet.lenovo.local'
+
+# # domain = '10.176.120.165:8080'
+# protocol = 'https://'
+# address_book = {
+#         'logout': protocol + domain + '/rest/auth/1/session',
+#         'getProject': protocol + domain + '/rest/api/2/project',
+#         'getBoard': protocol + domain + '/rest/agile/1.0/board',
+#         'getStatus': protocol + domain + '/rest/api/2/status',
+#         'getType': protocol + domain + '/rest/api/2/project/type',
+#         'getIssuetype': protocol + domain + '/rest/api/2/issuetype',
+#         'getAssignee': protocol + domain + '/rest/api/2/user/search',
+#         'getPriority': protocol + domain + '/rest/api/2/priority',
+#         'query': protocol + domain + '/rest/api/2/search',
+#         'query_number': protocol + domain + '/rest/agile/1.0/issue',
+#         'issue': protocol + domain + '/rest/api/2/issue',
+#         'search': protocol + domain + '/rest/api/2/user',
+#         'getVersion': protocol + domain + '/rest/api/2/project',
+#         'getSprint':protocol + domain + '/rest/agile/1.0/sprint',
+#         'assign_sprint': protocol + domain + '/rest/agile/1.0/sprint',
+#     }
 
 headers_book = {
     'createmeta':{

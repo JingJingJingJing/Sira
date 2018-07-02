@@ -177,6 +177,12 @@ class SiraApp(App, CommandReactive, Completable, Mutative):
             self.config_func_dict[(section, key)](value)
 
     @overrides(App)
+    def on_start(self) -> None:
+        """TODO: both here and class doc
+        """
+        self.controller.on_start(self.username)
+
+    @overrides(App)
     def on_stop(self) -> None:
         """Fires on successful exit.
 
@@ -187,7 +193,8 @@ class SiraApp(App, CommandReactive, Completable, Mutative):
         if self.commandText.password_mode:
             self.commandText.password_mode = False
         write_memo_log(self, self.commandText)
-        glob_dic.tips.write_file('res/tables.json')
+        if self.username != "":
+            glob_dic.tips.write_file(self.username)
         return None
 
     @overrides(App)

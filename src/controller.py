@@ -30,7 +30,6 @@ class SiraController():
     def __init__(self, view, model):
         self.view = view
         self.model = model
-        login.tryload()
         self.separater = re.compile("\\s+")  # command separater
         self.args = []  # hold the args of command
         self.interactive = False
@@ -44,6 +43,9 @@ class SiraController():
         self.updateField = ['', '', '', '', '', '', '', '', '']
         self.updateIndexes = []
         self.updateIssue = ''
+
+    def on_start(self, username):
+        login.tryload(username)
 
     @func_log
     def processInput(self, string):
@@ -210,6 +212,7 @@ class SiraController():
             if name == "login" and f:
                 self.view.username = self.args[0]
             elif (name == "login" and not f) or name == "logout":
+                glob_dic.tips.write_file(self.view.username)
                 self.view.username = ""
             # result = result[1]
             # display result

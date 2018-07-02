@@ -1,10 +1,11 @@
 import json
+from os import F_OK, access, mkdir
 from threading import Thread
 
 import requests
 
 from query import method, send_request
-from utils import (Super401, glob_dic, mylog, prepare)
+from utils import Super401, glob_dic, mylog, prepare
 
 ''' lst = ['username','password'] '''
 
@@ -300,9 +301,13 @@ def download():
     # pass
 
 
-def tryload():
+def tryload(username):
+    directory = "res/downloads/"
+    if not access(directory, F_OK):
+        mkdir(directory)
     try:
-        f = open('res/tables.json', 'r')
+        filename = '{}{}.json'.format(directory, username)
+        f = open(filename, 'r')
         data = json.loads(f.read())
         f.close()
 

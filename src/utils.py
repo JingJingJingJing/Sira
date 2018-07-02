@@ -175,7 +175,11 @@ class tips():
                 break
         tgt_list.insert(start_index, element)
 
-    def write_file(self, file_name):
+    def write_file(self, username):
+        directory = "res/downloads/"
+        if not access(directory, F_OK):
+            mkdir(directory)
+        file_name = "{}{}.json".format(directory, username)
         f = open(file_name, 'w+')
         f.write(json.dumps(self.dic))
         f.close()

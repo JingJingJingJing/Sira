@@ -460,7 +460,7 @@ class AdvancedTextInput(TextInput):
         if self._selection:
             self.cancel_selection()
         if not self._editable:
-            self.do_cursor_movement("cursor_end", control=False)
+            self.do_cursor_movement("cursor_end", control=True)
         if self.password_mode:
             self.password_cache += text
         else:

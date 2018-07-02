@@ -97,7 +97,14 @@ def getTarget(fields, field):
         except KeyError:
             ret = fields.get(field)
     except TypeError:
-        ret = str(fields.get(field))
+        try:
+            ret = str(fields.get(field)[0].get('name'))
+        except IndexError:
+            ret = str(fields.get(field))
+        except TypeError:
+            pass
+        except AttributeError:
+            ret = fields.get(field)
     if ret != '':
         return ret
     else:

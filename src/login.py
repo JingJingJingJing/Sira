@@ -15,6 +15,7 @@ def login(lst):
     url = prepare('logout')[0]
     headers = {'Content-Type': 'application/json'}
     data = json.dumps({"username": un, "password": pw})
+    print(url, headers, data)
     try:
         r = requests.post(
             url,
@@ -63,11 +64,14 @@ def login(lst):
 
 def logout():
     url, headers = prepare('logout')
-    r = requests.delete(url, headers=headers)
     try:
-        r.raise_for_status()
-    except requests.exceptions.HTTPError:
-        return (False, ['No account logged in yet'])
+        r = requests.delete(url, headers = headers, timeout=5)
+        try:
+            r.raise_for_status()
+        except requests.exceptions.HTTPError:
+            pass
+    except requests.exceptions.RequestException:
+        pass
     f = open(glob_dic.get_value('cookie_path') + "cookie.txt", "w")
     f.write('')
     f.close
@@ -103,30 +107,84 @@ def getBoard():
     f, r = send_request(url, method.Get, headers, None, None)
     if f:
         return goInto(r.get('values'), 'board', 'id')
+    return False
+def assignment(sname, sid, lst):
+    for issue in lst:
+        glob_dic.tips.get_value('issue')[0][issue.get('name').upper()] = sname
+
+def getAll(sname, sid):
+    
+
+    url,headers = prepare('assign_sprint','/{}/issue'.format(sid))
+    
+    f,r = send_request(url, method.Get, headers, None, None)
+    
+    if f:
+        for issue in r.get('issues'):
+            glob_dic.tips.get_value('issues')[0][issue.get('key').upper()] = sname
+            
+    
+
+# getAll('','')
+def thread_download(url,headers,lst,sprint=False):
+    f, r = send_request(url, method.Get, headers, None, None)
+    if f:
+        mlst = r.get('values')
+        lst += mlst
+        if sprint:
+            thr = Thread()
+            thr_lst = []
+            for msg in mlst:
+                
+                spName = msg.get('name')
+                spId = msg.get('id')
+                glob_dic.tips.get_value('sid')[0][spName.lower()] = spId
+
+                thr = Thread(target=getAll, args=(spName,spId))
+                thr_lst.append(thr)
+                thr.start()
+
+            for t in thr_lst:
+                t.join()
 
 
-def getSprint():
-    headers = prepare('getSprint')[1]
-    lst = []
 
+
+def getBoardRelated():
     if not getBoard():
         return False
-    for boardid in glob_dic.tips.get_value('board'):
-        url = 'http://' + glob_dic.get_value(
-            'domain') + '/rest/agile/1.0/board/' + str(boardid) + '/sprint'
-        f, r = send_request(url, method.Get, headers, None, None)
-        if not f:
-            return False
-        lst += r.get("values")
-    if not goInto(lst, 'sprint', 'name'):
-        return False
-    # print(lst)
+    thrSprint = Thread()
+    thrVersion = Thread()
+    lstVersion = []
+    lstSprint = []
     glob_dic.tips.set_value('sid', [{}])
-    for msg in lst:
-        glob_dic.tips.get_value('sid')[0][msg.get('name').lower()] = msg.get('id')
+    glob_dic.tips.set_value('issues', [{}])
+    thr_s = []
+    thr_v = []
+    for boardid in glob_dic.tips.get_value('board'):
+        url, headers = prepare('getBoard','/{}/sprint'.format(str(boardid)))
+        thrSprint = Thread(target = thread_download, args = (url,headers,lstSprint,True))
+        thr_s.append(thrSprint)
+        thrSprint.start()
+        url, headers = prepare('getBoard','/{}/version'.format(str(boardid)))
+        thrVersion = Thread(target = thread_download, args = (url,headers,lstVersion))
+        thr_v.append(thrVersion)
+        thrVersion.start()
+    for t in thr_s:
+        t.join()
+    
+    if lstSprint:
+        if not goInto(lstSprint, 'sprint', 'name'):
+            return False
+    for t in thr_v:
+        t.join()
+    if not goInto(lstVersion, 'versions', 'name'):
+        return False
+
     return True
 
-
+# getBoardRelated()
+# print(glob_dic.tips.get_value('issues'))
 def getStatus():
     url, headers = prepare('getStatus')
     f, r = send_request(url, method.Get, headers, None, None)
@@ -148,14 +206,28 @@ def getIssuetype():
         return goInto(r, 'issuetype', 'name')
 
 
+def getUserHelper(lst, url, headers, i):
+    param = {'username':'.','maxResults':100,'startAt':i}
+    f, r = send_request(url, method.Get, headers, param, None)
+    if f:
+        lst += r
+
 def getAssignee():
     url, headers = prepare('getAssignee')
-    f, r = send_request(url, method.Get, headers, None, None)
-    if f:
-        if goInto(r, 'assignee', 'key'):
-            return goInto(r, 'reporter', 'key')
-        else: 
-            return False
+    lst=[]
+    thr = Thread()
+    thr_lst = []
+    for i in range(0,10000,100):
+        url, headers = prepare('getAssignee')
+        thr = Thread(target=getUserHelper, args=(lst,url,headers,i))
+        thr_lst.append((thr))
+        thr.start()
+    for t in thr_lst:
+        t.join()
+    if goInto(lst, 'assignee', 'key'):
+        return goInto(lst, 'reporter', 'key')
+    else: 
+        return False
 
 
 def getPriority():
@@ -170,31 +242,60 @@ def getVersion():
     lst = []
     for i, p in enumerate(glob_dic.tips.get_value('project')):
         print('Iteration %d' % i)
-        url, headers = prepare('getVersion')
-        url += '/{}/versions'.format(p)
+        url, headers = prepare('getVersion','/{}/versions'.format(p))
+        
         f, r = send_request(url, method.Get, headers, None, None)
         if not f:
             return False
         lst += r
     return goInto(lst, 'versions', 'name')
 
+# def ultimate_request(url, headers, i, sname, lst):
+#     param = {'startAt':i, 'maxResults':100}
+#     f, r = send_request(url, method.Get, headers, param, None)
+#     if f:
+#         lst += r
+# def ultimateGetIssues():
+#     id_book = glob_dic.tips.get_value('sid')[0]
+
+#     thr = Thread()
+#     thr_lst = []
+#     lst = []
+#     for sid in id_book:
+#         sname = id_book.get(sid)
+#         url, headers = prepare('getBoard','/sprint/{}/issue'.format(str(sid)))
+#         for i in range(0, 3500, 10):
+#             thr = Thread(target=ultimate_request, args=(url,headers,i,sname,lst))
+#             thr_lst.append(thr)
+#             thr.start()
+#     for t in thr_lst:
+#         t.join()
+#     print('Do I return?')
+    
+#     return goInto(lst, 'issues', 'key')
+        
+        # sname = glob_dic.tips.get_value('sid')[]
+        # url, headers = prepare('getBoard','/sprint/{}/issue'.format(str(sid)))
 
 def download():
-    print('Downloading Project...')
-    getProject()
     print('Downloading Sprint...')
-    getSprint()
-    print('Downloading Type...')
-    getType()
+    thrb = Thread(target=getBoardRelated,args=())
+    print('Downloading Project...')
+    thrpro = Thread(target=getProject,args=())
     print('Downloading Issuetype...')
-    getIssuetype()
+    thri = Thread(target=getIssuetype,args=())
     print('Downloading Status...')
-    getStatus()
+    thrs = Thread(target=getStatus,args=())
     print('Downloading Assignee...')
-    getAssignee()
+    thra = Thread(target=getAssignee,args=())
     print('Downloading Priority...')
-    getPriority()
-    # getVersion()
+    thrpri = Thread(target=getPriority,args=())
+    threadlst = [thrpro, thrb, thri, thrs, thra, thrpri]
+    for thread in threadlst:
+        thread.start()
+    for thread in threadlst:
+        thread.join()
+    print('Writing to disc')
     glob_dic.tips.write_file('res/tables.json')
     # pass
 
@@ -214,61 +315,66 @@ def tryload():
         mylog.error(err)
         return False
 
+# tryload()
+# ultimateGetIssues()
+# print(glob_dic.tips.get_value('issues'))
+# f = open('issues.json','w')
+# f.write(json.dumps(glob_dic.tips.get_value('issues')))
+# f.close
+# def getIssueFromSprint():
+#     getSprint()
+#     glob_dic.set_value('issues',{})
+#     lst = glob_dic.tips.get_value('sprint')
+#     issues = []
+#     for sp in lst:
+#         sid = glob_dic.tips.get_value('sid')[0].get(sp.lower())
+#         url, headers = prepare('getSprint','/{}/issue'.format(sid))
 
-def getIssueFromSprint():
-    getSprint()
-    glob_dic.set_value('issues',{})
-    lst = glob_dic.tips.get_value('sprint')
-    issues = []
-    for sp in lst:
-        sid = glob_dic.tips.get_value('sid')[0].get(sp.lower())
-        url, headers = prepare('getSprint','/{}/issue'.format(sid))
-
-        f, r = send_request(url, method.Get, headers, None, None)
-        if not f:
-            return False
-        issues += r.get('issues')
+#         f, r = send_request(url, method.Get, headers, None, None)
+#         if not f:
+#             return False
+#         issues += r.get('issues')
         
-        for issue in r.get('issues'):
-            glob_dic.get_value('issues')[issue.get('key')] = sp
+#         for issue in r.get('issues'):
+#             glob_dic.get_value('issues')[issue.get('key')] = sp
 
 
 
 
-def getPermission():
-    url, headers = prepare('mypermission')
+# def getPermission():
+#     url, headers = prepare('mypermission')
 
-    print(url)
-    print(headers)
+#     print(url)
+#     print(headers)
 
-    f, r = send_request(url, method.Get, headers, None, None)
+#     f, r = send_request(url, method.Get, headers, None, None)
 
-def getProjectKey():
-    url, headers = prepare('createmeta')
-    f, r = send_request(url, method.Get, headers, None, None)
-    if not f:
-        return False, r
-    for p in r.get('projects'):
-        print(p.get('key'))
+# def getProjectKey():
+#     url, headers = prepare('createmeta')
+#     f, r = send_request(url, method.Get, headers, None, None)
+#     if not f:
+#         return False, r
+#     for p in r.get('projects'):
+#         print(p.get('key'))
 
 
-def getAss():
-    url, headers = prepare('query')
-    data = {}
-    data["jql"] = '{}'.format('project=TAN')
-    data["startAt"] = 0
-    data["maxResults"] = 100
-    dic = {}
-    while data.get("startAt") < 1000:
-        print('DOING {}'.format(data.get("startAt")))
-        tosend = json.dumps(data)
-        f, r = send_request(url, method.Post, headers, None, tosend)
-        print(type(r))
-        dic.update(r)
-        data["startAt"] = data.get("startAt") + 100
-    f = open('jqlexample.json','a')
-    f.write(json.dumps(r))
-    f.close
+# def getAss():
+#     url, headers = prepare('query')
+#     data = {}
+#     data["jql"] = '{}'.format('project=TAN')
+#     data["startAt"] = 0
+#     data["maxResults"] = 100
+#     dic = {}
+#     while data.get("startAt") < 1000:
+#         print('DOING {}'.format(data.get("startAt")))
+#         tosend = json.dumps(data)
+#         f, r = send_request(url, method.Post, headers, None, tosend)
+#         print(type(r))
+#         dic.update(r)
+#         data["startAt"] = data.get("startAt") + 100
+#     f = open('jqlexample.json','a')
+#     f.write(json.dumps(r))
+#     f.close
     # print(url, headers, data)
 # getAss()
 # print(glob_dic.tips.get_value('assignee'))
@@ -279,7 +385,8 @@ def getAss():
 # except FileNotFoundError as fe:
 # mylog.error(fe)
 # download()
-# login(['admin','admin'])
+# login([
+# 'zhengxp2','bvfp-6217'])
 # download()
 # print(glob_dic.tips.get_value('assignee'))
 # getProject()

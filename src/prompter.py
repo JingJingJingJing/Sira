@@ -1,6 +1,7 @@
 import re
 from utils import glob_dic, func_log
 
+
 class Prompter:
 
     blank = " "
@@ -26,23 +27,30 @@ class Prompter:
                 if child.tag == "keyword" and child.attrib['name'] == token:
                     position = child
                     break
-                elif (child.tag == "optional" or child.tag == "required") and token:
-                    if interactive and child.find("./keyword") is None and not complete:
+                    
+                elif (child.tag == "optional"
+                      or child.tag == "required") and token:
+                    if interactive and child.find(
+                            "./keyword") is None and not complete:
                         return result
                     position = child
                     break
+
             if position == pre_position and l > 0:
-                if((not complete and position.find("./keyword") is None) or (complete and i != len(tokens)-1 )):
+                if ((not complete and position.find("./keyword") is None)
+                        or (complete and i != len(tokens) - 1)):
                     return result
 
         keywords = position.findall("./keyword")
-        if (not complete and keywords) or (complete and position.tag == "keyword"):
+        if (not complete and keywords) or (complete
+                                           and position.tag == "keyword"):
             for keyword in keywords:
                 name = keyword.attrib['name']
                 if complete and name.startswith(tokens[-1]):
                     result.append(name)
                 elif not complete:
                     result.append(name)
+
         elif complete and position.tag == "cmd":
             option = position.getchildren()
             for op in option:
@@ -51,12 +59,10 @@ class Prompter:
                     result.append(name)
 
         else:
-            
             option = position.find("./required") if not complete else position
             if not option:
                 option = position.find("./optional")
 
-            
             if option and option.attrib['name'] in glob_dic.tips.dic:
                 result = glob_dic.tips.get_value(option.attrib['name'])
                 if complete:
@@ -65,6 +71,5 @@ class Prompter:
                         if s.startswith(tokens[-1]):
                             cl.append(s)
                     result = cl
-                            
-        return result
 
+        return result

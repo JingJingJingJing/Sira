@@ -152,6 +152,8 @@ class Completable(object):
         instance.cancel_selection()
         start = instance.text.rindex('\n')
         end = len(instance.text)
+        if end < start:
+            import pdb; pdb.set_trace()
         instance.select_text(start, end)
         instance.delete_selection()
 
@@ -173,14 +175,10 @@ class Completable(object):
             [Scenario 3]: When behavior == "prev", the function will display the
                 previous n options.
 
-        [requires]: instance.completion_mode
         [ensures]:  [display n options below self.commandText.last_row]
                     self.tab_index = -1
                     [convention #3.1]
         """
-        if not asserts(instance.completion_mode, "Not in completion mode"):
-            return True
-
         # display options based on behavior
         instance.do_cursor_movement("cursor_end", control=True)
         cursor = instance.cursor
@@ -188,6 +186,7 @@ class Completable(object):
             self.page_index = 0
         else:
             self._clear_options(instance)
+            instance.completion_mode = False
             self.tab_index = -1
             next_index = self.page_index + self.options_per_line\
                 if behavior == "next"\
@@ -200,8 +199,9 @@ class Completable(object):
             else len(option)
         instance.insert_text(
             "\n" + " ".join(option[self.page_index:end_index]))
-        instance._reset_last_line()
+        instance.completion_mode = True
         instance.cursor = cursor
+        instance._reset_last_line()
         instance.on_cursor(instance, instance.cursor)
         # calc start indices of displayed options
         index = 0
@@ -344,6 +344,8 @@ class Completable(object):
             instance.cancel_selection()
             start = self.completion_start
             end = instance.find_last_return(0, len(instance.text))
+            if end < start:
+                import pdb; pdb.set_trace()
             instance.select_text(start, end)
             instance.delete_selection()
             instance.do_cursor_movement("cursor_end", control=True)
@@ -354,6 +356,8 @@ class Completable(object):
             last_char_return = instance.text.rindex("\n")
             start = last_char_return + self.start_indices[tab_index] + 1
             end = start + len(self.option[self.page_index + tab_index])
+            if end < start:
+                import pdb; pdb.set_trace()
             instance.select_text(start, end)
             # update self.tab_index
             self.tab_index = tab_index
@@ -370,9 +374,11 @@ class Completable(object):
         """
         if not asserts(instance.completion_mode, "Not in completion mode"):
             return
+
         self._clear_options(instance)
         instance.completion_mode = False
         instance._reset_last_line()
+        instance.on_cursor(instance, instance.cursor)
         self.tab_index = -1
         self.option = []
         self.start_indices = []
@@ -391,7 +397,6 @@ class Completable(object):
         if option == []:
             obj.completion_mode = False
             return
-        obj.completion_mode = True
         # calc the start index of the completion part
         search_start = obj.last_row_start + obj.protected_len
         search_end = len(obj.text)

@@ -81,7 +81,8 @@ class AdvancedTextInput(TextInput):
         elif internal_action == 'backspace':
             if self.password_mode:
                 self.password_cache = self.password_cache[:-1]
-            if self._get_cursor_col() > self.protected_len:
+            col, row = self.cursor
+            if self._check_editable_cursor(col, row, backspace=True):
                 self.do_backspace()
         elif internal_action == 'enter':
             if not self.readonly:
@@ -327,7 +328,7 @@ class AdvancedTextInput(TextInput):
             elif self.completion_mode:
                 self.dispatch("on_left_option")
                 col, row = self.cursor
-            elif self._get_cursor_col() > self.protected_len:
+            elif self._check_editable_cursor(col, row, backspace=True):
                 col, row = col - 1, row
         elif action == 'cursor_right':
             # changes in the next line
@@ -350,6 +351,7 @@ class AdvancedTextInput(TextInput):
                 row = 0
         elif action == 'cursor_end':
             if control:
+                self._reset_last_line()
                 row = self.last_row
             col = len(self._lines[row])
         elif action == 'cursor_pgup':
@@ -440,19 +442,17 @@ class AdvancedTextInput(TextInput):
         # and update all the graphics.
         col, row = value
         if self.focus:
-            self._trigger_cursor_reset()
-            if row != self.last_row:
+            if self.last_row > len(self._lines_flags) - 1:
+                self._reset_last_line()
+            index = self.last_row
+            last_row_list = [self.last_row]
+            while self._lines_flags[index] != 1 and index > 0:
+                index -= 1
+                last_row_list.append(index)
+            if row not in last_row_list:
                 self._editable = False
-            elif self._lines_flags[row] == 1:
-                self._editable = False if col < self.protected_len else True
             else:
-                count = col
-                index = row - 1
-                while self._lines_flags[index] != 1 and index > 0:
-                    count += len(self._lines[index])
-                    index -= 1
-                count += len(self._lines[index])
-                self._editable = False if count < self.protected_len else True
+                self._editable = self._check_editable_cursor(col, row)
         self._trigger_update_graphics()
 
     def keyboard_on_textinput(self, window, text):
@@ -469,6 +469,7 @@ class AdvancedTextInput(TextInput):
             self.dispatch("on_space")
         elif self.completion_mode:
             self.dispatch("on_reduce_option")
+        self._reset_last_line()
         # changes end here
         return
 
@@ -499,7 +500,24 @@ class AdvancedTextInput(TextInput):
     def insert_text(self, substring, from_undo=False):
         super(AdvancedTextInput, self).insert_text(substring, from_undo=False)
 
+    @overrides(TextInput)
+    def do_backspace(self, *args, **kwargs):
+        # import pdb; pdb.set_trace()
+        super(AdvancedTextInput, self).do_backspace(*args, **kwargs)
+        # self._reset_last_line()
+        # self.on_cursor(self, self.cursor)
+
     # custom functions:
+    def _check_editable_cursor(self, col, row, backspace = False):
+        count = col
+        index = row
+        while self._lines_flags[index] != 1 and index > 0:
+            index -= 1
+            count += len(self._lines[index])
+        if backspace:
+            return True if count > self.protected_len else False
+        return False if count < self.protected_len else True
+
     def find_last_return(self, start, end):
         try:
             return self.text.rindex("\n", start, end)
@@ -568,5 +586,6 @@ class AdvancedTextInput(TextInput):
     def delete_lastchar(self):
         self.cancel_selection()
         self.do_cursor_movement("cursor_end", control=True)
-        if self._get_cursor_col() > self.protected_len:
+        col, row = self.cursor
+        if self._check_editable_cursor(col, row, backspace=True):
             self.do_backspace()

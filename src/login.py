@@ -55,7 +55,7 @@ def login(lst):
         f.write(glob_dic.get_value('cookie'))
         f.close()
         mylog.info("Successfully logged in as " + un)
-        thr = Thread(target=download, args=())
+        thr = Thread(target=download, args=(un))
         thr.start()
         return (True, ["Success"])
     except requests.exceptions.RequestException as err:
@@ -96,12 +96,18 @@ def goInto(lst, key, field):
     return False
 
 
+# def getProject():
+#     url, headers = prepare('getProject')
+#     f, r = send_request(url, method.Get, headers, None, None)
+#     if f:
+#         return goInto(r, 'project', 'key')
+
 def getProject():
-    url, headers = prepare('getProject')
+    url, headers = prepare('createmeta')
     f, r = send_request(url, method.Get, headers, None, None)
     if f:
         return goInto(r, 'project', 'key')
-
+    return False
 
 def getBoard():
     url, headers = prepare('getBoard')
@@ -278,7 +284,7 @@ def getVersion():
         # sname = glob_dic.tips.get_value('sid')[]
         # url, headers = prepare('getBoard','/sprint/{}/issue'.format(str(sid)))
 
-def download():
+def download(un):
     print('Downloading Sprint...')
     thrb = Thread(target=getBoardRelated,args=())
     print('Downloading Project...')
@@ -297,7 +303,7 @@ def download():
     for thread in threadlst:
         thread.join()
     print('Writing to disc')
-    glob_dic.tips.write_file('res/tables.json')
+    glob_dic.tips.write_file(un)
     # pass
 
 
@@ -356,13 +362,14 @@ def tryload(username):
 
 # def getProjectKey():
 #     url, headers = prepare('createmeta')
+
 #     f, r = send_request(url, method.Get, headers, None, None)
 #     if not f:
 #         return False, r
 #     for p in r.get('projects'):
 #         print(p.get('key'))
-
-
+# login(['zhengxp2','bvfp-6217'])
+# getProjectKey()
 # def getAss():
 #     url, headers = prepare('query')
 #     data = {}
@@ -391,7 +398,7 @@ def tryload(username):
 # mylog.error(fe)
 # download()
 # login([
-# 'zhengxp2','bvfp-6217'])
+# login(['zhengxp2','bvfp-6217'])
 # download()
 # print(glob_dic.tips.get_value('assignee'))
 # getProject()

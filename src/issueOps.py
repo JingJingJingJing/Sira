@@ -1,7 +1,6 @@
 import json
 
-import requests
-
+import requests 
 from login import getBoardRelated, goInto, login
 from query import method, read_cookie, send_request
 from utils import glob_dic, mylog, prepare
@@ -37,7 +36,7 @@ def issue_assign_sprint(issue, sprint):
     for sp in glob_dic.tips.get_value('sprint'):
         if sprint.lower() == sp.lower():
             sprint = sp
-            break
+            break 
     url, headers = prepare(
         'assign_sprint', '/{}/issue'.format(
             glob_dic.tips.get_value('sid')[0].get(sprint.lower())))

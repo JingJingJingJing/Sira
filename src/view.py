@@ -85,10 +85,12 @@ class SiraApp(App, CommandReactive, Completable, Mutative):
 
         self.settings_cls = SettingsWithSidebar
         self.username = self.config.get("Text", "username")
-        self.options_per_line = self.config.get("Option", "options_per_line")
+        self.options_per_line = max(
+            int(self.config.get("Option", "options_per_line")), 1)
         self.space_completion = self.config.get(
             "Option", "space_completion") == "1"
-        self.tab_completion = self.config.get("Option", "tab_completion") == "1"
+        self.tab_completion = self.config.get(
+            "Option", "tab_completion") == "1"
         self._reset_header(self.username,
                            self.config.get("Text", "cmd_identifier"))
         self.protected_text = self.header

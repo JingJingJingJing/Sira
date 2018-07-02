@@ -16,7 +16,6 @@ def login(lst):
     url = prepare('logout')[0]
     headers = {'Content-Type': 'application/json'}
     data = json.dumps({"username": un, "password": pw})
-    print(url, headers, data)
     try:
         r = requests.post(
             url,
@@ -55,7 +54,7 @@ def login(lst):
         f.write(glob_dic.get_value('cookie'))
         f.close()
         mylog.info("Successfully logged in as " + un)
-        thr = Thread(target=download, args=(un))
+        thr = Thread(target=download, args=(None, un))
         thr.start()
         return (True, ["Success"])
     except requests.exceptions.RequestException as err:
@@ -106,7 +105,7 @@ def getProject():
     url, headers = prepare('createmeta')
     f, r = send_request(url, method.Get, headers, None, None)
     if f:
-        return goInto(r, 'project', 'key')
+        return goInto(r.get('projects'), 'project', 'key')
     return False
 
 def getBoard():
@@ -284,7 +283,7 @@ def getVersion():
         # sname = glob_dic.tips.get_value('sid')[]
         # url, headers = prepare('getBoard','/sprint/{}/issue'.format(str(sid)))
 
-def download(un):
+def download(dummy, un):
     print('Downloading Sprint...')
     thrb = Thread(target=getBoardRelated,args=())
     print('Downloading Project...')

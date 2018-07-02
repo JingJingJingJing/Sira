@@ -28,7 +28,7 @@
     },
     {
         "type": "title",
-        "title": "Features"
+        "title": "Auto Completion"
     },
     {
         "type": "bool",
@@ -36,5 +36,19 @@
         "desc": "Display optional keywords on every space",
         "section": "Option",
         "key": "space_completion"
+    },
+    {
+        "type": "bool",
+        "title": "Tab Completion",
+        "desc": "Display and select options on every tab",
+        "section": "Option",
+        "key": "tab_completion"
+    },
+    {
+        "type": "numeric",
+        "title": "Option Number",
+        "desc": "The number of options displayed each time",
+        "section": "Option",
+        "key": "options_per_line"
     }
 ]

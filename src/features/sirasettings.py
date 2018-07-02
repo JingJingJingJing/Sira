@@ -75,7 +75,17 @@ class Mutative(object):
     be initialized by subclasses before calling any other functions in Mutative.
     """
 
+    options_per_line = kp.NumericProperty(7)
+    """Dummy reference to eliminate syntax error. This instance variable should
+    be initialized by subclasses before calling any other functions in Mutative.
+    """
+
     space_completion = None
+    """Dummy reference to eliminate syntax error. This instance variable should
+    be initialized by subclasses before calling any other functions in Mutative.
+    """
+
+    tab_completion = None
     """Dummy reference to eliminate syntax error. This instance variable should
     be initialized by subclasses before calling any other functions in Mutative.
     """
@@ -158,6 +168,16 @@ class Mutative(object):
 
         self.commandText.font_size = int(value)
 
+    def _on_options_per_line(self, value: str) -> None:
+        """TODO: both here and class docs
+        """
+        if not value.isdigit() or int(value) < 1:
+            self.config.set("Option", "options_per_line", "1")
+            self.config.write()
+            # TODO
+        
+        self.options_per_line = max(int(value), 1)
+
     def _on_protocol(self, value: str) -> None:
         """Private function fired when protocol is changed through self.config.
 
@@ -171,8 +191,12 @@ class Mutative(object):
     def _on_space_completion(self, value: str) -> None:
         """TODO: both here and class doc
         """
-        self.space_completion = True if self.config.get(
-            "Option", "space_completion") == "1" else False
+        self.space_completion = value == "1"
+
+    def _on_tab_completion(self, value:str) -> None:
+        """TODO: both here and class doc
+        """
+        self.tab_completion = value == "1"
 
     def _on_timeout(self, value: str) -> None:
         """Private function fired when timeout is changed through self.config.

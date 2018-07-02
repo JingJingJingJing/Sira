@@ -43,5 +43,12 @@
         "desc": "Display and select options on every tab",
         "section": "Option",
         "key": "tab_completion"
+    },
+    {
+        "type": "numeric",
+        "title": "Option Number",
+        "desc": "The number of options displayed each time",
+        "section": "Option",
+        "key": "options_per_line"
     }
 ]

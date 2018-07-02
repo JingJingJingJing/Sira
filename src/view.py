@@ -61,7 +61,8 @@ class SiraApp(App, CommandReactive, Completable, Mutative):
             ("Jira", "timeout"): self._on_timeout,
             ("Jira", "protocol"): self._on_protocol,
             ("Option", "space_completion"): self._on_space_completion,
-            ("Option", "tab_completion"): self._on_tab_completion
+            ("Option", "tab_completion"): self._on_tab_completion,
+            ("Option", "options_per_line"): self._on_options_per_line
         }
 
     @overrides(App)
@@ -84,6 +85,7 @@ class SiraApp(App, CommandReactive, Completable, Mutative):
 
         self.settings_cls = SettingsWithSidebar
         self.username = self.config.get("Text", "username")
+        self.options_per_line = self.config.get("Option", "options_per_line")
         self.space_completion = self.config.get(
             "Option", "space_completion") == "1"
         self.tab_completion = self.config.get("Option", "tab_completion") == "1"
@@ -113,7 +115,8 @@ class SiraApp(App, CommandReactive, Completable, Mutative):
                         ("Jira", "timeout"),
                         ("Jira", "protocol"),
                         ("Option", "space_completion"),
-                        ("Option", "tab_completion")
+                        ("Option", "tab_completion"),
+                        ("Option", "options_per_line")
                     ]
         """
         text = {
@@ -129,7 +132,8 @@ class SiraApp(App, CommandReactive, Completable, Mutative):
         }
         option = {
             "space_completion": "1",
-            "tab_completion": "1"
+            "tab_completion": "1",
+            "options_per_line": "7"
         }
         config.setdefaults("Text", text)
         config.setdefaults("Jira", jira)

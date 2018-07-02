@@ -11,7 +11,7 @@ from features.sirasettings import Mutative
 from utils import asserts, func_log, overrides, write_memo_log, glob_dic
 
 
-class SiraApp(App, Completable, CommandReactive, Mutative):
+class SiraApp(App, CommandReactive, Completable, Mutative):
 
     """The application class for Sira application, working as a view.
 
@@ -60,7 +60,8 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
             ("Jira", "url"): self._on_url,
             ("Jira", "timeout"): self._on_timeout,
             ("Jira", "protocol"): self._on_protocol,
-            ("Option", "space_completion"): self._on_space_completion
+            ("Option", "space_completion"): self._on_space_completion,
+            ("Option", "tab_completion"): self._on_tab_completion
         }
 
     @overrides(App)
@@ -83,8 +84,9 @@ class SiraApp(App, Completable, CommandReactive, Mutative):
 
         self.settings_cls = SettingsWithSidebar
         self.username = self.config.get("Text", "username")
-        self.space_completion = True if self.config.get(
-            "Option", "space_completion") == "1" else False
+        self.space_completion = self.config.get(
+            "Option", "space_completion") == "1"
+        self.tab_completion = self.config.get("Option", "tab_completion") == "1"
         self._reset_header(self.username,
                            self.config.get("Text", "cmd_identifier"))
         self.protected_text = self.header

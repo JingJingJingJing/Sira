@@ -117,6 +117,10 @@ class Completable(object):
     }
     """
 
+    tab_completion = kp.BooleanProperty()
+    """Kivy numeric property to store whether use completion on tab.
+    """
+
     tab_index = kp.NumericProperty(-1)
     """Kivy numeric property to store current index in displayed options.
     """
@@ -298,6 +302,8 @@ class Completable(object):
         if instance.completion_mode:
             self._select_next_option("tab")
         else:
+            if not self.tab_completion:
+                return True
             string = instance.text[instance.last_row_start
                                    + instance.protected_len:]
             self.from_space = False

@@ -496,17 +496,6 @@ class AdvancedTextInput(TextInput):
             lambda dt: self._reset_last_line()
         )
 
-    @overrides(TextInput)
-    def insert_text(self, substring, from_undo=False):
-        super(AdvancedTextInput, self).insert_text(substring, from_undo=False)
-
-    @overrides(TextInput)
-    def do_backspace(self, *args, **kwargs):
-        # import pdb; pdb.set_trace()
-        super(AdvancedTextInput, self).do_backspace(*args, **kwargs)
-        # self._reset_last_line()
-        # self.on_cursor(self, self.cursor)
-
     # custom functions:
     def _check_editable_cursor(self, col, row, backspace = False):
         count = col

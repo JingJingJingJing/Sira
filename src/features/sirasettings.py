@@ -80,6 +80,11 @@ class Mutative(object):
     be initialized by subclasses before calling any other functions in Mutative.
     """
 
+    tab_completion = None
+    """Dummy reference to eliminate syntax error. This instance variable should
+    be initialized by subclasses before calling any other functions in Mutative.
+    """
+
     def __init__(self):
         """Constructor of Mutative. This method should not be called except by
         its subclasses' constructors.
@@ -171,8 +176,12 @@ class Mutative(object):
     def _on_space_completion(self, value: str) -> None:
         """TODO: both here and class doc
         """
-        self.space_completion = True if self.config.get(
-            "Option", "space_completion") == "1" else False
+        self.space_completion = value == "1"
+
+    def _on_tab_completion(self, value:str) -> None:
+        """TODO: both here and class doc
+        """
+        self.tab_completion = value == "1"
 
     def _on_timeout(self, value: str) -> None:
         """Private function fired when timeout is changed through self.config.

@@ -2,7 +2,7 @@ import json
 
 import requests
 
-from login import getIssueFromSprint, getSprint, goInto, login
+from login import getBoardRelated, goInto, login
 from query import method, read_cookie, send_request
 from utils import glob_dic, mylog, prepare
 
@@ -37,7 +37,7 @@ def issue_assign_sprint(issue, sprint):
     for sp in glob_dic.tips.get_value('sprint'):
         if sprint.lower() == sp.lower():
             sprint = sp
-            break
+            breakgit 
     url, headers = prepare(
         'assign_sprint', '/{}/issue'.format(
             glob_dic.tips.get_value('sid')[0].get(sprint.lower())))
@@ -110,7 +110,7 @@ lst = [status, issuetype, summary, reporter,
     priority, lable, description, assignee, sprint]
 '''
 
-
+glob_labels = []
 def issue_display_info(issue):
     url, headers = prepare('query_number', '/{}'.format(issue.upper()))
     f, r = send_request(url, method.Get, headers, None, None)
@@ -118,13 +118,19 @@ def issue_display_info(issue):
         return False, r
     dic = r.get('fields')
     lst = [
-        'status', 'issuetype', 'summary', 'reporter', 'priority', 'lable',
+        'status', 'issuetype', 'summary', 'reporter', 'priority', 'labels',
         'description', 'assignee', 'sprint'
     ]
     s = 'Here are the information of {}: '.format(issue)
     stringLst = [s]
     for i, field in enumerate(lst):
         obj = dic.get(field)
+        if field == 'labels':
+            try:
+                global glob_labels
+                glob_labels=obj
+            except AttributeError:
+                pass
         if isinstance(obj, dict):
             s = '{}.{}: {}'.format(i + 1, field, obj.get('name'))
         else:
@@ -153,12 +159,26 @@ def issue_edit(lst):
     labels = lst[5].split(' ')
     description = lst[6]
     assignee = {"name": lst[7]}
+    if labels != ['']:
+        global glob_labels
+        r_lst = [issue, 'remove']
+        a_lst = [issue, 'add']
+        for label in labels:
+            if label in glob_labels:
+                r_lst.append(label)
+            else:
+                a_lst.append(label)
+        if not issue_edit_labels(r_lst):
+            return False, ['error occur while removing labels']
+        if not issue_edit_labels(a_lst):
+            return False, ['error occur while adding labels']
+    glob_labels = []
     lst = lst[1:]
     fields = [
-        issuetype, summary, reporter, priority, labels, description, assignee
+        issuetype, summary, reporter, priority, description, assignee
     ]
     keys = [
-        'issuetype', 'summary', 'reporter', 'priority', 'labels',
+        'issuetype', 'summary', 'reporter', 'priority',
         'description', 'assignee'
     ]
     dic = {}
@@ -185,16 +205,20 @@ def issue_edit_labels(lst):
     issue = lst[0]
     mode = lst[1]
     labels = lst[2:]
-    url, headers = prepare('issue', '/{}'.format(issue))
-    target = []
-    for l in labels:
-        target.append({mode: l})
-    data = json.dumps({"update": {"labels": target}})
-    f, r = send_request(url, method.Put, headers, None, data)
-    if not f:
-        return False, ['Error occured while add labels'] + r
-    return True, ['label successfully {}ed'.format(mode)]
-
+    if labels:
+        
+        url, headers = prepare('issue', '/{}'.format(issue))
+        target = []
+        for l in labels:
+            target.append({mode: l})
+        data = json.dumps({"update": {"labels": target}})
+        f, r = send_request(url, method.Put, headers, None, data)
+        if not f:
+            return False, ['Error occured while add labels'] + r
+        
+        return True, ['label successfully {}ed'.format(mode)]
+    else:
+        return True
 
 def issue_assign(lst):
     issue = lst[0]

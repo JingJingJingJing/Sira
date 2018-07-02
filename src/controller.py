@@ -335,11 +335,9 @@ class SiraController():
             self.updateField[self.updateIndex] = s
 
             index = self.updateIndexes.pop()
-
             def delete_element(e):
                 if e != index:
                     return True
-
             output = lst[index]
             self.updateIndexes = list(
                 filter(delete_element, self.updateIndexes))

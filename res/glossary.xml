@@ -77,9 +77,9 @@
                 <interactive>issuetype(*):</interactive>
                 <required name="issuetype">
                     <interactive>summary(*):</interactive>
-                    <optional name="summary">
-                        <interactive>reporter:</interactive>
-                        <optional name="assignee">
+                    <required name="summary">
+                        <interactive>reporter(*):</interactive>
+                        <required name="assignee">
                             <interactive>priority:</interactive>
                             <optional name="priority">
                                 <interactive>labels:</interactive>

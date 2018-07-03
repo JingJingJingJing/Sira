@@ -27,9 +27,8 @@ class SiraController():
     normal_cursor = ">"
     no_need_login = ["sira", "login", "exit", "clear"]
 
-    def __init__(self, view, model):
+    def __init__(self, view):
         self.view = view
-        self.model = model
         self.separater = re.compile("\\s+")  # command separater
         self.args = []  # hold the args of command
         self.interactive = False
@@ -47,7 +46,6 @@ class SiraController():
     def on_start(self, username):
         login.tryload(username)
 
-    @func_log
     def processInput(self, string):
         """According to the xml DOM structure, parser the input from UI, exec function and display the result
 
@@ -213,6 +211,7 @@ class SiraController():
                 self.view.username = self.args[0]
             elif (name == "login" and not f) or name == "logout":
                 glob_dic.tips.write_file(self.view.username)
+                glob_dic.tips.dic = dict()
                 self.view.username = ""
             # result = result[1]
             # display result
@@ -272,12 +271,12 @@ class SiraController():
                         'sprint'
                     ]
                     info = []
-                    for tips in eval(lst[self.updateIndex], glob_dic.tips.dic):
+                    for tips in glob_dic.tips.dic[lst[self.updateIndex]]:
                         if tips[1].startswith(command):
                             info.append(tips[1])
                     if info:
                         self.view.option = info
-                except NameError:
+                except KeyError:
                     pass
 
     def _update_special(self, dum, s):

@@ -197,6 +197,7 @@ def reset_address_book():
     domain = glob_dic.get_value('domain')
     protocol = glob_dic.get_value('protocol')
     address_book = {
+        'login': protocol + domain + '/rest/auth/1/session',
         'logout': protocol + domain + '/rest/auth/1/session',
         'getProject': protocol + domain + '/rest/api/2/project',
         'getBoard': protocol + domain + '/rest/agile/1.0/board',
@@ -320,7 +321,8 @@ headers_book = {
 
 
 def prepare(s, extend=None):
-    headers_book.get(s)['cookie'] = read_cookie()
+    if s != 'login':
+        headers_book.get(s)['cookie'] = read_cookie()
     if extend is not None:
         return (address_book.get(s) + extend, headers_book.get(s))
     return (address_book.get(s), headers_book.get(s))

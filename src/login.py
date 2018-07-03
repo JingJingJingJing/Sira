@@ -13,7 +13,7 @@ from utils import Super401, glob_dic, mylog, prepare
 def login(lst):
     un = lst[0]
     pw = lst[1]
-    url = prepare('logout')[0]
+    url = prepare('login')[0]
     headers = {'Content-Type': 'application/json'}
     data = json.dumps({"username": un, "password": pw})
     try:
@@ -24,9 +24,10 @@ def login(lst):
             timeout=glob_dic.get_value('timeout'),
             verify=False)
         mylog.error(r.text)
+        print('login here')
         if r.status_code == 401:
             mylog.error("401 Unauthorized")
-            raise Super401
+            return False,['401 Unauthorized!','Please make sure the username and password are correct']
         try:
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:

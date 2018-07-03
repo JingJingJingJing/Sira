@@ -27,9 +27,8 @@ class SiraController():
     normal_cursor = ">"
     no_need_login = ["sira", "login", "exit", "clear"]
 
-    def __init__(self, view, model):
+    def __init__(self, view):
         self.view = view
-        self.model = model
         self.separater = re.compile("\\s+")  # command separater
         self.args = []  # hold the args of command
         self.interactive = False

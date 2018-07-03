@@ -96,8 +96,8 @@
                                     </optional>
                                 </optional>
                             </optional>
-                        </optional>
-                    </optional>
+                        </required>
+                    </required>
                 </required>
             </required>
         </keyword>

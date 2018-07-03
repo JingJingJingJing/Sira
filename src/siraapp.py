@@ -1,12 +1,10 @@
 from controller import SiraController
-from model import SiraMode
 from view import SiraApp
 
 
 def main():
     view = SiraApp()
-    model = SiraMode()
-    controller = SiraController(view, model)
+    controller = SiraController(view)
     view.set_controller(controller)
     view.run()
     

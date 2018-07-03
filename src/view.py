@@ -128,9 +128,9 @@ class SiraApp(App, CommandReactive, Completable, Mutative):
             "username": ""
         }
         jira = {
-            "url": "10.176.120.165:8080",
+            "url": "lnvusjira.lenovonet.lenovo.local",
             "timeout": "5",
-            "protocol": "http"
+            "protocol": "https"
         }
         option = {
             "space_completion": "1",

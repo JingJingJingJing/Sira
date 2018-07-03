@@ -194,7 +194,7 @@ class SiraApp(App, CommandReactive, Completable, Mutative):
         """
         if self.commandText.password_mode:
             self.commandText.password_mode = False
-        write_memo_log(self, self.commandText)
+        write_memo_log(self, self.commandText, glob_dic, glob_dic.tips)
         if self.username != "":
             glob_dic.tips.write_file(self.username)
         return None

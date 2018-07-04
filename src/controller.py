@@ -64,6 +64,10 @@ class SiraController():
 
                 if update.search(string) is not None:
                     ''' if it is sira update commond '''
+                    if not self.view.username:
+                        self.view.info = ['Please Login First!']
+                        self.view.print_header()
+                        return 
                     issue = re.compile(r'\w*-\d*\S*')
                     if issue.search(string) is not None:
                         ''' if issue is provided '''

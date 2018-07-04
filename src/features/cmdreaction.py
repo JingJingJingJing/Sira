@@ -108,6 +108,23 @@ class CommandReactive(object):
         """
         pass
 
+    def delete_line(self, num: int) -> None:
+        """TODO: both here and class doc.
+        """
+        self.commandText.do_cursor_movement("cursor_end", control=True)
+        self.commandText.deletion_mode = True
+        while num > 0 and self.commandText.text != "":
+            start = max(self.commandText.last_row_start - 1, 0)
+            end = len(self.commandText.text)
+            self.commandText.cancel_selection()
+            self.commandText.select_text(start, end)
+            self.commandText.delete_selection()
+            self.commandText._reset_last_line()
+            num -= 1
+        self.commandText.deletion_mode = False
+        if num > 0:
+            raise ValueError("Delete more lines than existing")
+
     def on_clear(self) -> None:
         """Public function to clear the screen. This methods essentially
         scrolls all historical texts above the window.

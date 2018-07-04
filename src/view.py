@@ -62,7 +62,8 @@ class SiraApp(App, CommandReactive, Completable, Mutative):
             ("Jira", "protocol"): self._on_protocol,
             ("Option", "space_completion"): self._on_space_completion,
             ("Option", "tab_completion"): self._on_tab_completion,
-            ("Option", "options_per_line"): self._on_options_per_line
+            ("Option", "options_per_line"): self._on_options_per_line,
+            ("Result", "max_result"): self._on_max_result
         }
 
     @overrides(App)
@@ -118,7 +119,8 @@ class SiraApp(App, CommandReactive, Completable, Mutative):
                         ("Jira", "protocol"),
                         ("Option", "space_completion"),
                         ("Option", "tab_completion"),
-                        ("Option", "options_per_line")
+                        ("Option", "options_per_line"),
+                        ("Result", "max_result)
                     ]
         """
         text = {
@@ -137,9 +139,13 @@ class SiraApp(App, CommandReactive, Completable, Mutative):
             "tab_completion": "1",
             "options_per_line": "7"
         }
+        result = {
+            "max_result": "10"
+        }
         config.setdefaults("Text", text)
         config.setdefaults("Jira", jira)
         config.setdefaults("Option", option)
+        config.setdefaults("Result", result)
 
     @overrides(App)
     def build_settings(self, settings: Settings) -> None:

@@ -50,5 +50,16 @@
         "desc": "The number of options displayed each time",
         "section": "Option",
         "key": "options_per_line"
+    },
+    {
+        "type": "title",
+        "title": "Display Options"
+    },
+    {
+        "type": "numeric",
+        "title": "Maximum Result",
+        "desc": "The maximum number of results displayed each time",
+        "section": "Result",
+        "key": "max_result"
     }
 ]

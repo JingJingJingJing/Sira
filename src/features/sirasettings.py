@@ -168,6 +168,12 @@ class Mutative(object):
 
         self.commandText.font_size = int(value)
 
+    def _on_max_result(self, value: str) -> None:
+        """TODO: both here and class doc.
+        """
+        print("entered", value)
+        # TODO
+
     def _on_options_per_line(self, value: str) -> None:
         """TODO: both here and class docs
         """

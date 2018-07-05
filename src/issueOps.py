@@ -151,13 +151,14 @@ def issue_edit(lst):
     status = lst[0]
     if not issue_transit([issue, status]):
         return False, ['Error occured during transit']
-    issuetype = {"name": lst[1].capitalize()}
-    summary = lst[2]
-    reporter = {"name": lst[3]}
-    priority = {"name": lst[4].capitalize()}
-    labels = lst[5].split(' ')
-    description = lst[6]
-    assignee = {"name": lst[7]}
+    lst = lst[1:]
+    issuetype = {"name": lst[0].capitalize()}
+    summary = lst[1]
+    reporter = {"name": lst[2]}
+    priority = {"name": lst[3].capitalize()}
+    labels = lst[4].split(' ')
+    description = lst[5]
+    assignee = {"name": lst[6]}
     if labels != ['']:
         global glob_labels
         r_lst = [issue, 'remove']
@@ -188,8 +189,8 @@ def issue_edit(lst):
     f, r = send_request(url, method.Put, headers, None, data)
     if not f:
         return False, r
-    if lst[7]:
-        f, r = issue_assign_sprint(issue, lst[7])
+    if lst[6]:
+        f, r = issue_assign_sprint(issue, lst[6])
         if not f:
             return False, [
                 'Problem occured while assigning the issue to target sprint: All other fields have been updated!'
@@ -259,9 +260,6 @@ def issue_addComment(lst):
     issue = lst[0]
     url, headers = prepare('issue', '/{}/{}'.format(issue, 'comment'))
     data = json.dumps({"body": lst[1]})
-    # with open("res/comments.json", "r") as f:
-    #     data = json.load(f)
-    #     data = json.dumps(data)
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
         return False, r

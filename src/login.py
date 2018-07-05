@@ -4,7 +4,7 @@ from threading import Thread
 
 import requests
 
-from query import method, send_request
+from query import method, send_request, query_project_assignee
 from utils import Super401, glob_dic, mylog, prepare
 
 ''' lst = ['username','password'] '''
@@ -190,8 +190,6 @@ def getBoardRelated():
 
     return True
 
-# getBoardRelated()
-# print(glob_dic.tips.get_value('issues'))
 def getStatus():
     url, headers = prepare('getStatus')
     f, r = send_request(url, method.Get, headers, None, None)

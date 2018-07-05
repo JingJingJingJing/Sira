@@ -50,6 +50,12 @@
                             <function multi-thread="True" object="query" name="query_project_sprint" para="project_name sprint"/>
                         </required>
                     </keyword>
+                    <keyword name="status">
+                        <interactive>status:</interactive>
+                        <required name="status">
+                            <function multi-thread="True" object="query" name="query_project_status" para="project_name status"/>
+                        </required>
+                    </keyword>
                 </required>
             </keyword>
             <keyword name="type">
@@ -102,10 +108,5 @@
             </required>
         </keyword>
         <keyword name="update"/>
-            <!-- <interactive>issueId/Key:</interactive>
-            <required name="issueId">
-                <function multi-thread="True" object="issueOps" name="issue_display_info" para="issueId"/>
-            </required>
-        </keyword> -->
     </keyword>
 </cmd>

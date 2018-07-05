@@ -284,100 +284,112 @@ class SiraController():
                     pass
 
     def _update_special(self, dum, s):
-        lst = [
-            'status', 'issuetype', 'summary', 'reporter', 'priority', 'lable',
-            'description', 'assignee', 'sprint'
-        ]
-        x = s.split(' ')
         try:
-            s = ' '.join(list(filter(list.remove(x, ''), x)))
-        except ValueError:
-            s = ' '.join(x)
-        if self.updateDepth == 1:
-            ''' user need to give an issue '''
-            f, r = issueOps.issue_display_info(s)
-            if f:
-                self.updateIssue = s
-            else:
-                self._quit_updateMode(r)
-                return
-            self.view.commandText.readonly = False
-            self.view.info = r
-
-        elif self.updateDepth == 2:
-            ''' user need to choose from 8 fields and enter numbers '''
-            valid = re.compile(r'\A[1-9](,[1-9])*$')
-            if not valid.search(s):
-                self.view.commandText.readonly = False
-                self.view.info = ['Please enter numbers separated by ",": ']
-                return
-
-            def decrease(e):
-                return int(e) - 1
-
+            lst = [
+                'status', 'issuetype', 'summary', 'reporter', 'priority', 'lable',
+                'description', 'assignee', 'sprint'
+            ]
+            x = s.split(' ')
             try:
-                self.updateIndexes = list(map(decrease, s.split(',')))
-                if not len(self.updateIndexes):
+                s = ' '.join(list(filter(list.remove(x, ''), x)))
+            except ValueError:
+                s = ' '.join(x)
+            if self.updateDepth == 1:
+                ''' user need to give an issue '''
+                f, r = issueOps.issue_display_info(s)
+                if f:
+                    self.updateIssue = s
+                else:
+                    self._quit_updateMode(r)
+                    return
+                self.view.commandText.readonly = False
+                self.view.info = r
+
+            elif self.updateDepth == 2:
+                ''' user need to choose from 8 fields and enter numbers '''
+                valid = re.compile(r'\A[1-9](,[1-9])*$')
+                if not valid.search(s):
+                    self.view.commandText.readonly = False
+                    self.view.info = ['Please enter numbers separated by ",": ']
+                    return
+
+                def decrease(e):
+                    return int(e) - 1
+
+                try:
+                    self.updateIndexes = list(map(decrease, s.split(',')))
+                    if not len(self.updateIndexes):
+                        self.view.commandText.readonly = False
+                        return
+                    self.updateIndexes.sort(reverse=True)
+                    index = self.updateIndexes.pop()
+                    self.updateIndex = index
+                    self.view.commandText.readonly = False
+                    self.view.info = ['{}: '.format(lst[index])]
+
+                except ValueError:
+                    self.view.commandText.readonly = False
+                    self.view.info = [
+                        'Input not valid, please enter numbers between 1 to 8 and separate them by " "'
+                    ]
+                    return
+
+            elif (self.updateDepth > 2) and (len(self.updateIndexes) > 0):
+                ''' user start to update one by one '''
+                if not s:
                     self.view.commandText.readonly = False
                     return
-                self.updateIndexes.sort(reverse=True)
+                self.updateField[self.updateIndex] = s
+
                 index = self.updateIndexes.pop()
+                def delete_element(e):
+                    return e != index
+                output = lst[index]
+                self.updateIndexes = list(
+                    filter(delete_element, self.updateIndexes))
+                self.updateIndexes.sort(reverse=True)
                 self.updateIndex = index
                 self.view.commandText.readonly = False
-                self.view.info = ['{}: '.format(lst[index])]
+                self.view.info = ['{}: '.format(output)]
 
-            except ValueError:
-                self.view.commandText.readonly = False
-                self.view.info = [
-                    'Input not valid, please enter numbers between 1 to 8 and separate them by " "'
-                ]
+            else:
+                ''' the last updated field '''
+                self.updateField[self.updateIndex] = s
+                self._quit_updateMode(
+                    issueOps.issue_edit([self.updateIssue] + self.updateField)[1])
                 return
 
-        elif (self.updateDepth > 2) and (len(self.updateIndexes) > 0):
-            ''' user start to update one by one '''
-            if not s:
-                self.view.commandText.readonly = False
-                return
-            self.updateField[self.updateIndex] = s
-
-            index = self.updateIndexes.pop()
-            def delete_element(e):
-                if e != index:
-                    return True
-            output = lst[index]
-            self.updateIndexes = list(
-                filter(delete_element, self.updateIndexes))
-            self.updateIndexes.sort(reverse=True)
-            self.updateIndex = index
-            self.view.commandText.readonly = False
-            self.view.info = ['{}: '.format(output)]
-
-        else:
-            ''' the last updated field '''
-            self.updateField[self.updateIndex] = s
-            self._quit_updateMode(
-                issueOps.issue_edit([self.updateIssue] + self.updateField)[1])
-            return
-
-        self.updateDepth += 1
+            self.updateDepth += 1
+        except Super401:
+            if self.view.username:
+                self.view.username = ''
+                self._quit_updateMode('Cookie expired! Please Login Again')
+            else:
+                self._quit_updateMode('Please login first')
 
     def _display_wrapper(self, dum, issue):
-        f, r = issueOps.issue_display_info(issue)
-        if f:
-            ''' displayed the issue info successfully '''
-            self.view.commandText.readonly = False
-            self.updateIssue = issue
-            self.view.set_command_mode(False)
-            self.view.info = r
-            self.updateDepth = 2
-            self.interactive = True
-            self.updateMode = True
-            return
-
-        else:
-            ''' If the cmd is sira update but the given issue not found '''
-            self._quit_updateMode(r)
-            return
+        try:
+            f, r = issueOps.issue_display_info(issue)
+            if f:
+                ''' displayed the issue info successfully '''
+                self.view.commandText.readonly = False
+                self.updateIssue = issue
+                self.view.set_command_mode(False)
+                self.view.info = r
+                self.updateDepth = 2
+                self.interactive = True
+                self.updateMode = True
+                return
+            else:
+                ''' If the cmd is sira update but the given issue not found '''
+                self._quit_updateMode(r)
+                return
+        except Super401:
+            if self.view.username:
+                self.view.username = ''
+                self._quit_updateMode('Cookie expired! Please Login Again')
+            else:
+                self._quit_updateMode('Please login first')
 
     def _quit_updateMode(self, msg, c=False):
         self.updateMode = False

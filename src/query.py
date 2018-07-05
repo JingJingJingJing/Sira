@@ -6,6 +6,20 @@ from requests.status_codes import _codes
 from utils import Super401, glob_dic, mylog, prepare, read_cookie
 """ This function returns all issue assigned to the user 'user' """
 
+class Queue:
+    def __init__(self):
+        self.lst = []
+
+    def push(self,item):
+        self.lst.insert(0,item)
+
+    def pop(self):
+        return self.lst.pop()
+
+    def isEmpty(self):
+        return len(self.lst) == 0
+
+q = Queue()
 
 def send_request(url, method, headers, params, data):
     r = requests.Response
@@ -147,19 +161,26 @@ def query_number(lst):
         return False, r
     return True, getResponse([r])
 
-def query(field1, field2, f):
+
+
+def query(field1, field2, counter=int(0)):
     url, headers = prepare('query')
     if field2:
         field2 = 'and ' + field2
     data = {}
-    data["jql"] = '{} {}'.format(field1, field2)
-    data["startAt"] = 0
-    data["maxResults"] = 100
+    data["jql"] = '{} {} order by updated DESC'.format(field1, field2)
+    data["startAt"] = 30
+    data["maxResults"] = 10
     data = json.dumps(data)
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
         return False, r
-    return True, getResponse(r.get('issues'))
+    ret = getResponse(r.get('issues'))
+    print(len(ret))
+    if ret == ['Issue Not Found']:
+        return False, ['Issue Not Found']
+    else:
+        return True, ret
 
 
 def addQuotation(s):
@@ -170,28 +191,28 @@ def addQuotation(s):
 
 
 def query_sprint(lst):
-    return query('sprint=' + addQuotation(lst[0]), '', 0)
+    return query('sprint=' + addQuotation(lst[0]), '')
 
 
 ''' lst = ['assignee name or id'] '''
 
 
 def query_assignee(lst):
-    return query('assignee=' + addQuotation(lst[0]), '', 0)
+    return query('assignee=' + addQuotation(lst[0]), '')
 
 
 ''' lst = ['issuetype or issuetype id'] '''
 
 
 def query_type(lst):
-    return query('issuetype =' + addQuotation(lst[0]), '', 0)
+    return query('issuetype =' + addQuotation(lst[0]), '')
 
 
 ''' lst = ['issue status name or id'] '''
 
 
 def query_status(lst):
-    return query('status=' + addQuotation(lst[0]), '', 0)
+    return query('status=' + addQuotation(lst[0]), '')
 
 
 ''' lst = ['project name or id','issuetype or issuetype id'] '''
@@ -199,7 +220,7 @@ def query_status(lst):
 
 def query_project_type(lst):
     return query('project=' + addQuotation(lst[0]),
-                 'issuetype =' + addQuotation(lst[1]), 1)
+                 'issuetype =' + addQuotation(lst[1]))
 
 
 ''' lst = ['project name or id','assignee name or id'] '''
@@ -207,7 +228,7 @@ def query_project_type(lst):
 
 def query_project_assignee(lst):
     return query('project=' + addQuotation(lst[0]),
-                 'assignee =' + addQuotation(lst[1]), 1)
+                 'assignee =' + addQuotation(lst[1]))
 
 
 ''' lst = ['project name or id','sprint name or id'] '''
@@ -215,7 +236,7 @@ def query_project_assignee(lst):
 
 def query_project_sprint(lst):
     return query('project =' + addQuotation(lst[0]),
-                 'sprint =' + addQuotation(lst[1]), 1)
+                 'sprint =' + addQuotation(lst[1]))
 
 
 ''' lst = ['project name or id','issue status name or id'] '''
@@ -223,7 +244,7 @@ def query_project_sprint(lst):
 
 def query_project_status(lst):
     return query('project =' + addQuotation(lst[0]),
-                 'status =' + addQuotation(lst[1]), 1)
+                 'status =' + addQuotation(lst[1]))
 
 
 class method(Enum):
@@ -231,6 +252,7 @@ class method(Enum):
     Post = 1
     Put = 2
     Delete = 3
+
 
 
 if __name__ == '__main__':

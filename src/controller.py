@@ -42,7 +42,9 @@ class SiraController():
         self.updateField = ['', '', '', '', '', '', '', '', '']
         self.updateIndexes = []
         self.updateIssue = ''
-
+        self.contMode = False
+        self.func = ''
+        self.counter = 0
     def on_start(self, username):
         login.tryload(username)
 
@@ -52,6 +54,22 @@ class SiraController():
         *string* is the command from UI
 
         """
+        if self.contMode and self.interactive:
+            if re.compile(r'\Ay(es)?$').search(string) or re.compile(r'\AY(es)?$').search(string):
+                item = query.q.pop()
+                if item:
+                    self.counter += 1
+
+                else:
+                    pass
+
+            elif re.compile(r'\An(o)?$').search(string) or re.compile(r'\AN(o)?$').search(string):
+                pass
+
+            else:
+                return
+
+
 
         if self.updateMode and self.interactive:
             self.view.commandText.readonly = True
@@ -88,11 +106,6 @@ class SiraController():
                         return
             self._cal(string)
 
-        # try:
-        #     self._cal(string)
-        # except Exception as err:
-        #     mylog.error(err)
-        #     self._sendinfo("error while processing")
 
     def closeinteractive(self):
         """Close the interactive mode by clear cache and display "interactive mode closed"
@@ -400,3 +413,6 @@ class SiraController():
         self.updateIssue = ''
         if not c:
             self._sendinfo(msg)
+
+    def _query_series(self, dum, lst):
+        pass

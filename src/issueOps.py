@@ -173,7 +173,6 @@ def issue_edit(lst):
         if not issue_edit_labels(a_lst):
             return False, ['error occur while adding labels']
     glob_labels = []
-    lst = lst[1:]
     fields = [
         issuetype, summary, reporter, priority, description, assignee
     ]
@@ -183,14 +182,14 @@ def issue_edit(lst):
     ]
     dic = {}
     for i in range(0, len(fields)):
-        if lst[i]:
+        if lst[i] != "":
             dic[keys[i]] = fields[i]
     data = json.dumps({"fields": dic})
     f, r = send_request(url, method.Put, headers, None, data)
     if not f:
         return False, r
-    if lst[6]:
-        f, r = issue_assign_sprint(issue, lst[6])
+    if lst[7]:
+        f, r = issue_assign_sprint(issue, lst[7])
         if not f:
             return False, [
                 'Problem occured while assigning the issue to target sprint: All other fields have been updated!'

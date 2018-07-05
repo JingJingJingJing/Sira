@@ -154,8 +154,9 @@ class SiraController():
                 if pre_position.tag != "keyword" and self.args:
                     self._increpara(token)
                 else:
-                    keywords = [child.attrib['name']
-                                for child in self.position.getchildren()]
+                    keywords = [child.attrib["name"]
+                                for child in self.position.getchildren()
+                                if child.tag == "keyword"]
                     self._on_error_command(token, keywords)
                     return
         # pass if has sub-node ,exec function if has't

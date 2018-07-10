@@ -45,6 +45,7 @@ class SiraController():
         self.contMode = False
         self.func = ''
         self.counter = 0
+        
     def on_start(self, username):
         login.tryload(username)
 
@@ -68,7 +69,6 @@ class SiraController():
 
             else:
                 return
-
 
 
         if self.updateMode and self.interactive:
@@ -326,11 +326,10 @@ class SiraController():
                     self.view.info = ['Please enter numbers separated by ",": ']
                     return
 
-                def decrease(e):
-                    return int(e) - 1
+                def decrease(e): return int(e) - 1
 
                 try:
-                    self.updateIndexes = list(map(decrease, s.split(',')))
+                    self.updateIndexes = list(set(map(decrease, s.split(','))))
                     if not len(self.updateIndexes):
                         self.view.commandText.readonly = False
                         return
@@ -355,11 +354,10 @@ class SiraController():
                 self.updateField[self.updateIndex] = s
 
                 index = self.updateIndexes.pop()
-                def delete_element(e):
-                    return e != index
+
                 output = lst[index]
-                self.updateIndexes = list(
-                    filter(delete_element, self.updateIndexes))
+
+
                 self.updateIndexes.sort(reverse=True)
                 self.updateIndex = index
                 self.view.commandText.readonly = False

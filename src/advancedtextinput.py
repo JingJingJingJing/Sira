@@ -13,6 +13,8 @@ from utils import overrides
 class AdvancedTextInput(TextInput):
 
     # Additional instance variables:
+    
+    deletion_mode = kp.BooleanProperty(False)
 
     history_stack = kp.ObjectProperty(None)
 
@@ -245,7 +247,8 @@ class AdvancedTextInput(TextInput):
         index = 0 if self.last_row < 1 else self.last_row_start
 
         # when user selected both protected texts and the command
-        if self.selection_from < index + self.protected_len:
+        if self.selection_from < index + self.protected_len\
+                and not self.deletion_mode:
             self.delete_lastchar()
             return
 
@@ -480,7 +483,7 @@ class AdvancedTextInput(TextInput):
         '''
         # changes start here
         text_end = len(self.text)
-        line_start = text_end - (len(self._lines[-1]) - self.protected_len)
+        line_start = self.last_row_start + self.protected_len
         if self._selection and self.selection_from == line_start\
                 and self.selection_to == text_end or \
                 len(self._lines[-1]) == self.protected_len:

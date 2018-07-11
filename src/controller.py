@@ -1,11 +1,12 @@
 import re
 import threading
 import xml.etree.ElementTree as ET
+from difflib import SequenceMatcher
+
+import issueOps
 import login
 import query
-import issueOps
 from prompter import Prompter
-import re
 from utils import Super401, func_log, glob_dic
 
 
@@ -64,6 +65,10 @@ class SiraController():
 
                 if update.search(string) is not None:
                     ''' if it is sira update commond '''
+                    if not self.view.username:
+                        self.view.info = ['Please Login First!']
+                        self.view.print_header()
+                        return
                     issue = re.compile(r'\w*-\d*\S*')
                     if issue.search(string) is not None:
                         ''' if issue is provided '''
@@ -116,7 +121,8 @@ class SiraController():
         for i, token in enumerate(tokens):
             pre_position = self.position
             for child in self.position.getchildren():
-                if child.tag == "keyword" and child.attrib['name'] == token:  # 如果在keyword里找到func
+                # 如果在keyword里找到func
+                if child.tag == "keyword" and child.attrib['name'] == token:
                     # exclude keywords need to login
                     if (not self.view.username) and (
                             token not in self.no_need_login):
@@ -140,7 +146,7 @@ class SiraController():
                         self.position = child
                         self.tp[token] = self.position.attrib.get(
                             'name') if token not in self.tp.keys(
-                            ) else self.tp[token]
+                        ) else self.tp[token]
                         self.args.append(token)
                     break
             # do not extend deep
@@ -148,7 +154,10 @@ class SiraController():
                 if pre_position.tag != "keyword" and self.args:
                     self._increpara(token)
                 else:
-                    self._sendinfo("error command")
+                    keywords = [child.attrib["name"]
+                                for child in self.position.getchildren()
+                                if child.tag == "keyword"]
+                    self._on_error_command(token, keywords)
                     return
         # pass if has sub-node ,exec function if has't
         if self.position.find("./required") or self.position.find(
@@ -258,6 +267,7 @@ class SiraController():
             'name') if arg not in self.tp.keys() else self.tp[arg]
         # else:
         #     self.args.append(s)
+
     def auto_complete(self, command):
         if not self.updateMode:
             self.view.option = self.prompter.auto_complete(
@@ -272,7 +282,7 @@ class SiraController():
                     ]
                     info = []
                     for tips in glob_dic.tips.dic[lst[self.updateIndex]]:
-                        if tips[1].startswith(command):
+                        if tips[1].lower().startswith(command.lower()):
                             info.append(tips[1])
                     if info:
                         self.view.option = info
@@ -337,6 +347,7 @@ class SiraController():
             self.updateField[self.updateIndex] = s
 
             index = self.updateIndexes.pop()
+
             def delete_element(e):
                 if e != index:
                     return True
@@ -384,3 +395,17 @@ class SiraController():
         self.updateIssue = ''
         if not c:
             self._sendinfo(msg)
+
+    def _diff(self, string_1, string_2):
+        sm = SequenceMatcher(None, string_1, string_2)
+        return sm.ratio()
+
+    def _on_error_command(self, token, keywords):
+        choices = [
+            c for c in keywords if self._diff(c, token) > 0.5]
+        if choices:
+            self._sendinfo(
+                ["error command",
+                    "Do you mean {}?".format(" or ".join(choices))])
+        else:
+            self._sendinfo("error command")

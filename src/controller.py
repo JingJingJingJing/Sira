@@ -282,7 +282,7 @@ class SiraController():
                     ]
                     info = []
                     for tips in glob_dic.tips.dic[lst[self.updateIndex]]:
-                        if tips[1].startswith(command):
+                        if tips[1].lower().startswith(command.lower()):
                             info.append(tips[1])
                     if info:
                         self.view.option = info

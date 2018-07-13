@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from func import query_board, query_issue, query_project
 
 issue_opts_list = ["assignee", "creator", "id", "key", "label", "priority",
                    "reporter", "type", "watcher"]
@@ -88,16 +89,6 @@ def build_parser():
     return query
 
 
-def query_project(limit=None, order=None, **kwargs):
-    return limit, order
-
-
-def query_board(limit=None, order=None, key=None, **kwargs):
-    return limit, order, key
-
-
-def query_issue(constaint=None, order=None, limit=None, **kwargs):
-    return constaint, limit, order
 
 
 def main():

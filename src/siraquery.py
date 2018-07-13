@@ -88,13 +88,9 @@ def build_parser():
         )
     return query
 
-
-
-
 def main():
     parser = build_parser()
     namespace = parser.parse_args()
-    print(namespace)
     if not namespace.sub_command:
         parser.print_help()
         return
@@ -108,7 +104,7 @@ def main():
             if element not in ("sub_command", "order", "limit") and value:
                 jql += " and {} = {}".format(element, value) if jql\
                        else "{} = {}".format(element, value)
-        kwargs["constaint"] = jql
+        kwargs["constraint"] = jql
         print(query_issue(**kwargs))
     elif namespace.sub_command == "project":
         print(query_project(**vars(namespace)))

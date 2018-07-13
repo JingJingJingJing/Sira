@@ -4,13 +4,11 @@ from os import F_OK, access, mkdir
 from threading import Thread
 
 import requests
-from requests.status_codes import _codes
 
 from utils import Super401, glob_dic, mylog, prepare
 
-
-
 ''' ************ login logout ************* '''
+
 def login(lst):
     un = lst[0]
     pw = lst[1]
@@ -57,8 +55,6 @@ def login(lst):
         f.write(glob_dic.get_value('cookie'))
         f.close()
         mylog.info("Successfully logged in as " + un)
-        # thr = Thread(target=download, args=(None, un))
-        # thr.start()
         return (True, ["Success"])
     except requests.exceptions.RequestException as err:
         return (False, ['Login failed due to an internet error!'])
@@ -83,7 +79,6 @@ def logout():
 
 
 ''' ************** All requests are sent through this function except login logout ************** '''
-
 
 def send_request(url, method, headers, params, data):
     r = requests.Response()
@@ -128,7 +123,7 @@ def send_request(url, method, headers, params, data):
             mylog.error(r.text)
             sLst = [
                 'Request denied!', 'error code: {} {}'.format(
-                    str(r.status_code), str(_codes[r.status_code][0]))
+                    str(r.status_code), str(requests.status_codes._codes[r.status_code][0]))
             ]
             try:
                 lst = r.json().get('errorMessages', [])
@@ -166,8 +161,6 @@ def send_request(url, method, headers, params, data):
 
 
 ''' ************** Queries ************** '''
-
-
 class method(Enum):
     Get = 0
     Post = 1
@@ -176,6 +169,11 @@ class method(Enum):
 
 
 def getTarget(fields, field):
+    '''
+    This function only works for identifier "name" or "key"
+    fields: dict()
+    field: str() (identifiers)
+    '''
     ret = ''
     try:
         ret = fields.get(field)['name']
@@ -200,137 +198,187 @@ def getTarget(fields, field):
 
 
 def getResponse(lst):
-    if not lst:
-        return ['Issue Not Found']
+    '''
+    This function used to get target field information from a list of issues
+    Only information of the fields in defaultList will be returned
+    '''
+
     defaultList = [
-        'issuetype', 'assignee', 'status', 'sprint', 'fixVersions', 'summary'
+        'assignee', 'reporter', 'priority', 'status', 'labels', 'fixVersions','summary'
     ]
-    defaultHeader = [
-        'IssueID', 'Type', 'Assignee', 'Status', 'Sprint', 'FixVer.', 'Summary'
-    ]
-    stringLst = []
+    if not lst:
+        return 'Issue Not Found'
     s = ''
-    for i in defaultHeader:
-        s += '{}'.format(i).ljust(18, ' ')
-    stringLst.append(s)
-    for issue in lst:
-        s = '{}'.format(issue.get('key')).ljust(14, ' ') + ' |  '
+    for i, issue in enumerate(lst):
+        s += str(issue.get('key')) + ' '
         fields = issue.get('fields')
         for j, field in enumerate(defaultList):
-            s += getTarget(fields, field).ljust(14, ' ')
-            if j != len(defaultList) - 1:
-                s += ' |  '
-        stringLst.append(s)
-    return stringLst
+            s += str(getTarget(fields, field)) + ' '
+            if (i != len(lst) - 1) and (j == len(defaultList) - 1):
+                s += '\r\n'
+    return s
 
 
-def query_number(lst):
-    issue = lst[0].upper()
-    url, headers = prepare('query_number', '/{}'.format(issue))
-    f, r = send_request(url, method.Get, headers, None, None)
-    if not f:
-        return False, r
-    return True, getResponse([r])
 
-def query(constraint, mode='mine', limit='5', order='DESC'):
+def query_issue(constraint, limit=0, order=None, **kwargs):
     url, headers = prepare('query')
     data = {}
-    data["jql"] = '{} order by updated {}'.format(constraint, order)
+    if order:
+        order = order.lower()
+        if order == 'asc':
+            constraint += ' order by key ASC'
+        elif order == 'desc':
+            constraint += ' order by key DESC'
+    else:
+        constraint += ' order by updated DESC'
+    
+    data["jql"] = constraint
     data["startAt"] = 0
-    data["maxResults"] = limit
+    
+    if limit:
+        data["maxResults"] = limit
     f, r = send_request(url, method.Post, headers, None, json.dumps(data))
     if not f:
-        return False, r
-    ret = getResponse(r.get('issues'))
+        return r
+    return getResponse(r.get('issues'))
+
+
+
+def getInfo(r, order):
+    '''
+    This function used to get target field information from a list of projects
+    Only information of the fields in defaultList will be returned
+    '''
+    lst = []
+    defaultList = ['name', 'key', 'lead']
+    for i, pro in enumerate(r):
+        s = ''
+        key = pro.get('key')
+        for j, f in enumerate(defaultList):
+            s += getTarget(pro, f)
+            if j != len(defaultList)-1:
+                s += ' ' 
+        if i != len(r)-1:
+            s += '\r\n'
+        lst.append((key,s))
+    if order and order.lower() == 'asc':
+        lst.sort()
+    elif order and order.lower == 'desc':
+        lst.sort(reverse=True)
+    s = ''
+    for tup in lst:
+        s += tup[1]
+    return s
+
+
+def query_project(limit=0, order=None, **kwargs):
+    if order:
+        order = order.lower()
+    param = {}
+    if order == 'recent':
+        if limit:
+            param["recent"] = limit
+        else:
+            param["recent"] = 20
+    param["expand"]="lead"
+
+    url, headers = prepare('getProject')
+    f,r = send_request(url, method.Get, headers, param, None)
+    if not f:
+        return r
     
-    if ret == ['Issue Not Found']:
-        return False, ['Issue Not Found']
-    else:
-        return True, ret
-
-# def query(field1, field2, counter=int(0)):
-#     url, headers = prepare('query')
-#     if field2:
-#         field2 = 'and ' + field2
-#     data = {}
-#     data["jql"] = '{} {} order by updated DESC'.format(field1, field2)
-#     data["startAt"] = 30
-#     data["maxResults"] = 10
-#     data = json.dumps(data)
-#     f, r = send_request(url, method.Post, headers, None, data)
-#     if not f:
-#         return False, r
-#     ret = getResponse(r.get('issues'))
-#     print(len(ret))
-#     if ret == ['Issue Not Found']:
-#         return False, ['Issue Not Found']
-#     else:
-#         return True, ret
+    return getInfo(r, order)
 
 
-def addQuotation(s):
-    return '\'' + s + '\''
+    
+def query_board(key=None, limit=None, order=None, **kwargs):
+    '''
+    This function return all boards and order the return value.
+    The return value is a string of board id adn board name
+    If key is specified and valid, only one line will be returned
+    '''
+    url, headers = prepare('getBoard')
+    f, r = send_request(url, method.Get, headers, None, None)
+    lst = []
+    defaultList = ['id','name']
+    for info in r.get('values'):
+        bid = info.get('id')
+        innerlst=[]
+        for f in defaultList:
+            innerlst.append(info.get(f))
+        lst.append(tuple(innerlst))
+        if key and (bid == key):
+            tup = lst.pop()
+            return '{} "{}"'.format(tup[0],tup[1])
+    if key:
+        return 'Not found or you don\'t have permission to view this board.'
+    if order and order.lower() == 'asc':
+        lst.sort()
+    elif order and order.lower() == 'desc':
+        lst.sort(reverse=True)
+    s = ''
+    for i, tup in enumerate(lst):
+        s += '{} "{}"'.format(tup[0],tup[1])
+        if i != len(lst)-1:
+            s += '\r\n'
+    return s
 
 
-''' lst = ['sprint name or id'] '''
 
 
-def query_sprint(lst):
-    return query('sprint=' + addQuotation(lst[0]), '')
+''' ***************** Update ******************* '''
+_updateBook={
+    "assignee":"",
+    "status":"",
+    "fixVersions":"",
+    "labels":"",
+    "Story Points":""
+}
+
+def update_assignee(issue, info):
+    url, headers = prepare('issue','/{}'.format(issue))
+    data = {"fields":{"assignee":{"name":info}}}
+    f, r = send_request(url, method.Put, headers, None, json.dumps(data))
+    if not f:
+        return r
+    return 'success'
 
 
-''' lst = ['assignee name or id'] '''
+def issue_get_tansition(issue, dic):
+    url, headers = prepare('issue', '/{}/transitions'.format(issue))
+    f, r = send_request(url, method.Get, headers, None, None)
+    if not f:
+        return None
+    for msg in r.get('transitions'):
+        dic[msg.get('name')] = msg.get('id')
+    return dic
 
 
-def query_assignee(lst):
-    return query('assignee=' + addQuotation(lst[0]), '')
+def update_status(issue, info):
+    status = info.title()
+    url, headers = prepare(
+        'issue', '/{}/transitions?expand=transitions.fields'.format(issue))
+    data = {}
+    dic = {}
+    if not issue_get_tansition(issue, dic):
+        return 'no transit is avaiable'
+    transition = {"id": dic.get(status)}
+    data = json.dumps({"transition": transition})
+    f, r = send_request(url, method.Post, headers, None, data)
+    if not f:
+        return r
+    return 'success'
 
 
-''' lst = ['issuetype or issuetype id'] '''
 
 
-def query_type(lst):
-    return query('issuetype =' + addQuotation(lst[0]), '')
 
 
-''' lst = ['issue status name or id'] '''
-
-
-def query_status(lst):
-    return query('status=' + addQuotation(lst[0]), '')
-
-
-''' lst = ['project name or id','issuetype or issuetype id'] '''
-
-
-def query_project_type(lst):
-    return query('project=' + addQuotation(lst[0]),
-                 'issuetype =' + addQuotation(lst[1]))
-
-
-''' lst = ['project name or id','assignee name or id'] '''
-
-
-def query_project_assignee(lst):
-    return query('project=' + addQuotation(lst[0]),
-                 'assignee =' + addQuotation(lst[1]))
-
-
-''' lst = ['project name or id','sprint name or id'] '''
-
-
-def query_project_sprint(lst):
-    return query('project =' + addQuotation(lst[0]),
-                 'sprint =' + addQuotation(lst[1]))
-
-
-''' lst = ['project name or id','issue status name or id'] '''
-
-
-def query_project_status(lst):
-    return query('project =' + addQuotation(lst[0]),
-                 'status =' + addQuotation(lst[1]))
 
 if __name__ == '__main__':
-    print(query_sprint(['Test sprint 1']))
+    # print(query_issue(''))
+    # print(query_project())
+    # print(query_board())
+    # print(query_board(key=4))
+    print(update_status('test-88','to do'))
     pass

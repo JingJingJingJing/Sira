@@ -228,9 +228,12 @@ def getResponse(lst):
 
 
 
-def query_issue(constraint, limit=0, order=None, **kwargs):
+def query_issue(constraint, limit=0, order=None, verbose=None, **kwargs):
     url, headers = prepare('query')
     data = {}
+    if verbose is None:
+        verbose = json.loads(read_from_config()).get("verbose")
+    print_v("Formating Input ...", verbose)
     if order:
         order = order.lower()
         if order == 'asc':
@@ -245,9 +248,12 @@ def query_issue(constraint, limit=0, order=None, **kwargs):
     
     if limit:
         data["maxResults"] = limit
+    print_v("Sending the Request ...", verbose)
     f, r = send_request(url, method.Post, headers, None, json.dumps(data))
     if not f:
+        print_v("Request Failed !!!", verbose)
         return False, r
+    print_v("Extracting the Results ...", verbose)
     return True, getResponse(r.get('issues'))
 
 
@@ -279,34 +285,44 @@ def getInfo(r, order):
     return s
 
 
-def query_project(limit=0, order=None, **kwargs):
+def query_project(limit=0, order=None, verbose=None, **kwargs):
+    if verbose is None:
+        verbose = read_from_config().get("verbose")
     if order:
         order = order.lower()
     param = {}
+    print_v("Formating Input ...", verbose)
     if order == 'recent':
         if limit:
             param["recent"] = limit
         else:
             param["recent"] = 20
     param["expand"]="lead"
-
+    print_v("Sending the Request ...", verbose)
     url, headers = prepare('getProject')
     f,r = send_request(url, method.Get, headers, param, None)
+
     if not f:
+        print_v("Request Failed !!!", verbose)
         return False, r
-    
+    print_v("Extracting the Results ...", verbose)
     return True, getInfo(r, order)
 
 
     
-def query_board(key=None, limit=None, order=None, **kwargs):
+def query_board(key=None, limit=None, order=None, verbose=None, **kwargs):
     '''
     This function return all boards and order the return value.
     The return value is a string of board id adn board name
     If key is specified and valid, only one line will be returned
     '''
+    if verbose is None:
+        verbose = read_from_config().get("verbose")
+    print_v("Formating Input ...", verbose)
     url, headers = prepare('getBoard')
+    print_v("Sending the Request ...", verbose)
     f, r = send_request(url, method.Get, headers, None, None)
+    print_v("Extracting the Results ...", verbose)
     lst = []
     defaultList = ['id','name']
     for info in r.get('values'):
@@ -427,10 +443,13 @@ def getPermission():
     for permission in r.get('permissions'):
         write_to_config(['permissions'],permission,True)
 
+def print_v(s, f=False):
+    if f:
+        print(s)
 
 if __name__ == '__main__':
     # login(['admin','admin'])
-    print(query_issue('project=sira and assignee=ysg'))
+    # print(query_issue('project=sira and assignee=ysg')[1])
     # print(query_project())
     # print(query_board())
     # print(query_board(key=4))

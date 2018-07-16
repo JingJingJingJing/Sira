@@ -123,9 +123,11 @@ class glob():
 def read_cookie():
     if glob_dic.get_value('cookie', '') == '':
         try:
-            with open(glob_dic.get_value('cookie_path') + "cookie.txt",
-                      "r") as f:
-                glob_dic.set_value('cookie', f.read())
+            with open(".sirarc", "r") as f:
+                content = f.read()
+                if content:
+                    data = json.loads(content)
+                    glob_dic.set_value('cookie', data.get('credential').get('cookie'))
                 f.close()
         except FileNotFoundError as err:
             mylog.error(err)
@@ -165,7 +167,8 @@ address_book = {
         'assign_sprint': protocol + domain + '/rest/agile/1.0/sprint',
         'createmeta': protocol + domain + '/rest/api/2/issue/createmeta',
         'getField': protocol + domain + '/rest/api/2/field',
-        'getEstimation': protocol + domain + '/rest/agile/1.0/issue'
+        'getEstimation': protocol + domain + '/rest/agile/1.0/issue',
+        'mypermission': protocol + domain + '/rest/api/2/mypermissions'
     }
 
 headers_book = {

@@ -45,15 +45,14 @@ def login(lst):
             ])
         j = r.json()
         try:
+            cookie = j['session']['name'] + '=' + j['session']['value']
             glob_dic.set_value(
                 'cookie', j['session']['name'] + '=' + j['session']['value'])
         except KeyError:
             mylog.error('No session information from HTTP response\r\n' +
                         r.text)
             return (False, ['session info not found!'])
-        f = open(glob_dic.get_value('cookie_path') + "cookie.txt", "w")
-        f.write(glob_dic.get_value('cookie'))
-        f.close()
+        write_to_config(["credential"],["cookie","username"],[cookie, un])
         mylog.info("Successfully logged in as " + un)
         return (True, ["Success"])
     except requests.exceptions.RequestException as err:
@@ -116,7 +115,7 @@ def send_request(url, method, headers, params, data):
             return (False, ['Unknown internal error occured'])
         if r.status_code == 401:
             mylog.error("401 Unauthorized")
-            raise Super401()
+            return (False, "401 Unauthorized")
         try:
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -202,10 +201,19 @@ def getResponse(lst):
     This function used to get target field information from a list of issues
     Only information of the fields in defaultList will be returned
     '''
-
-    defaultList = [
-        'assignee', 'reporter', 'priority', 'status', 'labels', 'fixVersions','summary'
-    ]
+    try:
+        defaultList = json.loads(read_from_config()).get('query_field').get('issue_default')
+    except AttributeError:
+        print('warning, config file damaged')
+        defaultList=[
+            "assignee",
+            "reporter",
+            "priority",
+            "status",
+            "labels",
+            "fixVersions",
+            "summary"
+        ]
     if not lst:
         return 'Issue Not Found'
     s = ''
@@ -239,8 +247,8 @@ def query_issue(constraint, limit=0, order=None, **kwargs):
         data["maxResults"] = limit
     f, r = send_request(url, method.Post, headers, None, json.dumps(data))
     if not f:
-        return r
-    return getResponse(r.get('issues'))
+        return False, r
+    return True, getResponse(r.get('issues'))
 
 
 
@@ -285,9 +293,9 @@ def query_project(limit=0, order=None, **kwargs):
     url, headers = prepare('getProject')
     f,r = send_request(url, method.Get, headers, param, None)
     if not f:
-        return r
+        return False, r
     
-    return getInfo(r, order)
+    return True, getInfo(r, order)
 
 
     
@@ -311,7 +319,7 @@ def query_board(key=None, limit=None, order=None, **kwargs):
             tup = lst.pop()
             return '{} "{}"'.format(tup[0],tup[1])
     if key:
-        return 'Not found or you don\'t have permission to view this board.'
+        return False, 'Not found or you don\'t have permission to view this board.'
     if order and order.lower() == 'asc':
         lst.sort()
     elif order and order.lower() == 'desc':
@@ -321,7 +329,7 @@ def query_board(key=None, limit=None, order=None, **kwargs):
         s += '{} "{}"'.format(tup[0],tup[1])
         if i != len(lst)-1:
             s += '\r\n'
-    return s
+    return True, s
 
 
 
@@ -340,8 +348,8 @@ def update_assignee(issue, info):
     data = {"fields":{"assignee":{"name":info}}}
     f, r = send_request(url, method.Put, headers, None, json.dumps(data))
     if not f:
-        return r
-    return 'success'
+        return False, r
+    return True, 'success'
 
 
 def issue_get_tansition(issue, dic):
@@ -361,24 +369,73 @@ def update_status(issue, info):
     data = {}
     dic = {}
     if not issue_get_tansition(issue, dic):
-        return 'no transit is avaiable'
+        return False, 'no transit is avaiable'
     transition = {"id": dic.get(status)}
     data = json.dumps({"transition": transition})
     f, r = send_request(url, method.Post, headers, None, data)
     if not f:
         return r
-    return 'success'
+    return True, 'success'
 
 
 
+def write_to_config(dic_path, field, info):
 
+    fh = open('.sirarc', 'r')
+    content = fh.read()
+    if content:
+        data = json.loads(content)
+    else:
+        data = {}
+    dic = data
+    for x in dic_path:
+        dic = dic[x]
+    if isinstance(field, list):
 
+        for i in range(len(field)):
+            if isinstance(info, list):
+                if len(field)!=len(info):
+                    fh.close()
+                    raise "Field and Info length need to be equal"
+                dic[field[i]]=info[i]
+            else:
+                dic[field[i]]=info
+    else:
+        dic[field] = info
+    fh = open('.sirarc', 'w')
+    ret = json.dumps(data)
+    fh.write(ret)
+    fh.close()
+    return ret
+
+def read_from_config():
+    try:
+        fh = open('.sirarc', 'r')
+        content = fh.read()
+        fh.close()
+        return content
+    except FileNotFoundError:
+        fh = open('.sirarc','w')
+        fh.write('')
+        fh.close()
+
+def getPermission():
+    url, headers = prepare('mypermission')
+    f, r = send_request(url, method.Get,headers, None, None)
+    if not f:
+        return r
+    for permission in r.get('permissions'):
+        write_to_config(['permissions'],permission,True)
 
 
 if __name__ == '__main__':
-    # print(query_issue(''))
+    # login(['admin','admin'])
+    print(query_issue('project=sira and assignee=ysg'))
     # print(query_project())
     # print(query_board())
     # print(query_board(key=4))
-    print(update_status('test-88','to do'))
+    # print(update_status('test-88','to do'))
+    # login(['admin','admin'])
+    # print(read_from_config())
+    # getPermission()
     pass

@@ -69,11 +69,11 @@ def logout():
             pass
     except requests.exceptions.RequestException:
         pass
-    f = open(glob_dic.get_value('cookie_path') + "cookie.txt", "w")
-    f.write('')
-    f.close
-    glob_dic.set_value('cookie', '')
-    mylog.info('Successfully logged out')
+    # f = open(glob_dic.get_value('cookie_path') + "cookie.txt", "w")
+    # f.write('')
+    # f.close
+    # glob_dic.set_value('cookie', '')
+    # mylog.info('Successfully logged out')
     return (True, ['Successfully logged out'])
 
 
@@ -112,7 +112,7 @@ def send_request(url, method, headers, params, data):
                 verify=False)
         else:
             mylog.error('Wrong method that not suppord:' + str(method))
-            return (False, ['Unknown internal error occured'])
+            return (False, 'Unknown internal error occured')
         if r.status_code == 401:
             mylog.error("401 Unauthorized")
             return (False, "401 Unauthorized")
@@ -120,30 +120,35 @@ def send_request(url, method, headers, params, data):
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
             mylog.error(r.text)
-            sLst = [
-                'Request denied!', 'error code: {} {}'.format(
-                    str(r.status_code), str(requests.status_codes._codes[r.status_code][0]))
-            ]
+            
+            s = 'Request denied!\r\nerror code: {} {}\r\n'.format(
+                str(r.status_code), str(requests.status_codes._codes[r.status_code][0]))
+            
             try:
                 lst = r.json().get('errorMessages', [])
-                for errors in lst:
-                    sLst.append(errors)
+                for i, errors in enumerate(lst):
+                    s += errors
+                    if i != len(lst) -1:
+                        s += '\r\n'
                 dic = r.json().get('errors', {})
-                for key in dic:
-                    sLst.append('{} '.format(dic[key]))
+                for i, key in enumerate(dic):
+                    s += dic[key]+' '
+
             except json.JSONDecodeError:
                 pass
-            sLst.append('Please try again')
-            return (False, sLst)
+            s += "Please Try Again"
+            return False, s
         mylog.info(r)
         try:
             try:
                 s = ''
                 lst = r.json()['warningMessages']
-                for errors in lst:
-                    s += errors + '\r\n'
+                for i, errors in enumerate(lst):
+                    s += errors
+                    if s!=len(lst):
+                        s+='\r\n'
                 mylog.error(s)
-                return (False, [s])
+                return (False, s)
             except KeyError:
                 return (True, r.json())
             except TypeError:
@@ -152,11 +157,12 @@ def send_request(url, method, headers, params, data):
             return (True, r)
     except requests.exceptions.RequestException as err:
         mylog.error(err)
-        return (False, [
-            'Internet error', 'Try:',
-            '\tChecking the network cables, modem, and route',
-            '\tReconnecting to Wi-Fi', '\tRunning Network Diagnostics'
-        ])
+        return (False, 
+            '''Internet Error! Try:\r\n
+            \tChecking the network cables, modem, and route\r\n
+            \tReconnecting to Wi-Fi\r\n
+            \tRunning Network Diagnostics'''
+        )
 
 
 ''' ************** Queries ************** '''
@@ -193,7 +199,7 @@ def getTarget(fields, field):
     if ret != '':
         return ret
     else:
-        return 'Not available'
+        return 'N/A'
 
 
 def getResponse(lst):
@@ -204,7 +210,6 @@ def getResponse(lst):
     try:
         defaultList = json.loads(read_from_config()).get('query_field').get('issue_default')
     except AttributeError:
-        print('warning, config file damaged')
         defaultList=[
             "assignee",
             "reporter",
@@ -287,7 +292,7 @@ def getInfo(r, order):
 
 def query_project(limit=0, order=None, verbose=None, **kwargs):
     if verbose is None:
-        verbose = read_from_config().get("verbose")
+        verbose = json.loads(read_from_config()).get("verbose")
     if order:
         order = order.lower()
     param = {}
@@ -359,7 +364,7 @@ _updateBook={
     "Story Points":""
 }
 
-def update_assignee(issue, info):
+def issue_update_assignee(issue, info):
     url, headers = prepare('issue','/{}'.format(issue))
     data = {"fields":{"assignee":{"name":info}}}
     f, r = send_request(url, method.Put, headers, None, json.dumps(data))
@@ -368,22 +373,24 @@ def update_assignee(issue, info):
     return True, 'success'
 
 
-def issue_get_tansition(issue, dic):
-    url, headers = prepare('issue', '/{}/transitions'.format(issue))
-    f, r = send_request(url, method.Get, headers, None, None)
-    if not f:
-        return None
-    for msg in r.get('transitions'):
-        dic[msg.get('name')] = msg.get('id')
-    return dic
 
 
-def update_status(issue, info):
+def issue_update_status(issue, info):
     status = info.title()
     url, headers = prepare(
         'issue', '/{}/transitions?expand=transitions.fields'.format(issue))
     data = {}
     dic = {}
+
+    def issue_get_tansition(issue, dic):
+        url, headers = prepare('issue', '/{}/transitions'.format(issue))
+        f, r = send_request(url, method.Get, headers, None, None)
+        if not f:
+            return None
+        for msg in r.get('transitions'):
+            dic[msg.get('name')] = msg.get('id')
+        return dic
+
     if not issue_get_tansition(issue, dic):
         return False, 'no transit is avaiable'
     transition = {"id": dic.get(status)}
@@ -393,7 +400,87 @@ def update_status(issue, info):
         return r
     return True, 'success'
 
+def issue_update_labels(issue, labels, mode='add'):
+    url, headers = prepare('issue', '/{}'.format(issue))
+    target = []
+    if isinstance(labels, str):
+        target = [{mode:labels}]
+    else:
+        for l in labels:
+            target.append({mode: l})
+    data = json.dumps({"update": {"labels": target}})
+    f, r = send_request(url, method.Put, headers, None, data)
+    if not f:
+        return False, str(r)
+    
+    return True, 'label successfully {}ed'.format(mode)
 
+
+
+def issue_get_comment(issue):
+    url, headers = prepare('issue', '/{}{}'.format(issue, '/comment'))
+
+    f, r = send_request(url, method.Get, headers, None, None)
+    if not f:
+        return False, str(r)
+
+    comments = r.get('comments', [])
+    if len(comments) > 0:
+        string = 'Here are the comments for ' + issue + ':\r\n'
+        for com in comments:
+            string += '"{}"\r\n\twrote by {}\r\n\t{}\r\n\t(cid: {})\r\n'.format(
+                com['body'], com['updateAuthor']['key'], com['created'],
+                com['id'])
+        return True, string
+    else:
+        return True, "There is no comment yet!"
+
+def issue_edit_comment(issue, cid, body):
+    url, headers = prepare('issue', '/{}{}{}'.format(issue, '/comment/', cid))
+    data = {"body": body}
+    f, r = send_request(url, method.Put, headers, None, data)
+    if not f:
+        return r
+    return True, 'Comment(ID: ' + r['id'] + ') modified'
+
+def issue_add_comment(issue, body):
+    url, headers = prepare('issue', '/{}/{}'.format(issue, 'comment'))
+    data = json.dumps({"body": body})
+    f, r = send_request(url, method.Post, headers, None, data)
+    if not f:
+        return False, r
+    return True, 'Comment(ID: ' + r['id'] + ') added'
+
+
+def issue_del_comment(issue, cid):
+    url, headers = prepare('issue', '/{}{}{}'.format(issue, '/comment/', cid))
+    f, r = send_request(url, method.Delete, headers, None, None)
+    if not f:
+        return False, r
+    return True, 'Comment deleted'
+
+def issue_watch(issue):
+    url, headers = prepare('issue', '/{}/watchers'.format(issue))
+    data = '"ysg"'
+    print(url, headers)
+    return send_request(url, method.Post, headers, None, data)
+
+def issue_get_watcher(issue):
+    url, headers = prepare('issue', '/{}/watchers'.format(issue))
+    f, r = send_request(url, method.Get, headers, None, None)
+    if not f:
+        return r
+    lst = r.get('watchers')
+    s = ''
+    for i, user in enumerate(lst):
+        s += user.get('name')
+        if i != len(lst)-1:
+            s +='\r\n'
+    return s
+
+def issue_del_watcher(issue, user):
+    url, headers = prepare('issue', '/{}/watchers'.format(issue))
+    return send_request(url, method.Delete, headers, '"ysg"', None)
 
 def write_to_config(dic_path, field, info):
 
@@ -449,12 +536,15 @@ def print_v(s, f=False):
 
 if __name__ == '__main__':
     # login(['admin','admin'])
-    # print(query_issue('project=sira and assignee=ysg')[1])
+    # print(query_issue('project=sira')[1])
     # print(query_project())
     # print(query_board())
     # print(query_board(key=4))
     # print(update_status('test-88','to do'))
-    # login(['admin','admin'])
     # print(read_from_config())
-    # getPermission()
+    test = 'test-88'
+    print(issue_watch(test)[1])
+    print(issue_get_watcher(test))
+    print(issue_del_watcher(test, 'ysg')[1])
+    print(issue_get_watcher(test))
     pass

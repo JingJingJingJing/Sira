@@ -153,3 +153,5 @@ testfolder
 tables.json
 test.py
 .sirarc
+*.sh
+*.pem

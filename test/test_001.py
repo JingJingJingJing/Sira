@@ -16,7 +16,9 @@ class Test_0(unittest.TestCase):
         self.parser = build_parser()
 
     def test_0(self):
-        namespace = self.parser.parse_args("".split(" "))
+        args = "".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -26,7 +28,9 @@ class Test_0(unittest.TestCase):
         }, kwargs)
 
     def test_1(self):
-        namespace = self.parser.parse_args("-h".split(" "))
+        args = "-h".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -36,7 +40,9 @@ class Test_0(unittest.TestCase):
         }, kwargs)
 
     def test_2(self):
-        namespace = self.parser.parse_args("--help".split(" "))
+        args = "--help".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -50,7 +56,9 @@ class Test_1(unittest.TestCase):
         self.parser = build_parser()
 
     def test_3(self):
-        namespace = self.parser.parse_args("-q type=project mode=all".split(" "))
+        args = "-q type=project mode=all".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -61,7 +69,9 @@ class Test_1(unittest.TestCase):
         }, kwargs)
 
     def test_4(self):
-        namespace = self.parser.parse_args("-v -q type=project mode=all".split(" "))
+        args = "-v -q type=project mode=all".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -72,7 +82,9 @@ class Test_1(unittest.TestCase):
         }, kwargs)
 
     def test_5(self):
-        namespace = self.parser.parse_args("-vq type=project mode=all".split(" "))
+        args = "-vq type=project mode=all".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -83,7 +95,9 @@ class Test_1(unittest.TestCase):
         }, kwargs)
 
     def test_6(self):
-        namespace = self.parser.parse_args("-qv type=project mode=all".split(" "))
+        args = "-qv type=project mode=all".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -94,7 +108,9 @@ class Test_1(unittest.TestCase):
         }, kwargs)
 
     def test_7(self):
-        namespace = self.parser.parse_args("-q -v type=project mode=all".split(" "))
+        args = "-q -v type=project mode=all".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -105,7 +121,9 @@ class Test_1(unittest.TestCase):
         }, kwargs)
 
     def test_8(self):
-        namespace = self.parser.parse_args("-q type=project -v mode=all".split(" "))
+        args = "-q type=project -v mode=all".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -116,7 +134,9 @@ class Test_1(unittest.TestCase):
         }, kwargs)
 
     def test_9(self):
-        namespace = self.parser.parse_args("-q type=project mode=all -v".split(" "))
+        args = "-q type=project mode=all -v".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -131,7 +151,9 @@ class Test_2(unittest.TestCase):
         self.parser = build_parser()
 
     def test_10(self):
-        namespace = self.parser.parse_args("-q type=project mode=current".split(" "))
+        args = "-q type=project mode=current".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -142,7 +164,9 @@ class Test_2(unittest.TestCase):
         }, kwargs)
 
     def test_11(self):
-        namespace = self.parser.parse_args("--query type=project mode=current".split(" "))
+        args = "--query type=project mode=current".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -153,7 +177,9 @@ class Test_2(unittest.TestCase):
         }, kwargs)
 
     def test_12(self):
-        namespace = self.parser.parse_args("-v --query type=project mode=current".split(" "))
+        args = "-v --query type=project mode=current".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -164,7 +190,9 @@ class Test_2(unittest.TestCase):
         }, kwargs)
 
     def test_13(self):
-        namespace = self.parser.parse_args("--query -v type=project mode=current".split(" "))
+        args = "--query -v type=project mode=current".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -175,7 +203,9 @@ class Test_2(unittest.TestCase):
         }, kwargs)
 
     def test_14(self):
-        namespace = self.parser.parse_args("--query type=project -v mode=current".split(" "))
+        args = "--query type=project -v mode=current".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -186,7 +216,9 @@ class Test_2(unittest.TestCase):
         }, kwargs)
 
     def test_15(self):
-        namespace = self.parser.parse_args("--query type=project mode=current -v".split(" "))
+        args = "--query type=project mode=current -v".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -201,7 +233,9 @@ class Test_3(unittest.TestCase):
         self.parser = build_parser()
 
     def test_16(self):
-        namespace = self.parser.parse_args("-q type=project mode=recent".split(" "))
+        args = "-q type=project mode=recent".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -212,7 +246,9 @@ class Test_3(unittest.TestCase):
         }, kwargs)
 
     def test_17(self):
-        namespace = self.parser.parse_args("--silent -q type=project mode=recent".split(" "))
+        args = "--silent -q type=project mode=recent".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -223,7 +259,9 @@ class Test_3(unittest.TestCase):
         }, kwargs)
 
     def test_18(self):
-        namespace = self.parser.parse_args("-q --silent type=project mode=recent".split(" "))
+        args = "-q --silent type=project mode=recent".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -234,7 +272,9 @@ class Test_3(unittest.TestCase):
         }, kwargs)
 
     def test_19(self):
-        namespace = self.parser.parse_args("-q type=project --silent mode=recent".split(" "))
+        args = "-q type=project --silent mode=recent".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -245,7 +285,9 @@ class Test_3(unittest.TestCase):
         }, kwargs)
 
     def test_20(self):
-        namespace = self.parser.parse_args("-q type=project mode=recent --silent".split(" "))
+        args = "-q type=project mode=recent --silent".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -260,7 +302,9 @@ class Test_4(unittest.TestCase):
         self.parser = build_parser()
 
     def test_21(self):
-        namespace = self.parser.parse_args("-q type=issue mode=mine".split(" "))
+        args = "-q type=issue mode=mine".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -271,7 +315,9 @@ class Test_4(unittest.TestCase):
         }, kwargs)
 
     def test_22(self):
-        namespace = self.parser.parse_args("--query type=issue mode=mine".split(" "))
+        args = "--query type=issue mode=mine".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -282,7 +328,9 @@ class Test_4(unittest.TestCase):
         }, kwargs)
 
     def test_23(self):
-        namespace = self.parser.parse_args("--silent --query type=issue mode=mine".split(" "))
+        args = "--silent --query type=issue mode=mine".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -293,7 +341,9 @@ class Test_4(unittest.TestCase):
         }, kwargs)
 
     def test_24(self):
-        namespace = self.parser.parse_args("--query --silent type=issue mode=mine".split(" "))
+        args = "--query --silent type=issue mode=mine".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -304,7 +354,9 @@ class Test_4(unittest.TestCase):
         }, kwargs)
 
     def test_25(self):
-        namespace = self.parser.parse_args("--query type=issue --silent mode=mine".split(" "))
+        args = "--query type=issue --silent mode=mine".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -315,7 +367,9 @@ class Test_4(unittest.TestCase):
         }, kwargs)
 
     def test_26(self):
-        namespace = self.parser.parse_args("--query type=issue mode=mine --silent".split(" "))
+        args = "--query type=issue mode=mine --silent".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -330,7 +384,9 @@ class Test_5(unittest.TestCase):
         self.parser = build_parser()
 
     def test_27(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported".split(" "))
+        args = "-q type=issue mode=reported".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -341,7 +397,9 @@ class Test_5(unittest.TestCase):
         }, kwargs)
 
     def test_28(self):
-        namespace = self.parser.parse_args("-q mode=reported type=issue".split(" "))
+        args = "-q mode=reported type=issue".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -352,7 +410,9 @@ class Test_5(unittest.TestCase):
         }, kwargs)
 
     def test_29(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported limit=0".split(" "))
+        args = "-q type=issue mode=reported limit=0".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -364,7 +424,9 @@ class Test_5(unittest.TestCase):
         }, kwargs)
 
     def test_30(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported limit=1".split(" "))
+        args = "-q type=issue mode=reported limit=1".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -376,7 +438,9 @@ class Test_5(unittest.TestCase):
         }, kwargs)
 
     def test_31(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported limit=10".split(" "))
+        args = "-q type=issue mode=reported limit=10".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -388,7 +452,9 @@ class Test_5(unittest.TestCase):
         }, kwargs)
 
     def test_32(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported limit=100".split(" "))
+        args = "-q type=issue mode=reported limit=100".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -400,7 +466,9 @@ class Test_5(unittest.TestCase):
         }, kwargs)
 
     def test_33(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported limit=-2147483649".split(" "))
+        args = "-q type=issue mode=reported limit=-2147483649".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -412,7 +480,9 @@ class Test_5(unittest.TestCase):
         }, kwargs)
 
     def test_34(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported limit=2147483648".split(" "))
+        args = "-q type=issue mode=reported limit=2147483648".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         kwargs = vars(namespace)
@@ -425,7 +495,9 @@ class Test_5(unittest.TestCase):
         }, kwargs)
 
     def test_35(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported order=desc".split(" "))
+        args = "-q type=issue mode=reported order=desc".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -438,7 +510,9 @@ class Test_5(unittest.TestCase):
 
 
     def test_36(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported order=asc".split(" "))
+        args = "-q type=issue mode=reported order=asc".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -450,7 +524,9 @@ class Test_5(unittest.TestCase):
         }, kwargs)
 
     def test_37(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported limit=10 order=desc".split(" "))
+        args = "-q type=issue mode=reported limit=10 order=desc".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -463,7 +539,9 @@ class Test_5(unittest.TestCase):
         }, kwargs)
 
     def test_38(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported limit=10 order=asc".split(" "))
+        args = "-q type=issue mode=reported limit=10 order=asc".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -479,7 +557,9 @@ class Test_6(unittest.TestCase):
         self.parser = build_parser()
 
     def test_39(self):
-        namespace = self.parser.parse_args("-q type=issue".split(" "))
+        args = "-q type=issue".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -489,7 +569,9 @@ class Test_6(unittest.TestCase):
         }, kwargs)
 
     def test_40(self):
-        namespace = self.parser.parse_args("-q type=issue limit=10".split(" "))
+        args = "-q type=issue limit=10".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -500,7 +582,9 @@ class Test_6(unittest.TestCase):
         }, kwargs)
 
     def test_41(self):
-        namespace = self.parser.parse_args("-q type=issue order=desc".split(" "))
+        args = "-q type=issue order=desc".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -511,7 +595,9 @@ class Test_6(unittest.TestCase):
         }, kwargs)
 
     def test_42(self):
-        namespace = self.parser.parse_args("-q type=issue limit=10 order=desc".split(" "))
+        args = "-q type=issue limit=10 order=desc".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -527,7 +613,9 @@ class Test_7(unittest.TestCase):
         self.parser = build_parser()
 
     def test_43(self):
-        namespace = self.parser.parse_args("-q type=issue mode=recent".split(" "))
+        args = "-q type=issue mode=recent".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -538,7 +626,9 @@ class Test_7(unittest.TestCase):
         }, kwargs)
 
     def test_44(self):
-        namespace = self.parser.parse_args("-q type=issue mode=recent limit=10 order=asc".split(" "))
+        args = "-q type=issue mode=recent limit=10 order=asc".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -551,7 +641,9 @@ class Test_7(unittest.TestCase):
         }, kwargs)
 
     def test_45(self):
-        namespace = self.parser.parse_args("-q type=issue mode=recent order=asc limit=10".split(" "))
+        args = "-q type=issue mode=recent order=asc limit=10".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -564,7 +656,9 @@ class Test_7(unittest.TestCase):
         }, kwargs)
 
     def test_46(self):
-        namespace = self.parser.parse_args("-q type=issue limit=10 mode=recent order=asc".split(" "))
+        args = "-q type=issue limit=10 mode=recent order=asc".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -577,7 +671,9 @@ class Test_7(unittest.TestCase):
         }, kwargs)
 
     def test_47(self):
-        namespace = self.parser.parse_args("-q type=issue limit=10 order=asc mode=recent".split(" "))
+        args = "-q type=issue limit=10 order=asc mode=recent".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -590,7 +686,9 @@ class Test_7(unittest.TestCase):
         }, kwargs)
 
     def test_48(self):
-        namespace = self.parser.parse_args("-q type=issue order=asc mode=recent limit=10".split(" "))
+        args = "-q type=issue order=asc mode=recent limit=10".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -603,7 +701,9 @@ class Test_7(unittest.TestCase):
         }, kwargs)
 
     def test_49(self):
-        namespace = self.parser.parse_args("-q type=issue order=asc limit=10 mode=recent".split(" "))
+        args = "-q type=issue order=asc limit=10 mode=recent".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -616,7 +716,9 @@ class Test_7(unittest.TestCase):
         }, kwargs)
 
     def test_50(self):
-        namespace = self.parser.parse_args("-q mode=recent type=issue limit=10 order=asc".split(" "))
+        args = "-q mode=recent type=issue limit=10 order=asc".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -629,7 +731,9 @@ class Test_7(unittest.TestCase):
         }, kwargs)
 
     def test_51(self):
-        namespace = self.parser.parse_args("-q limit=10 type=issue mode=recent order=asc".split(" "))
+        args = "-q limit=10 type=issue mode=recent order=asc".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -642,7 +746,9 @@ class Test_7(unittest.TestCase):
         }, kwargs)
 
     def test_52(self):
-        namespace = self.parser.parse_args("-q order=asc type=issue mode=recent limit=10".split(" "))
+        args = "-q order=asc type=issue mode=recent limit=10".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -655,7 +761,9 @@ class Test_7(unittest.TestCase):
         }, kwargs)
 
     def test_53(self):
-        namespace = self.parser.parse_args("-q mode=recent limit=10 order=asc type=issue".split(" "))
+        args = "-q mode=recent limit=10 order=asc type=issue".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -668,7 +776,9 @@ class Test_7(unittest.TestCase):
         }, kwargs)
 
     def test_54(self):
-        namespace = self.parser.parse_args("-q limit=10 mode=recent order=asc type=issue".split(" "))
+        args = "-q limit=10 mode=recent order=asc type=issue".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -681,7 +791,9 @@ class Test_7(unittest.TestCase):
         }, kwargs)
 
     def test_55(self):
-        namespace = self.parser.parse_args("-q order=asc mode=recent limit=10 type=issue".split(" "))
+        args = "-q order=asc mode=recent limit=10 type=issue".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -698,7 +810,9 @@ class Test_8(unittest.TestCase):
         self.parser = build_parser()
 
     def test_56(self):
-        namespace = self.parser.parse_args("-q type=issue mode=board key=2".split(" "))
+        args = "-q type=issue mode=board key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -710,7 +824,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_57(self):
-        namespace = self.parser.parse_args("-q type=issue mode=board limit=10 order=asc key=2".split(" "))
+        args = "-q type=issue mode=board limit=10 order=asc key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -724,7 +840,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_58(self):
-        namespace = self.parser.parse_args("-qv type=issue -s mode=board limit=10 order=asc key=2".split(" "))
+        args = "-qv type=issue -s mode=board limit=10 order=asc key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -738,7 +856,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_59(self):
-        namespace = self.parser.parse_args("-qvsvs type=issue mode=board limit=10 order=asc key=2".split(" "))
+        args = "-qvsvs type=issue mode=board limit=10 order=asc key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -752,7 +872,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_60(self):
-        namespace = self.parser.parse_args("-qv type=issue mode=board limit=10 order=asc -s key=2".split(" "))
+        args = "-qv type=issue mode=board limit=10 order=asc -s key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -766,7 +888,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_61(self):
-        namespace = self.parser.parse_args("-qv type=issue -v mode=board -v limit=10 -v order=asc -s key=2".split(" "))
+        args = "-qv type=issue -v mode=board -v limit=10 -v order=asc -s key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -780,7 +904,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_62(self):
-        namespace = self.parser.parse_args("-sq type=issue --verbose mode=board limit=10 order=asc key=2".split(" "))
+        args = "-sq type=issue --verbose mode=board limit=10 order=asc key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -794,7 +920,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_63(self):
-        namespace = self.parser.parse_args("-sq --verbose --silent --verbose type=issue mode=board limit=10 order=asc key=2".split(" "))
+        args = "-sq --verbose --silent --verbose type=issue mode=board limit=10 order=asc key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -808,7 +936,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_64(self):
-        namespace = self.parser.parse_args("-sq type=issue mode=board limit=10 order=asc --verbose key=2".split(" "))
+        args = "-sq type=issue mode=board limit=10 order=asc --verbose key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -822,7 +952,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_65(self):
-        namespace = self.parser.parse_args("-sq type=issue --silent mode=board --silent limit=10 --silent order=asc --verbose key=2".split(" "))
+        args = "-sq type=issue --silent mode=board --silent limit=10 --silent order=asc --verbose key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -836,7 +968,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_66(self):
-        namespace = self.parser.parse_args("-q type=issue mode=mine mode=board limit=10 order=asc key=2".split(" "))
+        args = "-q type=issue mode=mine mode=board limit=10 order=asc key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -850,7 +984,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_67(self):
-        namespace = self.parser.parse_args("-q type=issue mode=mine limit=10 order=asc mode=board key=2".split(" "))
+        args = "-q type=issue mode=mine limit=10 order=asc mode=board key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -864,7 +1000,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_68(self):
-        namespace = self.parser.parse_args("-q type=issue mode=board limit=1 limit=10 order=asc key=2".split(" "))
+        args = "-q type=issue mode=board limit=1 limit=10 order=asc key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -878,7 +1016,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_69(self):
-        namespace = self.parser.parse_args("-q type=issue mode=board limit=10 order=desc order=asc key=2".split(" "))
+        args = "-q type=issue mode=board limit=10 order=desc order=asc key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -892,7 +1032,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_70(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported limit=100 order=desc mode=board limit=10 order=asc key=2".split(" "))
+        args = "-q type=issue mode=reported limit=100 order=desc mode=board limit=10 order=asc key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -906,7 +1048,9 @@ class Test_8(unittest.TestCase):
         }, kwargs)
 
     def test_71(self):
-        namespace = self.parser.parse_args("-q type=issue -q type=issue mode=board limit=10 order=asc key=2".split(" "))
+        args = "-q type=issue -q type=issue mode=board limit=10 order=asc key=2".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -924,7 +1068,9 @@ class Test_9(unittest.TestCase):
         self.parser = build_parser()
 
     def test_72(self):
-        namespace = self.parser.parse_args("-q type=board".split(" "))
+        args = "-q type=board".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -934,7 +1080,9 @@ class Test_9(unittest.TestCase):
         }, kwargs)
 
     def test_73(self):
-        namespace = self.parser.parse_args("-q type=board key=52".split(" "))
+        args = "-q type=board key=52".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -945,7 +1093,9 @@ class Test_9(unittest.TestCase):
         }, kwargs)
 
     def test_74(self):
-        namespace = self.parser.parse_args("-q type=board limit=12 key=52".split(" "))
+        args = "-q type=board limit=12 key=52".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -957,7 +1107,9 @@ class Test_9(unittest.TestCase):
         }, kwargs)
 
     def test_75(self):
-        namespace = self.parser.parse_args("-q order=desc type=board limit=12 key=52".split(" "))
+        args = "-q order=desc type=board limit=12 key=52".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -969,7 +1121,9 @@ class Test_9(unittest.TestCase):
         }, kwargs)
 
     def test_76(self):
-        namespace = self.parser.parse_args("limit=12 -q type=board".split(" "))
+        args = "limit=12 -q type=board".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -979,7 +1133,9 @@ class Test_9(unittest.TestCase):
         }, kwargs)
 
     def test_77(self):
-        namespace = self.parser.parse_args("ccc=yyy --query mode=all type=board -v -q type=board key=52".split(" "))
+        args = "ccc=yyy --query mode=all type=board -v -q type=board key=52".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -990,7 +1146,9 @@ class Test_9(unittest.TestCase):
         }, kwargs)
 
     def test_78(self):
-        namespace = self.parser.parse_args("xxx=yyy --silent -q --verbose --query type=key type=issue key=23".split(" "))
+        args = "xxx=yyy --silent -q --verbose --query type=key type=issue key=23".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -1013,7 +1171,9 @@ class Test_11(unittest.TestCase):
         self.parser = build_parser()
 
     def test_79(self):
-        namespace = self.parser.parse_args("-v".split(" "))
+        args = "-v".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -1029,7 +1189,9 @@ class Test_12(unittest.TestCase):
         self.parser = build_parser()
 
     def test_80(self):
-        namespace = self.parser.parse_args("-vh".split(" "))
+        args = "-vh".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -1045,7 +1207,9 @@ class Test_13(unittest.TestCase):
         self.parser = build_parser()
 
     def test_81(self):
-        namespace = self.parser.parse_args("-hv".split(" "))
+        args = "-hv".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -1060,13 +1224,15 @@ class Test_14(unittest.TestCase):
         self.parser = build_parser()
 
     def test_82(self):
-        namespace = self.parser.parse_args("-s".split(" "))
+        args = "-s".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": None,
             "help": False,
-            "verbose": True
+            "verbose": False
         }, kwargs)
 
 ### help manual
@@ -1076,7 +1242,9 @@ class Test_15(unittest.TestCase):
         self.parser = build_parser()
 
     def test_83(self):
-        namespace = self.parser.parse_args("-vsvsvss".split(" "))
+        args = "-vsvsvss".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -1092,7 +1260,9 @@ class Test_16(unittest.TestCase):
         self.parser = build_parser()
 
     def test_84(self):
-        namespace = self.parser.parse_args("-q type=issue mode=reported limit=1.0".split(" "))
+        args = "-q type=issue mode=reported limit=1.0".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -1110,7 +1280,9 @@ class Test_17(unittest.TestCase):
         self.parser = build_parser()
 
     def test_85(self):
-        namespace = self.parser.parse_args("-q xxx=yyy type=issue yyy=xxx".split(" "))
+        args = "-q xxx=yyy type=issue yyy=xxx".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -1131,7 +1303,9 @@ class Test_19(unittest.TestCase):
 
     def test_86(self):
         with self.assertRaises(SystemExit) as se:
-            namespace = self.parser.parse_args("-x".split(" "))
+            args = "-x".split(" ")
+            preprocess_args(args)
+            namespace = self.parser.parse_args(args)
             extract_values(namespace)
             kwargs = vars(namespace)
         self.assertEqual(2, se.exception.code)
@@ -1139,14 +1313,18 @@ class Test_19(unittest.TestCase):
 
     def test_87(self):
         with self.assertRaises(SystemExit) as se:
-            namespace = self.parser.parse_args("-qx".split(" "))
+            args = "-qx".split(" ")
+            preprocess_args(args)
+            namespace = self.parser.parse_args(args)
             extract_values(namespace)
             kwargs = vars(namespace)
         self.assertEqual(2, se.exception.code)
 
     def test_88(self):
         with self.assertRaises(SystemExit) as se:
-            namespace = self.parser.parse_args("--xxx".split(" "))
+            args = "--xxx".split(" ")
+            preprocess_args(args)
+            namespace = self.parser.parse_args(args)
             extract_values(namespace)
             kwargs = vars(namespace)
         self.assertEqual(2, se.exception.code)
@@ -1154,7 +1332,9 @@ class Test_19(unittest.TestCase):
     # valid but print help
 
     def test_89(self):
-        namespace = self.parser.parse_args("xxx".split(" "))
+        args = "xxx".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
 
@@ -1163,27 +1343,37 @@ class Test_20(unittest.TestCase):
         self.parser = build_parser()
 
     def test_90(self):
-        namespace = self.parser.parse_args("-v -q type=xxx".split(" "))
+        args = "-v -q type=xxx".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
 
     def test_91(self):
-        namespace = self.parser.parse_args("-v -q type=project".split(" "))
+        args = "-v -q type=project".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
 
     def test_92(self):
-        namespace = self.parser.parse_args("-v -q type=project mode=xxx".split(" "))
+        args = "-v -q type=project mode=xxx".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
 
     def test_93(self):
-        namespace = self.parser.parse_args("-v -q type=project mode=current limit=xxx".split(" "))
+        args = "-v -q type=project mode=current limit=xxx".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
 
     def test_94(self):
-        namespace = self.parser.parse_args("-v -q type=project mode=current order=xxx".split(" "))
+        args = "-v -q type=project mode=current order=xxx".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
 
@@ -1192,22 +1382,30 @@ class Test_21(unittest.TestCase):
         self.parser = build_parser()
 
     def test_95(self):
-        namespace = self.parser.parse_args("-v -q type=issue mode=all".split(" "))
+        args = "-v -q type=issue mode=all".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
 
     def test_96(self):
-        namespace = self.parser.parse_args("-v mode=all -q type=project".split(" "))
+        args = "-v mode=all -q type=project".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
 
     def test_97(self):
-        namespace = self.parser.parse_args("-v -q type=project mode=board".split(" "))
+        args = "-v -q type=project mode=board".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
 
     def test_98(self):
-        namespace = self.parser.parse_args("-v -q type=project mode=board key=xxx".split(" "))
+        args = "-v -q type=project mode=board key=xxx".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
 
@@ -1216,7 +1414,9 @@ class Test_22(unittest.TestCase):
         self.parser = build_parser()
 
     def test_99(self):
-        namespace = self.parser.parse_args("-v -q type=board key=xxx".split(" "))
+        args = "-v -q type=board key=xxx".split(" ")
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
         extract_values(namespace)
         kwargs = vars(namespace)
 

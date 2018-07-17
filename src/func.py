@@ -5,7 +5,7 @@ from threading import Thread
 
 import requests
 
-from utils import Super401, glob_dic, mylog, prepare
+from utils import Super401, glob_dic, mylog, prepare, func_log
 
 ''' ************ login logout ************* '''
 
@@ -232,7 +232,7 @@ def getResponse(lst):
     return s
 
 
-
+@func_log
 def query_issue(constraint, limit=0, order=None, verbose=None, **kwargs):
     url, headers = prepare('query')
     data = {}
@@ -289,7 +289,7 @@ def getInfo(r, order):
         s += tup[1]
     return s
 
-
+@func_log
 def query_project(limit=0, order=None, verbose=None, **kwargs):
     if verbose is None:
         verbose = json.loads(read_from_config()).get("verbose")
@@ -306,7 +306,7 @@ def query_project(limit=0, order=None, verbose=None, **kwargs):
     print_v("Sending the Request ...", verbose)
     url, headers = prepare('getProject')
     f,r = send_request(url, method.Get, headers, param, None)
-
+    
     if not f:
         print_v("Request Failed !!!", verbose)
         return False, r
@@ -314,7 +314,7 @@ def query_project(limit=0, order=None, verbose=None, **kwargs):
     return True, getInfo(r, order)
 
 
-    
+@func_log
 def query_board(key=None, limit=None, order=None, verbose=None, **kwargs):
     '''
     This function return all boards and order the return value.

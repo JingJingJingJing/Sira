@@ -151,3 +151,7 @@ TTest.py
 cookie.txt
 testfolder
 tables.json
+test.py
+.sirarc
+*.sh
+*.pem

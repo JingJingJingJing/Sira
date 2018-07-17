@@ -1,4 +1,8 @@
 from argparse import ArgumentParser
+from sys import exit, stderr, stdin, stdout, platform
+
+from termcolor import colored
+
 from func import query_board, query_issue, query_project
 
 issue_opts_list = ["assignee", "creator", "id", "key", "label", "priority",
@@ -6,6 +10,7 @@ issue_opts_list = ["assignee", "creator", "id", "key", "label", "priority",
 
 user_opts = ["assignee", "creater", "reporter", "watcher"]
 
+jql_ignore =  ["sub_command", "order", "limit", "constraint", "from_sira"]
 
 def build_parser():
     query = ArgumentParser(
@@ -22,7 +27,7 @@ def build_parser():
     )
     issue = sub.add_parser(
         "issue",
-        prog="sira",
+        prog="issue",
         description="TODO",
         epilog="TODO"
     )
@@ -53,6 +58,15 @@ def build_parser():
             dest=opt
         )
     issue_opts["id"].type = int
+    issue.add_argument(
+        "constraint",
+        action="store",
+        nargs="?",
+        default=None,
+        type=str,
+        help="TODO",
+        metavar="CONSTR"
+    )
 
     # add key in board
     board.add_argument(
@@ -65,13 +79,21 @@ def build_parser():
         dest="key"
     )
 
-    # add order and limit to each sub-command
+    # add from-sira, limit, and order to each sub-command
     for sub_command in [issue, project, board]:
+        sub_command.add_argument(
+            "-f", "--from-sira",
+            action="store_true",
+            default=False,
+            required=False,
+            help="TODO",
+            dest="from_sira"
+        )
         sub_command.add_argument(
             "-l", "--limit",
             action="store",
             default=0,
-            type=int,
+            type=float,
             required=False,
             help="TODO",
             dest="limit"
@@ -89,34 +111,45 @@ def build_parser():
     return query
 
 
-
+def print_err(msg: str, color: str) -> None:
+    if platform in ("win32", "cygwin"):
+        import colorama
+        colorama.init()
+    print(colored(msg + "\n", color=color))
+    if platform in ("win32", "cygwin"):
+        import colorama
+        colorama.deinit()
 
 def main():
     parser = build_parser()
     namespace = parser.parse_args()
-    print(namespace)
     if not namespace.sub_command:
         parser.print_help()
         return
+    # floor limit
+    if "limit" in dir(namespace):
+        setattr(namespace, "limit", int(getattr(namespace, "limit")))
     if namespace.sub_command == "issue":
-        jql = ""
         kwargs = vars(namespace)
+        jql = kwargs["constraint"] if kwargs["constraint"] else ""
         for element in kwargs:
             value = "currentUser()"\
                     if element in user_opts and kwargs[element] == "mine"\
                     else kwargs[element]
-            if element not in ("sub_command", "order", "limit") and value:
+            if element not in jql_ignore and value:
                 jql += " and {} = {}".format(element, value) if jql\
                        else "{} = {}".format(element, value)
-        kwargs["constaint"] = jql
-        print(query_issue(**kwargs))
+        kwargs["constraint"] = jql
+        status, msg = query_issue(**kwargs)
     elif namespace.sub_command == "project":
-        print(query_project(**vars(namespace)))
+        status, msg = query_project(**vars(namespace))
     elif namespace.sub_command == "board":
-        print(query_board(**vars(namespace)))
+        status, msg = query_board(**vars(namespace))
+    if getattr(namespace, "from_sira") or status:
+        print(msg, file=stdout)
     else:
-        pass
-
+        print_err(msg, "red")
+    exit(0 if status else 1)
 
 if __name__ == '__main__':
     main()

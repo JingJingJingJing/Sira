@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
-from func import query_board, query_issue, query_project
+from sys import stderr, stdin, stdout
 
-from sys import stdin, stdout, stderr
+from func import query_board, query_issue, query_project
 
 issue_opts_list = ["assignee", "creator", "id", "key", "label", "priority",
                    "reporter", "type", "watcher"]
@@ -24,7 +24,7 @@ def build_parser():
     )
     issue = sub.add_parser(
         "issue",
-        prog="sira",
+        prog="issue",
         description="TODO",
         epilog="TODO"
     )
@@ -82,7 +82,7 @@ def build_parser():
             "-l", "--limit",
             action="store",
             default=0,
-            type=int,
+            type=float,
             required=False,
             help="TODO",
             dest="limit"
@@ -103,12 +103,14 @@ def build_parser():
 def main():
     parser = build_parser()
     namespace = parser.parse_args()
-    print(namespace)
     if not namespace.sub_command:
         parser.print_help()
         return
     if namespace.sub_command == "issue":
         kwargs = vars(namespace)
+        # floor limit
+        if "limit" in kwargs:
+            kwargs["limit"] = int(kwargs["limit"])
         jql = kwargs["constraint"] if kwargs["constraint"] else ""
         for element in kwargs:
             value = "currentUser()"\

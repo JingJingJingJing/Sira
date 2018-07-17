@@ -287,7 +287,7 @@ def getInfo(r, order):
 @func_log
 def query_project(limit=0, order=None, verbose=None, **kwargs):
     if verbose is None:
-        verbose = read_from_config().get("verbose")
+        verbose = json.loads(read_from_config()).get("verbose")
     if order:
         order = order.lower()
     param = {}
@@ -301,7 +301,7 @@ def query_project(limit=0, order=None, verbose=None, **kwargs):
     print_v("Sending the Request ...", verbose)
     url, headers = prepare('getProject')
     f,r = send_request(url, method.Get, headers, param, None)
-
+    
     if not f:
         print_v("Request Failed !!!", verbose)
         return False, r

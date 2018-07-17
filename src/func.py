@@ -6,8 +6,8 @@ from threading import Thread
 import requests
 
 from utils import Super401, glob_dic, mylog, prepare, func_log
-
 ''' ************ login logout ************* '''
+
 
 def login(lst):
     un = lst[0]
@@ -52,7 +52,7 @@ def login(lst):
             mylog.error('No session information from HTTP response\r\n' +
                         r.text)
             return (False, ['session info not found!'])
-        write_to_config(["credential"],["cookie","username"],[cookie, un])
+        write_to_config(["credential"], ["cookie", "username"], [cookie, un])
         mylog.info("Successfully logged in as " + un)
         return (True, ["Success"])
     except requests.exceptions.RequestException as err:
@@ -78,6 +78,14 @@ def logout():
 
 
 ''' ************** All requests are sent through this function except login logout ************** '''
+
+
+class method(Enum):
+    Get = 0
+    Post = 1
+    Put = 2
+    Delete = 3
+
 
 def send_request(url, method, headers, params, data):
     r = requests.Response()
@@ -120,19 +128,20 @@ def send_request(url, method, headers, params, data):
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
             mylog.error(r.text)
-            
+
             s = 'Request denied!\r\nerror code: {} {}\r\n'.format(
-                str(r.status_code), str(requests.status_codes._codes[r.status_code][0]))
-            
+                str(r.status_code),
+                str(requests.status_codes._codes[r.status_code][0]))
+
             try:
                 lst = r.json().get('errorMessages', [])
                 for i, errors in enumerate(lst):
                     s += errors
-                    if i != len(lst) -1:
+                    if i != len(lst) - 1:
                         s += '\r\n'
                 dic = r.json().get('errors', {})
                 for i, key in enumerate(dic):
-                    s += dic[key]+' '
+                    s += dic[key] + ' '
 
             except json.JSONDecodeError:
                 pass
@@ -145,8 +154,8 @@ def send_request(url, method, headers, params, data):
                 lst = r.json()['warningMessages']
                 for i, errors in enumerate(lst):
                     s += errors
-                    if s!=len(lst):
-                        s+='\r\n'
+                    if s != len(lst):
+                        s += '\r\n'
                 mylog.error(s)
                 return (False, s)
             except KeyError:
@@ -157,20 +166,13 @@ def send_request(url, method, headers, params, data):
             return (True, r)
     except requests.exceptions.RequestException as err:
         mylog.error(err)
-        return (False, 
-            '''Internet Error! Try:\r\n
+        return (False, '''Internet Error! Try:\r\n
             \tChecking the network cables, modem, and route\r\n
             \tReconnecting to Wi-Fi\r\n
-            \tRunning Network Diagnostics'''
-        )
+            \tRunning Network Diagnostics''')
 
 
 ''' ************** Queries ************** '''
-class method(Enum):
-    Get = 0
-    Post = 1
-    Put = 2
-    Delete = 3
 
 
 def getTarget(fields, field):
@@ -208,16 +210,12 @@ def getResponse(lst):
     Only information of the fields in defaultList will be returned
     '''
     try:
-        defaultList = json.loads(read_from_config()).get('query_field').get('issue_default')
+        defaultList = json.loads(
+            read_from_config()).get('query_field').get('issue_default')
     except AttributeError:
-        defaultList=[
-            "assignee",
-            "reporter",
-            "priority",
-            "status",
-            "labels",
-            "fixVersions",
-            "summary"
+        defaultList = [
+            "assignee", "reporter", "priority", "status", "labels",
+            "fixVersions", "summary"
         ]
     if not lst:
         return 'Issue Not Found'
@@ -233,9 +231,7 @@ def getResponse(lst):
 
 
 @func_log
-def query_issue(constraint, limit=0, order=None, verbose=None, **kwargs):
-    url, headers = prepare('query')
-    data = {}
+def query_issue(constraint, bid=0, limit=0, order=None, verbose=None, **kwargs):
     if verbose is None:
         verbose = json.loads(read_from_config()).get("verbose")
     print_v("Formating Input ...", verbose)
@@ -247,20 +243,25 @@ def query_issue(constraint, limit=0, order=None, verbose=None, **kwargs):
             constraint += ' order by key DESC'
     else:
         constraint += ' order by updated DESC'
-    
+    data = {}
     data["jql"] = constraint
     data["startAt"] = 0
-    
+
     if limit:
         data["maxResults"] = limit
     print_v("Sending the Request ...", verbose)
-    f, r = send_request(url, method.Post, headers, None, json.dumps(data))
+
+    if bid:
+        url, headers = prepare('getBoard','/{}/issue'.format(bid))
+        f, r = send_request(url, method.Get, headers, data, None)
+    else:
+        url, headers = prepare('query')
+        f, r = send_request(url, method.Post, headers, None, json.dumps(data))
     if not f:
         print_v("Request Failed !!!", verbose)
         return False, r
     print_v("Extracting the Results ...", verbose)
     return True, getResponse(r.get('issues'))
-
 
 
 def getInfo(r, order):
@@ -275,11 +276,11 @@ def getInfo(r, order):
         key = pro.get('key')
         for j, f in enumerate(defaultList):
             s += getTarget(pro, f)
-            if j != len(defaultList)-1:
-                s += ' ' 
-        if i != len(r)-1:
+            if j != len(defaultList) - 1:
+                s += ' '
+        if i != len(r) - 1:
             s += '\r\n'
-        lst.append((key,s))
+        lst.append((key, s))
     if order and order.lower() == 'asc':
         lst.sort()
     elif order and order.lower == 'desc':
@@ -288,6 +289,7 @@ def getInfo(r, order):
     for tup in lst:
         s += tup[1]
     return s
+
 
 @func_log
 def query_project(limit=0, order=None, verbose=None, **kwargs):
@@ -302,11 +304,11 @@ def query_project(limit=0, order=None, verbose=None, **kwargs):
             param["recent"] = limit
         else:
             param["recent"] = 20
-    param["expand"]="lead"
+    param["expand"] = "lead"
     print_v("Sending the Request ...", verbose)
     url, headers = prepare('getProject')
-    f,r = send_request(url, method.Get, headers, param, None)
-    
+    f, r = send_request(url, method.Get, headers, param, None)
+
     if not f:
         print_v("Request Failed !!!", verbose)
         return False, r
@@ -329,16 +331,16 @@ def query_board(key=None, limit=None, order=None, verbose=None, **kwargs):
     f, r = send_request(url, method.Get, headers, None, None)
     print_v("Extracting the Results ...", verbose)
     lst = []
-    defaultList = ['id','name']
+    defaultList = ['id', 'name']
     for info in r.get('values'):
         bid = info.get('id')
-        innerlst=[]
+        innerlst = []
         for f in defaultList:
             innerlst.append(info.get(f))
         lst.append(tuple(innerlst))
         if key and (bid == key):
             tup = lst.pop()
-            return '{} "{}"'.format(tup[0],tup[1])
+            return '{} "{}"'.format(tup[0], tup[1])
     if key:
         return False, 'Not found or you don\'t have permission to view this board.'
     if order and order.lower() == 'asc':
@@ -347,32 +349,22 @@ def query_board(key=None, limit=None, order=None, verbose=None, **kwargs):
         lst.sort(reverse=True)
     s = ''
     for i, tup in enumerate(lst):
-        s += '{} "{}"'.format(tup[0],tup[1])
-        if i != len(lst)-1:
+        s += '{} "{}"'.format(tup[0], tup[1])
+        if i != len(lst) - 1:
             s += '\r\n'
     return True, s
 
 
+''' ******************* Update ******************* '''
 
-
-''' ***************** Update ******************* '''
-_updateBook={
-    "assignee":"",
-    "status":"",
-    "fixVersions":"",
-    "labels":"",
-    "Story Points":""
-}
 
 def issue_update_assignee(issue, info):
-    url, headers = prepare('issue','/{}'.format(issue))
-    data = {"fields":{"assignee":{"name":info}}}
+    url, headers = prepare('issue', '/{}'.format(issue))
+    data = {"fields": {"assignee": {"name": info}}}
     f, r = send_request(url, method.Put, headers, None, json.dumps(data))
     if not f:
         return False, r
     return True, 'success'
-
-
 
 
 def issue_update_status(issue, info):
@@ -400,11 +392,12 @@ def issue_update_status(issue, info):
         return r
     return True, 'success'
 
+
 def issue_update_labels(issue, labels, mode='add'):
     url, headers = prepare('issue', '/{}'.format(issue))
     target = []
     if isinstance(labels, str):
-        target = [{mode:labels}]
+        target = [{mode: labels}]
     else:
         for l in labels:
             target.append({mode: l})
@@ -412,9 +405,8 @@ def issue_update_labels(issue, labels, mode='add'):
     f, r = send_request(url, method.Put, headers, None, data)
     if not f:
         return False, str(r)
-    
-    return True, 'label successfully {}ed'.format(mode)
 
+    return True, 'label successfully {}ed'.format(mode)
 
 
 def issue_get_comment(issue):
@@ -435,6 +427,7 @@ def issue_get_comment(issue):
     else:
         return True, "There is no comment yet!"
 
+
 def issue_edit_comment(issue, cid, body):
     url, headers = prepare('issue', '/{}{}{}'.format(issue, '/comment/', cid))
     data = {"body": body}
@@ -442,6 +435,7 @@ def issue_edit_comment(issue, cid, body):
     if not f:
         return r
     return True, 'Comment(ID: ' + r['id'] + ') modified'
+
 
 def issue_add_comment(issue, body):
     url, headers = prepare('issue', '/{}/{}'.format(issue, 'comment'))
@@ -459,11 +453,14 @@ def issue_del_comment(issue, cid):
         return False, r
     return True, 'Comment deleted'
 
-def issue_watch(issue):
+
+def issue_watch(issue, user=None):
     url, headers = prepare('issue', '/{}/watchers'.format(issue))
-    data = '"ysg"'
+    if user is None:
+        user = json.loads(read_from_config()).get('credential').get('username')
     print(url, headers)
-    return send_request(url, method.Post, headers, None, data)
+    return send_request(url, method.Post, headers, None, '"{}"'.format(user))
+
 
 def issue_get_watcher(issue):
     url, headers = prepare('issue', '/{}/watchers'.format(issue))
@@ -474,13 +471,15 @@ def issue_get_watcher(issue):
     s = ''
     for i, user in enumerate(lst):
         s += user.get('name')
-        if i != len(lst)-1:
-            s +='\r\n'
+        if i != len(lst) - 1:
+            s += '\r\n'
     return s
+
 
 def issue_del_watcher(issue, user):
     url, headers = prepare('issue', '/{}/watchers'.format(issue))
     return send_request(url, method.Delete, headers, '"ysg"', None)
+
 
 def write_to_config(dic_path, field, info):
 
@@ -497,12 +496,12 @@ def write_to_config(dic_path, field, info):
 
         for i in range(len(field)):
             if isinstance(info, list):
-                if len(field)!=len(info):
+                if len(field) != len(info):
                     fh.close()
                     raise "Field and Info length need to be equal"
-                dic[field[i]]=info[i]
+                dic[field[i]] = info[i]
             else:
-                dic[field[i]]=info
+                dic[field[i]] = info
     else:
         dic[field] = info
     fh = open('.sirarc', 'w')
@@ -511,6 +510,7 @@ def write_to_config(dic_path, field, info):
     fh.close()
     return ret
 
+
 def read_from_config():
     try:
         fh = open('.sirarc', 'r')
@@ -518,33 +518,37 @@ def read_from_config():
         fh.close()
         return content
     except FileNotFoundError:
-        fh = open('.sirarc','w')
+        fh = open('.sirarc', 'w')
         fh.write('')
         fh.close()
 
+
 def getPermission():
     url, headers = prepare('mypermission')
-    f, r = send_request(url, method.Get,headers, None, None)
+    f, r = send_request(url, method.Get, headers, None, None)
     if not f:
         return r
     for permission in r.get('permissions'):
-        write_to_config(['permissions'],permission,True)
+        write_to_config(['permissions'], permission, True)
+
 
 def print_v(s, f=False):
     if f:
         print(s)
 
+
 if __name__ == '__main__':
     # login(['admin','admin'])
-    # print(query_issue('project=sira')[1])
+    # print(query_issue('assignee=ysg')[1])
     # print(query_project())
     # print(query_board())
     # print(query_board(key=4))
     # print(update_status('test-88','to do'))
     # print(read_from_config())
-    test = 'test-88'
-    print(issue_watch(test)[1])
-    print(issue_get_watcher(test))
-    print(issue_del_watcher(test, 'ysg')[1])
-    print(issue_get_watcher(test))
+    # test = 'test-88'
+    # print(issue_watch(test)[1])
+    # print(issue_get_watcher(test))
+    # print(issue_del_watcher(test, 'ysg')[1])
+    # print(issue_get_watcher(test))
+
     pass

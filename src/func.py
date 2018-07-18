@@ -174,7 +174,6 @@ def send_request(url, method, headers, params, data):
 
 ''' ************** Queries ************** '''
 
-
 def getTarget(fields, field):
     '''
     This function only works for identifier "name" or "key"

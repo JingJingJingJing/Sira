@@ -180,12 +180,14 @@ expr_dict = {
                 "any": "-b %(key)s"
             }
         },
+        # hard code here, pay attention!
+        # doesn't check the confilict between "-k" and "-l"
         "board": {
-            "default": "key",
+            "default": "empty",
             "str": "",
-            "entry": "mode",
-            "recent": "-o recent",
-            "key": "-k %(key)s"
+            "entry": "key",
+            "any": "-k %(key)s",
+            "empty": "-o recent"
         },
         "project": {
             "default": None,
@@ -238,8 +240,12 @@ def process(namespace: Namespace, parser: ArgumentParser) -> int:
             print("confilict")
         else:
             command.append("-o %(order)s")
+    if hasattr(namespace, "verbose"):
+        verbose = getattr(namespace, "verbose")
+        if verbose is not None:
+            command.append("-v" if verbose else "-s")
     command.append("-f")
-    command = " ".join(command) % vars(namespace)
+    command = " ".join([s for s in command if s]) % vars(namespace)
     return command
 
 

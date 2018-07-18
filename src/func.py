@@ -323,7 +323,7 @@ def query_board(key=None, limit=None, order=None, verbose=None, **kwargs):
     If key is specified and valid, only one line will be returned
     '''
     if verbose is None:
-        verbose = read_from_config().get("verbose")
+        verbose = json.loads(read_from_config()).get("verbose")
     print_v("Formating Input ...", verbose)
     url, headers = prepare('getBoard')
     print_v("Sending the Request ...", verbose)
@@ -339,7 +339,7 @@ def query_board(key=None, limit=None, order=None, verbose=None, **kwargs):
         lst.append(tuple(innerlst))
         if key and (bid == key):
             tup = lst.pop()
-            return '{} "{}"'.format(tup[0], tup[1])
+            return True, '{} "{}"'.format(tup[0], tup[1])
     if key:
         return False, 'Not found or you don\'t have permission to view this board.'
     if order and order.lower() == 'asc':

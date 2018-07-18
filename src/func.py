@@ -328,6 +328,9 @@ def query_board(key=None, limit=None, order=None, verbose=None, **kwargs):
     url, headers = prepare('getBoard')
     print_v("Sending the Request ...", verbose)
     f, r = send_request(url, method.Get, headers, None, None)
+    if not f:
+        print_v("Request Failed !!!", verbose)
+        return False, r
     print_v("Extracting the Results ...", verbose)
     lst = []
     defaultList = ['id', 'name']

@@ -5,12 +5,14 @@ from termcolor import colored
 
 from func import query_board, query_issue, query_project
 
-issue_opts_list = ["assignee", "creator", "id", "key", "label", "priority",
-                   "reporter", "type", "watcher"]
+issue_opts_list = ["assignee", "board", "creator", "id", "key", "label",
+                   "priority", "reporter", "type", "watcher"]
 
 user_opts = ["assignee", "creater", "reporter", "watcher"]
 
-jql_ignore =  ["sub_command", "order", "limit", "constraint", "from_sira"]
+jql_ignore = ["sub_command", "order", "limit", "constraint", "from_sira",
+              "board", "verbose"]
+
 
 def build_parser():
     query = ArgumentParser(
@@ -58,6 +60,7 @@ def build_parser():
             dest=opt
         )
     issue_opts["id"].type = int
+    issue_opts["board"].type = int
     issue.add_argument(
         "constraint",
         action="store",
@@ -108,6 +111,22 @@ def build_parser():
             help="TODO",
             dest="order"
         )
+        sub_command.add_argument(
+            "-v", "--verbose",
+            action="store_true",
+            default=None,
+            required=False,
+            help="TODO",
+            dest="verbose"
+        )
+        sub_command.add_argument(
+            "-s", "--silent",
+            action="store_false",
+            default=None,
+            required=False,
+            help="TODO",
+            dest="verbose"
+        )
     return query
 
 
@@ -119,6 +138,7 @@ def print_err(msg: str, color: str) -> None:
     if platform in ("win32", "cygwin"):
         import colorama
         colorama.deinit()
+
 
 def main():
     parser = build_parser()
@@ -151,5 +171,8 @@ def main():
         print_err(msg, "red")
     exit(0 if status else 1)
 
+
 if __name__ == '__main__':
+    # import func
+    # func.login(["admin", "admin"])
     main()

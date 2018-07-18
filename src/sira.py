@@ -7,6 +7,7 @@ keyword_dict = {
     "update": []
 }
 
+
 class Ignore(Action):
     def __init__(self, option_strings, **kwargs):
         super(Ignore, self).__init__(option_strings, **kwargs)
@@ -22,15 +23,18 @@ class Store_Const_and_Ignore(Ignore):
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, self.const)
 
+
 def Store_Const_and_Store_to(dest):
     class Store_Const_and_Store(Action):
         def __init__(self, option_strings, **kwargs):
-            super(Store_Const_and_Store, self).__init__(option_strings, **kwargs)
+            super(Store_Const_and_Store, self).__init__(
+                option_strings, **kwargs)
 
         def __call__(self, parser, namespace, values, option_string=None):
             setattr(namespace, self.dest, self.const)
             setattr(namespace, dest, values)
     return Store_Const_and_Store
+
 
 def build_parser() -> ArgumentParser:
     sira = ArgumentParser(
@@ -115,7 +119,7 @@ def extract_values(namespace: Namespace) -> None:
             key, value = expression.split("=")
             if key and key in keyword_dict[action]:
                 setattr(namespace, key, value)
-    
+
     # convert limit and key to int
     int_values = ["limit", "key"]
     for entry in int_values:
@@ -128,14 +132,16 @@ def extract_values(namespace: Namespace) -> None:
             else:
                 setattr(namespace, entry, value)
 
+
 def preprocess_args(args: list) -> list:
-    ### can be optimized to one loop
     i = 0
+    # can be optimized to one loop
+    # truncate serial args (eg. ['-ab'] to ['-a', '-b'])
     while i < len(args):
         if args[i].startswith("-") and not args[i].startswith("--"):
             string = args[i]
             del args[i]
-            for j in range(len(string) - 1, 0, -1) :
+            for j in range(len(string) - 1, 0, -1):
                 args.insert(i, "-{}".format(string[j]))
         i += 1
     global_switches = ["-v", "--verbose", "-s", "--silent"]
@@ -151,13 +157,105 @@ def preprocess_args(args: list) -> list:
     for element in cache:
         args.insert(i, element)
 
+# expr_dict[action][type][mode]
+expr_dict = {
+    "default": None,
+    "str": "sira-%(action)s",
+    "entry": "action",
+    "query": {
+        "default": None,
+        "str": "%(type)s",
+        "entry": "type",
+        "issue": {
+            "default": "mine",
+            "str": "",
+            "entry": "mode",
+            "mine": "-a mine",
+            "reported": "-r mine",
+            "recent": "-o recent",
+            "board": {
+                "default": None,
+                "str": "",
+                "entry": "key",
+                "any": "-b %(key)s"
+            }
+        },
+        "board": {
+            "default": "key",
+            "str": "",
+            "entry": "mode",
+            "recent": "-o recent",
+            "key": "-k %(key)s"
+        },
+        "project": {
+            "default": None,
+            "str": "",
+            "entry": "mode",
+            "all": "",
+            "current": "-l 1",
+            "recent": "-o recent"
+        }
+    }
+}
+
+def process(namespace: Namespace, parser: ArgumentParser) -> int:
+    if namespace.action is None or namespace.help:
+        parser.print_help()
+        sys.exit(0)
+    current_dic = expr_dict
+    command = list()
+    while 1:
+        # check whether there are expressions missing
+        entry = current_dic["entry"]
+        if not hasattr(namespace, entry):
+            default = current_dic["default"]
+            if default:
+                setattr(namespace, entry, default)
+            else:
+                # print error msg
+                # TODO
+                print("such input not allowed")
+                sys.exit(2)
+        try:
+            element = current_dic[getattr(namespace, entry)]
+        except KeyError:
+            element = current_dic["any"]
+        if type(element) == str:
+            command.append(element)
+            break
+        else:
+            command.append(current_dic["str"])
+            current_dic = element
+    if hasattr(namespace, "limit"):
+        if [s for s in command if "-l" in s]:
+            # TODO: conflict
+            print("conflict")
+        else:
+            command.append("-l %(limit)s")
+    if hasattr(namespace, "order"):
+        if [s for s in command if "-o" in s]:
+            # TODO: conflict
+            print("confilict")
+        else:
+            command.append("-o %(order)s")
+    command.append("-f")
+    command = " ".join(command) % vars(namespace)
+    return command
+
+
 def main():
     parser = build_parser()
     args = sys.argv[1:]
     preprocess_args(args)
     namespace = parser.parse_args(args)
     extract_values(namespace)
-    print(namespace)
+    try:
+        sub_process = run(process(namespace, parser))
+        print(sub_process.returncode)
+    except Exception as e:
+        print(e)
+    except BaseException as be:
+        print(be)
 
 
 if __name__ == '__main__':

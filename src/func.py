@@ -230,7 +230,7 @@ def getResponse(lst):
 
 
 @func_log
-def query_issue(constraint, bid=0, limit=0, order=None, verbose=None, **kwargs):
+def query_issue(constraint, board=0, limit=0, order=None, verbose=None, **kwargs):
     if verbose is None:
         verbose = json.loads(read_from_config()).get("verbose")
     print_v("Formating Input ...", verbose)
@@ -250,8 +250,8 @@ def query_issue(constraint, bid=0, limit=0, order=None, verbose=None, **kwargs):
         data["maxResults"] = limit
     print_v("Sending the Request ...", verbose)
 
-    if bid:
-        url, headers = prepare('getBoard','/{}/issue'.format(bid))
+    if board:
+        url, headers = prepare('getBoard','/{}/issue'.format(board))
         f, r = send_request(url, method.Get, headers, data, None)
     else:
         url, headers = prepare('query')

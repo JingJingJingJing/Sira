@@ -19,7 +19,8 @@ class Test_0(unittest.TestCase):
         args = "".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
            "action": None,
@@ -27,14 +28,15 @@ class Test_0(unittest.TestCase):
            "verbose": None
         }, kwargs)
         with self.assertRaises(SystemExit) as se:
-            process(namespace, self.parser)
+            process(namespace, self.parser, verbose)
         self.assertEqual(0, se.exception.code)
 
     def test_1(self):
         args = "-h".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
            "action": None,
@@ -42,14 +44,15 @@ class Test_0(unittest.TestCase):
            "verbose": None
         }, kwargs)
         with self.assertRaises(SystemExit) as se:
-            process(namespace, self.parser)
+            process(namespace, self.parser, verbose)
         self.assertEqual(0, se.exception.code)
 
     def test_2(self):
         args = "--help".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
            "action": None,
@@ -57,7 +60,7 @@ class Test_0(unittest.TestCase):
            "verbose": None
         }, kwargs)
         with self.assertRaises(SystemExit) as se:
-            process(namespace, self.parser)
+            process(namespace, self.parser, verbose)
         self.assertEqual(0, se.exception.code)
 
 class Test_1(unittest.TestCase):
@@ -68,7 +71,8 @@ class Test_1(unittest.TestCase):
         args = "-q type=project mode=all".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -76,14 +80,15 @@ class Test_1(unittest.TestCase):
             "mode": "all",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -f", command)
 
     def test_4(self):
         args = "-v -q type=project mode=all".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -91,14 +96,15 @@ class Test_1(unittest.TestCase):
             "mode": "all",
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -v -f", command)
 
     def test_5(self):
         args = "-vq type=project mode=all".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -106,14 +112,15 @@ class Test_1(unittest.TestCase):
             "mode": "all",
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -v -f", command)
 
     def test_6(self):
         args = "-qv type=project mode=all".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -121,14 +128,15 @@ class Test_1(unittest.TestCase):
             "mode": "all",
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -v -f", command)
 
     def test_7(self):
         args = "-q -v type=project mode=all".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -136,14 +144,15 @@ class Test_1(unittest.TestCase):
             "mode": "all",
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -v -f", command)
 
     def test_8(self):
         args = "-q type=project -v mode=all".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -151,14 +160,15 @@ class Test_1(unittest.TestCase):
             "mode": "all",
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -v -f", command)
 
     def test_9(self):
         args = "-q type=project mode=all -v".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -166,7 +176,7 @@ class Test_1(unittest.TestCase):
             "mode": "all",
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -v -f", command)
 
 class Test_2(unittest.TestCase):
@@ -177,7 +187,8 @@ class Test_2(unittest.TestCase):
         args = "-q type=project mode=current".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -185,14 +196,15 @@ class Test_2(unittest.TestCase):
             "mode": "current",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -l 1 -f", command)
 
     def test_11(self):
         args = "--query type=project mode=current".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -200,14 +212,15 @@ class Test_2(unittest.TestCase):
             "mode": "current",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -l 1 -f", command)
 
     def test_12(self):
         args = "-v --query type=project mode=current".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -215,14 +228,15 @@ class Test_2(unittest.TestCase):
             "mode": "current",
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -l 1 -v -f", command)
 
     def test_13(self):
         args = "--query -v type=project mode=current".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -230,14 +244,15 @@ class Test_2(unittest.TestCase):
             "mode": "current",
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -l 1 -v -f", command)
 
     def test_14(self):
         args = "--query type=project -v mode=current".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -245,14 +260,15 @@ class Test_2(unittest.TestCase):
             "mode": "current",
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -l 1 -v -f", command)
 
     def test_15(self):
         args = "--query type=project mode=current -v".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -260,7 +276,7 @@ class Test_2(unittest.TestCase):
             "mode": "current",
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -l 1 -v -f", command)
 
 class Test_3(unittest.TestCase):
@@ -271,7 +287,8 @@ class Test_3(unittest.TestCase):
         args = "-q type=project mode=recent".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -279,14 +296,15 @@ class Test_3(unittest.TestCase):
             "mode": "recent",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -o recent -f", command)
 
     def test_17(self):
         args = "--silent -q type=project mode=recent".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -294,14 +312,15 @@ class Test_3(unittest.TestCase):
             "mode": "recent",
             "verbose": False
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -o recent -s -f", command)
 
     def test_18(self):
         args = "-q --silent type=project mode=recent".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -309,14 +328,15 @@ class Test_3(unittest.TestCase):
             "mode": "recent",
             "verbose": False
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -o recent -s -f", command)
 
     def test_19(self):
         args = "-q type=project --silent mode=recent".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -324,14 +344,15 @@ class Test_3(unittest.TestCase):
             "mode": "recent",
             "verbose": False
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -o recent -s -f", command)
 
     def test_20(self):
         args = "-q type=project mode=recent --silent".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -339,7 +360,7 @@ class Test_3(unittest.TestCase):
             "mode": "recent",
             "verbose": False
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query project -o recent -s -f", command)
 
 class Test_4(unittest.TestCase):
@@ -350,7 +371,8 @@ class Test_4(unittest.TestCase):
         args = "-q type=issue mode=mine".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -358,14 +380,15 @@ class Test_4(unittest.TestCase):
             "mode": "mine",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -a mine -f", command)
 
     def test_22(self):
         args = "--query type=issue mode=mine".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -373,14 +396,15 @@ class Test_4(unittest.TestCase):
             "mode": "mine",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -a mine -f", command)
 
     def test_23(self):
         args = "--silent --query type=issue mode=mine".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -388,14 +412,15 @@ class Test_4(unittest.TestCase):
             "mode": "mine",
             "verbose": False
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -a mine -s -f", command)
 
     def test_24(self):
         args = "--query --silent type=issue mode=mine".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -403,14 +428,15 @@ class Test_4(unittest.TestCase):
             "mode": "mine",
             "verbose": False
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -a mine -s -f", command)
 
     def test_25(self):
         args = "--query type=issue --silent mode=mine".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -418,14 +444,15 @@ class Test_4(unittest.TestCase):
             "mode": "mine",
             "verbose": False
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -a mine -s -f", command)
 
     def test_26(self):
         args = "--query type=issue mode=mine --silent".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -433,7 +460,7 @@ class Test_4(unittest.TestCase):
             "mode": "mine",
             "verbose": False
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -a mine -s -f", command)
 
 class Test_5(unittest.TestCase):
@@ -444,7 +471,8 @@ class Test_5(unittest.TestCase):
         args = "-q type=issue mode=reported".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -452,14 +480,15 @@ class Test_5(unittest.TestCase):
             "mode": "reported",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -f", command)
 
     def test_28(self):
         args = "-q mode=reported type=issue".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -467,14 +496,15 @@ class Test_5(unittest.TestCase):
             "mode": "reported",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -f", command)
 
     def test_29(self):
         args = "-q type=issue mode=reported limit=0".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -483,14 +513,15 @@ class Test_5(unittest.TestCase):
             "verbose": None,
             "limit": 0
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -l 0 -f", command)
 
     def test_30(self):
         args = "-q type=issue mode=reported limit=1".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -499,14 +530,15 @@ class Test_5(unittest.TestCase):
             "verbose": None,
             "limit": 1
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -l 1 -f", command)
 
     def test_31(self):
         args = "-q type=issue mode=reported limit=10".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -515,14 +547,15 @@ class Test_5(unittest.TestCase):
             "verbose": None,
             "limit": 10
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -l 10 -f", command)
 
     def test_32(self):
         args = "-q type=issue mode=reported limit=100".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -531,14 +564,15 @@ class Test_5(unittest.TestCase):
             "verbose": None,
             "limit": 100
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -l 100 -f", command)
 
     def test_33(self):
         args = "-q type=issue mode=reported limit=-2147483649".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -547,14 +581,15 @@ class Test_5(unittest.TestCase):
             "verbose": None,
             "limit": -2147483649
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -l -2147483649 -f", command)
 
     def test_34(self):
         args = "-q type=issue mode=reported limit=2147483648".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
@@ -564,14 +599,15 @@ class Test_5(unittest.TestCase):
             "verbose": None,
             "limit": 2147483648
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -l 2147483648 -f", command)
 
     def test_35(self):
         args = "-q type=issue mode=reported order=desc".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -580,7 +616,7 @@ class Test_5(unittest.TestCase):
             "verbose": None,
             "order": "desc"
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -o desc -f", command)
 
 
@@ -588,7 +624,8 @@ class Test_5(unittest.TestCase):
         args = "-q type=issue mode=reported order=asc".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -597,14 +634,15 @@ class Test_5(unittest.TestCase):
             "verbose": None,
             "order": "asc"
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -o asc -f", command)
 
     def test_37(self):
         args = "-q type=issue mode=reported limit=10 order=desc".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -614,14 +652,15 @@ class Test_5(unittest.TestCase):
             "limit": 10,
             "order": "desc"
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -l 10 -o desc -f", command)
 
     def test_38(self):
         args = "-q type=issue mode=reported limit=10 order=asc".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -630,7 +669,7 @@ class Test_5(unittest.TestCase):
             "verbose": None,
             "order": "asc"
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -l 10 -o asc -f", command)
 
 class Test_6(unittest.TestCase):
@@ -641,21 +680,23 @@ class Test_6(unittest.TestCase):
         args = "-q type=issue".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
             "type": "issue",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -a mine -f", command)
 
     def test_40(self):
         args = "-q type=issue limit=10".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -663,14 +704,15 @@ class Test_6(unittest.TestCase):
             "limit": 10,
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -a mine -l 10 -f", command)
 
     def test_41(self):
         args = "-q type=issue order=desc".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -678,14 +720,15 @@ class Test_6(unittest.TestCase):
             "order": "desc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -a mine -o desc -f", command)
 
     def test_42(self):
         args = "-q type=issue limit=10 order=desc".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -694,7 +737,7 @@ class Test_6(unittest.TestCase):
             "order": "desc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -a mine -l 10 -o desc -f", command)
 
 class Test_7(unittest.TestCase):
@@ -705,7 +748,8 @@ class Test_7(unittest.TestCase):
         args = "-q type=issue mode=recent".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -713,14 +757,15 @@ class Test_7(unittest.TestCase):
             "mode": "recent",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -f", command)
 
     def test_44(self):
         args = "-q type=issue mode=recent limit=10 order=asc".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -730,14 +775,15 @@ class Test_7(unittest.TestCase):
             "order": "asc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -l 10 -f", command)
 
     def test_45(self):
         args = "-q type=issue mode=recent order=asc limit=10".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -747,14 +793,15 @@ class Test_7(unittest.TestCase):
             "order": "asc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -l 10 -f", command)
 
     def test_46(self):
         args = "-q type=issue limit=10 mode=recent order=asc".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -764,14 +811,15 @@ class Test_7(unittest.TestCase):
             "order": "asc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -l 10 -f", command)
 
     def test_47(self):
         args = "-q type=issue limit=10 order=asc mode=recent".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -781,14 +829,15 @@ class Test_7(unittest.TestCase):
             "order": "asc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -l 10 -f", command)
 
     def test_48(self):
         args = "-q type=issue order=asc mode=recent limit=10".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -798,14 +847,15 @@ class Test_7(unittest.TestCase):
             "order": "asc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -l 10 -f", command)
 
     def test_49(self):
         args = "-q type=issue order=asc limit=10 mode=recent".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -815,14 +865,15 @@ class Test_7(unittest.TestCase):
             "order": "asc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -l 10 -f", command)
 
     def test_50(self):
         args = "-q mode=recent type=issue limit=10 order=asc".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -832,14 +883,15 @@ class Test_7(unittest.TestCase):
             "order": "asc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -l 10 -f", command)
 
     def test_51(self):
         args = "-q limit=10 type=issue mode=recent order=asc".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -849,14 +901,15 @@ class Test_7(unittest.TestCase):
             "order": "asc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -l 10 -f", command)
 
     def test_52(self):
         args = "-q order=asc type=issue mode=recent limit=10".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -866,14 +919,15 @@ class Test_7(unittest.TestCase):
             "order": "asc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -l 10 -f", command)
 
     def test_53(self):
         args = "-q mode=recent limit=10 order=asc type=issue".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -883,14 +937,15 @@ class Test_7(unittest.TestCase):
             "order": "asc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -l 10 -f", command)
 
     def test_54(self):
         args = "-q limit=10 mode=recent order=asc type=issue".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -900,14 +955,15 @@ class Test_7(unittest.TestCase):
             "order": "asc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -l 10 -f", command)
 
     def test_55(self):
         args = "-q order=asc mode=recent limit=10 type=issue".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -917,7 +973,7 @@ class Test_7(unittest.TestCase):
             "order": "asc",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -o recent -l 10 -f", command)
 
 class Test_8(unittest.TestCase):
@@ -928,7 +984,8 @@ class Test_8(unittest.TestCase):
         args = "-q type=issue mode=board key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -937,14 +994,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -f", command)
 
     def test_57(self):
         args = "-q type=issue mode=board limit=10 order=asc key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -955,14 +1013,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -f", command)
 
     def test_58(self):
         args = "-qv type=issue -s mode=board limit=10 order=asc key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -973,14 +1032,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": False
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -s -f", command)
 
     def test_59(self):
         args = "-qvsvs type=issue mode=board limit=10 order=asc key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -991,14 +1051,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": False
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -s -f", command)
 
     def test_60(self):
         args = "-qv type=issue mode=board limit=10 order=asc -s key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1009,14 +1070,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": False
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -s -f", command)
 
     def test_61(self):
         args = "-qv type=issue -v mode=board -v limit=10 -v order=asc -s key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1027,14 +1089,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": False
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -s -f", command)
 
     def test_62(self):
         args = "-sq type=issue --verbose mode=board limit=10 order=asc key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1045,14 +1108,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -v -f", command)
 
     def test_63(self):
         args = "-sq --verbose --silent --verbose type=issue mode=board limit=10 order=asc key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1063,14 +1127,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -v -f", command)
 
     def test_64(self):
         args = "-sq type=issue mode=board limit=10 order=asc --verbose key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1081,14 +1146,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -v -f", command)
 
     def test_65(self):
         args = "-sq type=issue --silent mode=board --silent limit=10 --silent order=asc --verbose key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1099,14 +1165,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": True
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -v -f", command)
 
     def test_66(self):
         args = "-q type=issue mode=mine mode=board limit=10 order=asc key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1117,14 +1184,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -f", command)
 
     def test_67(self):
         args = "-q type=issue mode=mine limit=10 order=asc mode=board key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1135,14 +1203,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -f", command)
 
     def test_68(self):
         args = "-q type=issue mode=board limit=1 limit=10 order=asc key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1153,14 +1222,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -f", command)
 
     def test_69(self):
         args = "-q type=issue mode=board limit=10 order=desc order=asc key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1171,14 +1241,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -f", command)
 
     def test_70(self):
         args = "-q type=issue mode=reported limit=100 order=desc mode=board limit=10 order=asc key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1189,14 +1260,15 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -f", command)
 
     def test_71(self):
         args = "-q type=issue -q type=issue mode=board limit=10 order=asc key=2".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1207,7 +1279,7 @@ class Test_8(unittest.TestCase):
             "key": 2,
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -b 2 -l 10 -o asc -f", command)
 
 class Test_9(unittest.TestCase):
@@ -1218,14 +1290,15 @@ class Test_9(unittest.TestCase):
         args = "-q type=board".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
             "type": "board",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query board -o recent -f", command)
 
 
@@ -1233,7 +1306,8 @@ class Test_9(unittest.TestCase):
         args = "-q type=board key=52".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1241,14 +1315,15 @@ class Test_9(unittest.TestCase):
             "verbose": None,
             "key": 52
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query board -k 52 -f", command)
 
     def test_74(self):
         args = "-q type=board limit=12 key=52".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1257,14 +1332,15 @@ class Test_9(unittest.TestCase):
             "key": 52,
             "limit": 12
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query board -k 52 -l 12 -f", command)
 
     def test_75(self):
         args = "-q order=desc type=board limit=12 key=52".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1273,28 +1349,30 @@ class Test_9(unittest.TestCase):
             "key": 52,
             "limit": 12
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query board -k 52 -l 12 -o desc -f", command)
 
     def test_76(self):
         args = "limit=12 -q type=board".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
             "type": "board",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query board -o recent -f", command)
 
     def test_77(self):
         args = "ccc=yyy --query mode=all type=board -v -q type=board key=52".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1302,14 +1380,15 @@ class Test_9(unittest.TestCase):
             "verbose": True,
             "key": 52
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query board -k 52 -v -f", command)
 
     def test_78(self):
         args = "xxx=yyy --silent -q --verbose --query type=key type=board key=23".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1317,7 +1396,7 @@ class Test_9(unittest.TestCase):
             "verbose": True,
             "key": 23
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query board -k 23 -v -f", command)
 
 ## Ambiguous Inputs:
@@ -1336,7 +1415,8 @@ class Test_11(unittest.TestCase):
         args = "-v".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": None,
@@ -1344,7 +1424,7 @@ class Test_11(unittest.TestCase):
             "verbose": True
         }, kwargs)
         with self.assertRaises(SystemExit) as se:
-            process(namespace, self.parser)
+            process(namespace, self.parser, verbose)
         self.assertEqual(0, se.exception.code)
 
 ### verbose help
@@ -1357,7 +1437,8 @@ class Test_12(unittest.TestCase):
         args = "-vh".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": None,
@@ -1365,7 +1446,7 @@ class Test_12(unittest.TestCase):
             "verbose": True
         }, kwargs)
         with self.assertRaises(SystemExit) as se:
-            process(namespace, self.parser)
+            process(namespace, self.parser, verbose)
         self.assertEqual(0, se.exception.code)
 
 ### verbose help
@@ -1378,7 +1459,8 @@ class Test_13(unittest.TestCase):
         args = "-hv".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": None,
@@ -1386,7 +1468,7 @@ class Test_13(unittest.TestCase):
             "verbose": True
         }, kwargs)
         with self.assertRaises(SystemExit) as se:
-            process(namespace, self.parser)
+            process(namespace, self.parser, verbose)
         self.assertEqual(0, se.exception.code)
 ### help manual
 
@@ -1398,7 +1480,8 @@ class Test_14(unittest.TestCase):
         args = "-s".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": None,
@@ -1406,7 +1489,7 @@ class Test_14(unittest.TestCase):
             "verbose": False
         }, kwargs)
         with self.assertRaises(SystemExit) as se:
-            process(namespace, self.parser)
+            process(namespace, self.parser, verbose)
         self.assertEqual(0, se.exception.code)
 
 ### help manual
@@ -1419,7 +1502,8 @@ class Test_15(unittest.TestCase):
         args = "-vsvsvss".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": None,
@@ -1427,7 +1511,7 @@ class Test_15(unittest.TestCase):
             "verbose": False
         }, kwargs)
         with self.assertRaises(SystemExit) as se:
-            process(namespace, self.parser)
+            process(namespace, self.parser, verbose)
         self.assertEqual(0, se.exception.code)
 
 ### floot
@@ -1440,7 +1524,8 @@ class Test_16(unittest.TestCase):
         args = "-q type=issue mode=reported limit=1.0".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
@@ -1449,7 +1534,7 @@ class Test_16(unittest.TestCase):
             "limit": 1,
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -r mine -l 1 -f", command)
 
 ### discard invalid keys
@@ -1462,14 +1547,15 @@ class Test_17(unittest.TestCase):
         args = "-q xxx=yyy type=issue yyy=xxx".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
         self.assertDictContainsSubset({
             "action": "query",
             "type": "issue",
             "verbose": None
         }, kwargs)
-        command = process(namespace, self.parser)
+        command = process(namespace, self.parser, verbose)
         self.assertEqual("sira-query issue -a mine -f", command)
 
 ## Invalid Inputs:
@@ -1510,7 +1596,8 @@ class Test_19(unittest.TestCase):
         args = "xxx".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
 
 class Test_20(unittest.TestCase):
@@ -1521,35 +1608,40 @@ class Test_20(unittest.TestCase):
         args = "-v -q type=xxx".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
 
     def test_91(self):
         args = "-v -q type=project".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
 
     def test_92(self):
         args = "-v -q type=project mode=xxx".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
 
     def test_93(self):
         args = "-v -q type=project mode=current limit=xxx".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
 
     def test_94(self):
         args = "-v -q type=project mode=current order=xxx".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
 
 class Test_21(unittest.TestCase):
@@ -1560,28 +1652,32 @@ class Test_21(unittest.TestCase):
         args = "-v -q type=issue mode=all".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
 
     def test_96(self):
         args = "-v mode=all -q type=project".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
 
     def test_97(self):
         args = "-v -q type=project mode=board".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
 
     def test_98(self):
         args = "-v -q type=project mode=board key=xxx".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
 
 class Test_22(unittest.TestCase):
@@ -1592,7 +1688,8 @@ class Test_22(unittest.TestCase):
         args = "-v -q type=board key=xxx".split(" ")
         preprocess_args(args)
         namespace = self.parser.parse_args(args)
-        extract_values(namespace)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
         kwargs = vars(namespace)
 
 

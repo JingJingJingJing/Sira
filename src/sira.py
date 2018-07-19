@@ -232,7 +232,12 @@ def process(namespace: Namespace, parser: ArgumentParser, verbose: bool) -> int:
         try:
             element = current_dic[getattr(namespace, entry)]
         except KeyError:
-            element = current_dic["any"]
+            try:
+                element = current_dic["any"]
+            except KeyError:
+                print_err("{} is not a valid {}\n"\
+                    .format(getattr(namespace, entry), entry), "red")
+                exit_prog(2, verbose)
         if type(element) == str:
             command.append(element)
             break
@@ -290,4 +295,6 @@ def main():
 
 
 if __name__ == '__main__':
+    import func
+    func.login(["admin", "admin"])
     main()

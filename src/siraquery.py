@@ -1,9 +1,8 @@
+import sys
 from argparse import ArgumentParser
-from sys import exit, stderr, stdin, stdout, platform
-
-from termcolor import colored
 
 from func import query_board, query_issue, query_project
+from utils import print_err, exit_prog
 
 issue_opts_list = ["assignee", "board", "creator", "id", "key", "label",
                    "priority", "reporter", "type", "watcher"]
@@ -11,7 +10,7 @@ issue_opts_list = ["assignee", "board", "creator", "id", "key", "label",
 user_opts = ["assignee", "creater", "reporter", "watcher"]
 
 jql_ignore = ["sub_command", "order", "limit", "constraint", "from_sira",
-              "board", "verbose"]
+              "board", "verbose", "verbose_new"]
 
 
 def build_parser():
@@ -19,6 +18,22 @@ def build_parser():
         prog="sira-query",
         description="TODO",
         epilog="TODO"
+    )
+    query.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        default=None,
+        required=False,
+        help="TODO",
+        dest="verbose"
+    )
+    query.add_argument(
+        "-s", "--silent",
+        action="store_false",
+        default=None,
+        required=False,
+        help="TODO",
+        dest="verbose"
     )
     sub = query.add_subparsers(
         title="TODO",
@@ -117,7 +132,7 @@ def build_parser():
             default=None,
             required=False,
             help="TODO",
-            dest="verbose"
+            dest="verbose_new"
         )
         sub_command.add_argument(
             "-s", "--silent",
@@ -125,31 +140,36 @@ def build_parser():
             default=None,
             required=False,
             help="TODO",
-            dest="verbose"
+            dest="verbose_new"
         )
     return query
-
-
-def print_err(msg: str, color: str) -> None:
-    if platform in ("win32", "cygwin"):
-        import colorama
-        colorama.init()
-    print(colored(msg + "\n", color=color))
-    if platform in ("win32", "cygwin"):
-        import colorama
-        colorama.deinit()
 
 
 def main():
     parser = build_parser()
     namespace = parser.parse_args()
+    verbose = namespace.verbose if namespace.verbose_new is None\
+                                else namespace.verbose_new
+    setattr(namespace, "verbose", verbose)
+    if verbose:
+        print("[Verbose]: Finished Analyzing Command Arguments ...")
+        print("[Verbose]: A Verbose mode was Detected ...")
     if not namespace.sub_command:
+        if verbose:
+            print("[Verbose]: No Subcommand was Specified ...")
+            print("[Verbose]: Printing Help Manual ...")
         parser.print_help()
-        return
+        exit_prog(0, verbose)
     # floor limit
     if "limit" in dir(namespace):
         setattr(namespace, "limit", int(getattr(namespace, "limit")))
-    if namespace.sub_command == "issue":
+    sub_command = namespace.sub_command
+    if verbose:
+        print('[Verbose]: A Subcommand "{}" was Detected ...'\
+        .format(sub_command))
+        print('[Verbose]: Continuing Processing with Subcommand "{}" ...'\
+        .format(sub_command))
+    if sub_command == "issue":
         kwargs = vars(namespace)
         jql = kwargs["constraint"] if kwargs["constraint"] else ""
         for element in kwargs:
@@ -161,18 +181,18 @@ def main():
                        else "{} = {}".format(element, value)
         kwargs["constraint"] = jql
         status, msg = query_issue(**kwargs)
-    elif namespace.sub_command == "project":
+    elif sub_command == "project":
         status, msg = query_project(**vars(namespace))
-    elif namespace.sub_command == "board":
+    elif sub_command == "board":
         status, msg = query_board(**vars(namespace))
-    if getattr(namespace, "from_sira") or status:
-        print(msg, file=stdout)
+    if status:
+        print(msg, end="")
     else:
         print_err(msg, "red")
-    exit(0 if status else 1)
+    if getattr(namespace, "from_sira") or verbose:
+        print()
+    exit_prog(0 if status else 1, verbose)
 
 
 if __name__ == '__main__':
-    # import func
-    # func.login(["admin", "admin"])
     main()

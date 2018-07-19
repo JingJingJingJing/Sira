@@ -2,6 +2,8 @@ import sys
 from argparse import Action, ArgumentParser, Namespace
 from subprocess import run
 
+from utils import print_err, exit_prog
+
 keyword_dict = {
     "query": ["type", "mode", "limit", "order", "key"],
     "update": []
@@ -107,7 +109,7 @@ def build_parser() -> ArgumentParser:
     return sira
 
 
-def extract_values(namespace: Namespace) -> None:
+def extract_values(namespace: Namespace, verbose: bool) -> None:
     if not hasattr(namespace, "exprs") or not hasattr(namespace, "action"):
         return
     exprs = getattr(namespace, "exprs")
@@ -119,6 +121,9 @@ def extract_values(namespace: Namespace) -> None:
             key, value = expression.split("=")
             if key and key in keyword_dict[action]:
                 setattr(namespace, key, value)
+            elif verbose:
+                print('[Verbose]: Unrecognized Keyword "{}" ...'.format(key))
+                print('[Verbose]: Ignored Keyword "{}" ...'.format(key))
 
     # convert limit and key to int
     int_values = ["limit", "key"]
@@ -146,6 +151,7 @@ def preprocess_args(args: list) -> list:
         i += 1
     global_switches = ["-v", "--verbose", "-s", "--silent"]
     positional_switches = ["-q", "--query", "-u", "--update"]
+    # move all global switches before last positional switches
     cache = list()
     for i in range(len(args) - 1, -1, -1):
         value = args[i]
@@ -156,6 +162,7 @@ def preprocess_args(args: list) -> list:
             break
     for element in cache:
         args.insert(i, element)
+
 
 # expr_dict[action][type][mode]
 expr_dict = {
@@ -200,10 +207,13 @@ expr_dict = {
     }
 }
 
-def process(namespace: Namespace, parser: ArgumentParser) -> int:
+
+def process(namespace: Namespace, parser: ArgumentParser, verbose: bool) -> int:
     if namespace.action is None or namespace.help:
+        if verbose:
+            print("[Verbose]: Printing Help Manual ...")
         parser.print_help()
-        sys.exit(0)
+        exit_prog(0, verbose)
     current_dic = expr_dict
     command = list()
     while 1:
@@ -215,9 +225,10 @@ def process(namespace: Namespace, parser: ArgumentParser) -> int:
                 setattr(namespace, entry, default)
             else:
                 # print error msg
-                # TODO
-                print("such input not allowed")
-                sys.exit(2)
+                print_err("{} needs to be specified\n".format(entry), "red")
+                if verbose:
+                    print("[Verbose]: Problematic Command, Aborting ...")
+                exit_prog(2, verbose)
         try:
             element = current_dic[getattr(namespace, entry)]
         except KeyError:
@@ -230,14 +241,18 @@ def process(namespace: Namespace, parser: ArgumentParser) -> int:
             current_dic = element
     if hasattr(namespace, "limit"):
         if [s for s in command if "-l" in s]:
-            # TODO: conflict
-            print("conflict")
+            if verbose:
+                print('[Verbose]: Keyword "limit" Conflicted with '
+                      + 'Other Keywords ...')
+                print('[Verbose]: Ignored "limit" ...')
         else:
             command.append("-l %(limit)s")
     if hasattr(namespace, "order"):
         if [s for s in command if "-o" in s]:
-            # TODO: conflict
-            print("confilict")
+            if verbose:
+                print('[Verbose]: Keyword "order" Conflicted with '
+                      + 'Other Keywords ...')
+                print('[Verbose]: Ignored "order" ...')
         else:
             command.append("-o %(order)s")
     if hasattr(namespace, "verbose"):
@@ -254,14 +269,24 @@ def main():
     args = sys.argv[1:]
     preprocess_args(args)
     namespace = parser.parse_args(args)
-    extract_values(namespace)
-    try:
-        sub_process = run(process(namespace, parser))
-        print(sub_process.returncode)
-    except Exception as e:
-        print(e)
-    except BaseException as be:
-        print(be)
+    verbose = getattr(namespace, "verbose")
+    if verbose:
+        print("[Verbose]: Finished Analyzing Command Arguments ...")
+        print("[Verbose]: A Verbose mode was Detected ...")
+        print("[Verbose]: Extracting Values after the Last Query Flag ...")
+    extract_values(namespace, verbose)
+    if verbose:
+        print("[Verbose]: Finished Extracting Values ...")
+        print(
+            "[Verbose]: Interpreting Your Input and Assembling Subcommand ...")
+    command = process(namespace, parser, verbose)
+    if verbose:
+        print("[Verbose]: Finished Interpreting Your Input ...")
+        print('[Verbose]: Running Subcommand "{}" ...'.format(command))
+    sub_process = run(command)
+    if verbose:
+        print("[Verbose]: Finished Running Subcommand ...")
+    exit_prog(sub_process.returncode, verbose)
 
 
 if __name__ == '__main__':

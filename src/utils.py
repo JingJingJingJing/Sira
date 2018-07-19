@@ -11,8 +11,11 @@ mylog.error('msg')
 """
 import json
 import logging
+import sys
 from os import F_OK, access, listdir, mkdir, remove
 from time import localtime, strftime, strptime
+
+from termcolor import cprint
 
 log_directory = "log/"
 if not access(log_directory, F_OK):
@@ -103,6 +106,7 @@ class glob():
         self.set_value('jira', 'lnvusjira.lenovonet.lenovo.local')
         self.set_value('cookie_path', '')
         self.set_value('cookie', '')
+        self.set_value('timeout', 10)
 
     def set_value(self, key, value):
         self.dic[key] = value
@@ -254,3 +258,21 @@ headers_book = {
         'cookie': ''
     }
 }
+
+
+def print_err(msg: str, color: str) -> None:
+    if sys.platform in ("win32", "cygwin"):
+        import colorama
+        colorama.init()
+    cprint(msg, color=color, file=sys.stderr, end="")
+    if sys.platform in ("win32", "cygwin"):
+        import colorama
+        colorama.deinit()
+
+def exit_prog(code: int, verbose: bool) -> None:
+    if verbose:
+        print(
+            "[Verbose]: Exiting Program with Exit Code: {}".format(code),
+            end=""
+        )
+    sys.exit(code)

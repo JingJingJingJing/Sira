@@ -198,6 +198,8 @@ def getTarget(fields, field):
         except AttributeError:
             ret = fields.get(field)
     if ret != '':
+        if (' ' in ret) or isinstance(ret, list):
+            ret = '"{}"'.format(str(ret))
         return ret
     else:
         return 'N/A'

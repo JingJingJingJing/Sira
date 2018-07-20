@@ -148,7 +148,7 @@ def build_parser():
 def main():
     parser = build_parser()
     namespace = parser.parse_args()
-    verbose = namespace.verbose if namespace.verbose_new is None\
+    verbose = namespace.verbose if not hasattr(namespace,"verbose_new") or namespace.verbose_new is None\
                                 else namespace.verbose_new
     setattr(namespace, "verbose", verbose)
     if verbose:

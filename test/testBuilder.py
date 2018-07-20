@@ -1,4 +1,4 @@
-"""A simple script to build up unit test module.
+"""A simple script to build up unit test layouts.
 Please modifiy directory, file_name, and other constants before using in your
 own projects.
 """
@@ -17,7 +17,7 @@ from subprocess import run
 
 src_path = "src/"
 sys.path.insert(0, src_path)
-from sira import build_parser
+from sira import build_parser, extract_values
 #########################################
 
 """
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     main()
 """
 
-file_name = "test_001.py"
+file_name = "test_002.py"
 with open("/".join([directory, file_name]), "w") as f:
     f.write(header)
     index = 0
@@ -42,10 +42,11 @@ with open("/".join([directory, file_name]), "w") as f:
         if line.startswith("`"):
             f.write("    def test_{}(self):\n".format(index))
             f.write(
-                '        namespace = self.parser.parse_args("{}")\n'.format(
-                    line[1:-2]
+                '        namespace = self.parser.parse_args("{}".split(" "))\n'.format(
+                    line[10:-2]
                 )
             )
+            f.write("        extract_values(namespace)\n")
             f.write("        kwargs = vars(namespace)\n\n")
             index += 1
         elif line.startswith("-") or line.startswith("##"):

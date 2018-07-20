@@ -130,37 +130,37 @@
 
 -----------------------------------------------------------
 
-`sira.exe -q type=issue mode=board`
+`sira.exe -q type=issue mode=board key=2`
 
-`sira.exe -q type=issue mode=board limit=10 order=asc`
+`sira.exe -q type=issue mode=board limit=10 order=asc key=2`
 
-`sira.exe -qv type=issue -s mode=board limit=10 order=asc`
+`sira.exe -qv type=issue -s mode=board limit=10 order=asc key=2`
 
-`sira.exe -qvsvs type=issue mode=board limit=10 order=asc`
+`sira.exe -qvsvs type=issue mode=board limit=10 order=asc key=2`
 
-`sira.exe -qv type=issue mode=board limit=10 order=asc -s`
+`sira.exe -qv type=issue mode=board limit=10 order=asc -s key=2`
 
-`sira.exe -qv type=issue -v mode=board -v limit=10 -v order=asc -s`
+`sira.exe -qv type=issue -v mode=board -v limit=10 -v order=asc -s key=2`
 
-`sira.exe -sq type=issue --verbose mode=board limit=10 order=asc`
+`sira.exe -sq type=issue --verbose mode=board limit=10 order=asc key=2`
 
-`sira.exe -sq --verbose --silent --verbose type=issue mode=board limit=10 order=asc`
+`sira.exe -sq --verbose --silent --verbose type=issue mode=board limit=10 order=asc key=2`
 
-`sira.exe -sq type=issue mode=board limit=10 order=asc --verbose`
+`sira.exe -sq type=issue mode=board limit=10 order=asc --verbose key=2`
 
-`sira.exe -sq type=issue --silent mode=board --silent limit=10 --silent order=asc --verbose`
+`sira.exe -sq type=issue --silent mode=board --silent limit=10 --silent order=asc --verbose key=2`
 
-`sira.exe -q type=issue mode=mine mode=board limit=10 order=asc`
+`sira.exe -q type=issue mode=mine mode=board limit=10 order=asc key=2`
 
-`sira.exe -q type=issue mode=mine limit=10 order=asc mode=board`
+`sira.exe -q type=issue mode=mine limit=10 order=asc mode=board key=2`
 
-`sira.exe -q type=issue mode=board limit=1 limit=10 order=asc`
+`sira.exe -q type=issue mode=board limit=1 limit=10 order=asc key=2`
 
-`sira.exe -q type=issue mode=board limit=10 order=desc order=asc`
+`sira.exe -q type=issue mode=board limit=10 order=desc order=asc key=2`
 
-`sira.exe -q type=issue mode=reported limit=100 order=desc mode=board limit=10 order=asc`
+`sira.exe -q type=issue mode=reported limit=100 order=desc mode=board limit=10 order=asc key=2`
 
-`sira.exe -q type=issue -q type=issue mode=board limit=10 order=asc`
+`sira.exe -q type=issue -q type=issue mode=board limit=10 order=asc key=2`
 
 -----------------------------------------------------------
 
@@ -180,26 +180,61 @@
 
 ## Ambiguous Inputs:
 
+### help manual
 `sira.exe -v`
 
+### verbose help
 `sira.exe -vh`
 
+### verbose help
 `sira.exe -hv`
 
+### help manual
 `sira.exe -s`
 
+### help manual
 `sira.exe -vs[...]`
 
+### floot
 `sira.exe -q type=issue mode=reported limit=1.0`
 
+### discard invalid keys
 `sira.exe -q xxx=yyy type=issue yyy=xxx`
 
 ## Invalid Inputs:
 
+-----------------------------------------------------------
+
+`sira.exe -x`
+
+`sira.exe -qx`
+
+`sira.exe --xxx`
+
+`sira.exe xxx`
+
+-----------------------------------------------------------
+
+`sira.exe -v -q type=xxx`
+
 `sira.exe -v -q type=project`
+
+`sira.exe -v -q type=project mode=xxx`
+
+`sira.exe -v -q type=project mode=current limit=xxx`
+
+`sira.exe -v -q type=project mode=current order=xxx`
+
+-----------------------------------------------------------
 
 `sira.exe -v -q type=issue mode=all`
 
 `sira.exe -v mode=all -q type=project`
 
-TODO
+`sira.exe -v -q type=project mode=board`
+
+`sira.exe -v -q type=project mode=board key=xxx`
+
+-----------------------------------------------------------
+
+`sira.exe -v -q type=board key=xxx`

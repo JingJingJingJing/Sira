@@ -8,7 +8,9 @@ Here is the way to build sira 2.0:
   2. Install python dependencies using pip:
   
       pip install pyinstaller
+      
       pip install termcolor
+      
       pip install requests
       
   3. Run build/build.sh in git bash

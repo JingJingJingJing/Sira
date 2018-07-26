@@ -146,8 +146,8 @@ glob_dic = glob({})
 
 # domain ='lnvusjira.lenovonet.lenovo.local'
 
-domain = '10.176.120.165:8080'
-protocol = 'http://'
+domain = 'lnvusjira.lenovonet.lenovo.local'
+protocol = 'https://'
 address_book = {
     'login': protocol + domain + '/rest/auth/1/session',
     'logout': protocol + domain + '/rest/auth/1/session',

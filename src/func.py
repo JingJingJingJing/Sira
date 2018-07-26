@@ -297,6 +297,7 @@ def getInfo(r, order):
 def query_project(limit=0, order=None, verbose=None, **kwargs):
     if verbose is None:
         verbose = json.loads(read_from_config()).get("verbose")
+        verbose = verbose.lower()=="true"
     if order:
         order = order.lower()
     param = {}
@@ -327,6 +328,7 @@ def query_board(key=None, limit=None, order=None, verbose=None, **kwargs):
     '''
     if verbose is None:
         verbose = json.loads(read_from_config()).get("verbose")
+        verbose = verbose.lower()=="true"
     print_v("Formating Input ...", verbose)
     url, headers = prepare('getBoard')
     print_v("Sending the Request ...", verbose)

@@ -18,4 +18,4 @@ Here is the way to build sira 2.0:
   5. Run build/setup.ps1 in powershell
   6. Open cmd and make sure the cuurent directory contains .sirarc file.
   
-  Tips: The current version does not include functions to initial configuration file. So the tips is to cd the current directory to '/Sira' before you start to use Sira.
+  Tips: The current version does not include functions to initial configuration file. So the tip is to cd the current directory to '/Sira' before you start to use Sira.

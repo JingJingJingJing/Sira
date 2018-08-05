@@ -1,4 +1,6 @@
-import sys
+import sys,keyring,msvcrt
+import func
+from keyring.backends import Windows
 from argparse import Action, ArgumentParser, Namespace
 from subprocess import run
 
@@ -45,6 +47,10 @@ def build_parser() -> ArgumentParser:
         epilog="TODO",
         add_help=False,
         allow_abbrev=False
+    )
+    sira.add_argument(
+        "--init","-i",
+        action = "store_true",
     )
     sira.add_argument(
         "dummy",
@@ -268,6 +274,34 @@ def process(namespace: Namespace, parser: ArgumentParser, verbose: bool) -> int:
     command = " ".join([s for s in command if s]) % vars(namespace)
     return command
 
+def pwd_input(): 
+    chars = []   
+    while True:  
+        try:  
+            newChar = msvcrt.getch().decode(encoding="utf-8")  
+        except:  
+            return input("the password will not be hidden:")  
+        if newChar in '\r\n':                
+             break   
+        elif newChar == '\b':    
+             if chars:    
+                 del chars[-1]   
+                 msvcrt.putch('\b'.encode(encoding='utf-8'))   
+                 msvcrt.putch( ' '.encode(encoding='utf-8'))
+                 msvcrt.putch('\b'.encode(encoding='utf-8'))                  
+        else:  
+            chars.append(newChar)  
+            msvcrt.putch('*'.encode(encoding='utf-8')) 
+    return (''.join(chars) ) 
+
+def initUser():
+    userName=input("Please input your username:")
+    print("Please input your password:")
+    passWord=pwd_input()
+    keyring.set_keyring(Windows.WinVaultKeyring())
+    keyring.set_password("sira", userName, passWord)
+    jiraUrl=input("\nPlease input jira url:")
+    func.write_to_config(["credential"],["username","jiraUrl"],[userName,jiraUrl])
 
 def main():
     parser = build_parser()
@@ -275,6 +309,11 @@ def main():
     preprocess_args(args)
     namespace = parser.parse_args(args)
     verbose = getattr(namespace, "verbose")
+    init = getattr(namespace, "init")
+    if init:
+        initUser()
+        
+        return 
     if verbose:
         print("[Verbose]: Finished Analyzing Command Arguments ...")
         print("[Verbose]: A Verbose mode was Detected ...")
@@ -295,6 +334,5 @@ def main():
 
 
 if __name__ == '__main__':
-    import func
     func.login(["admin", "admin"])
     main()

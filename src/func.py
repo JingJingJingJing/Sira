@@ -2,7 +2,6 @@ import json
 from enum import Enum
 from os import F_OK, access, mkdir
 from threading import Thread
-
 import requests
 
 from utils import Super401, glob_dic, mylog, prepare, func_log
@@ -16,6 +15,7 @@ def login(lst):
     headers = {'Content-Type': 'application/json'}
     data = json.dumps({"username": un, "password": pw})
     try:
+        requests.urllib3.disable_warnings()
         r = requests.post(
             url,
             headers=headers,

@@ -1,9 +1,12 @@
 import json
+import os
 from enum import Enum
 from os import F_OK, access, mkdir
 from threading import Thread
-
+from config import read_from_config, write_to_config
+from utils import read_cookie
 import requests
+import keyring
 
 from utils import Super401, glob_dic, mylog, prepare, func_log
 ''' ************ login logout ************* '''
@@ -88,6 +91,8 @@ class method(Enum):
 
 
 def send_request(url, method, headers, params, data):
+    if not headers['cookie']:
+        return refreshcookie(url, method, headers, params, data)
     r = requests.Response()
     try:
         if method is method.Get:
@@ -122,8 +127,8 @@ def send_request(url, method, headers, params, data):
             mylog.error('Wrong method that not suppord:' + str(method))
             return (False, 'Unknown internal error occured')
         if r.status_code == 401:
-            mylog.error("401 Unauthorized")
-            return (False, "401 Unauthorized")
+            mylog.info("401 Unauthorized, re-login to fresh cookie")
+            return refreshcookie(url, method, headers, params, data)
         try:
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -171,6 +176,19 @@ def send_request(url, method, headers, params, data):
             \tReconnecting to Wi-Fi\r\n
             \tRunning Network Diagnostics''')
 
+def refreshcookie(url, method, headers, params, data):
+    username = read_from_config().get("credential").get("username")
+    password = keyring.get_password("sira",username)
+    if not password:
+        mylog.error("401 Unauthorized, and no account info")
+        # TODO: ask for username and pwd
+        return (False, "401 Unauthorized, please enter your account info")
+    else:
+        mylog.info("cookie expireded, re-login and fresh cookie")
+        login([username,password])
+        headers["cookie"] = read_cookie()
+        return send_request(url, method, headers, params, data)
+
 
 ''' ************** Queries ************** '''
 
@@ -211,8 +229,7 @@ def getResponse(lst):
     Only information of the fields in defaultList will be returned
     '''
     try:
-        defaultList = json.loads(
-            read_from_config()).get('query_field').get('issue_default')
+        defaultList = read_from_config().get('query_field').get('issue_default')
     except AttributeError:
         defaultList = [
             "assignee", "reporter", "priority", "status", "labels",
@@ -234,7 +251,7 @@ def getResponse(lst):
 @func_log
 def query_issue(constraint, board=0, limit=0, order=None, verbose=None, **kwargs):
     if verbose is None:
-        verbose = json.loads(read_from_config()).get("verbose")
+        verbose = read_from_config().get("verbose")
         verbose = verbose.lower()=="true"
     print_v("Formating Input ...", verbose)
     if order:
@@ -296,7 +313,7 @@ def getInfo(r, order):
 @func_log
 def query_project(limit=0, order=None, verbose=None, **kwargs):
     if verbose is None:
-        verbose = json.loads(read_from_config()).get("verbose")
+        verbose = read_from_config().get("verbose")
         verbose = verbose.lower()=="true"
     if order:
         order = order.lower()
@@ -327,7 +344,7 @@ def query_board(key=None, limit=None, order=None, verbose=None, **kwargs):
     If key is specified and valid, only one line will be returned
     '''
     if verbose is None:
-        verbose = json.loads(read_from_config()).get("verbose")
+        verbose = read_from_config().get("verbose")
         verbose = verbose.lower()=="true"
     print_v("Formating Input ...", verbose)
     url, headers = prepare('getBoard')
@@ -464,7 +481,7 @@ def issue_del_comment(issue, cid):
 def issue_watch(issue, user=None):
     url, headers = prepare('issue', '/{}/watchers'.format(issue))
     if user is None:
-        user = json.loads(read_from_config()).get('credential').get('username')
+        user = read_from_config().get('credential').get('username')
     print(url, headers)
     return send_request(url, method.Post, headers, None, '"{}"'.format(user))
 
@@ -486,48 +503,6 @@ def issue_get_watcher(issue):
 def issue_del_watcher(issue, user):
     url, headers = prepare('issue', '/{}/watchers'.format(issue))
     return send_request(url, method.Delete, headers, '"ysg"', None)
-
-
-def write_to_config(dic_path, field, info):
-
-    fh = open('.sirarc', 'r')
-    content = fh.read()
-    if content:
-        data = json.loads(content)
-    else:
-        data = {}
-    dic = data
-    for x in dic_path:
-        dic = dic[x]
-    if isinstance(field, list):
-
-        for i in range(len(field)):
-            if isinstance(info, list):
-                if len(field) != len(info):
-                    fh.close()
-                    raise "Field and Info length need to be equal"
-                dic[field[i]] = info[i]
-            else:
-                dic[field[i]] = info
-    else:
-        dic[field] = info
-    fh = open('.sirarc', 'w')
-    ret = json.dumps(data)
-    fh.write(ret)
-    fh.close()
-    return ret
-
-
-def read_from_config():
-    try:
-        fh = open('.sirarc', 'r')
-        content = fh.read()
-        fh.close()
-        return content
-    except FileNotFoundError:
-        fh = open('.sirarc', 'w')
-        fh.write('')
-        fh.close()
 
 
 def getPermission():

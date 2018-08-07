@@ -12,6 +12,7 @@ mylog.error('msg')
 import json
 import logging
 import sys
+from config import read_from_config
 from os import F_OK, access, listdir, mkdir, remove
 from time import localtime, strftime, strptime
 
@@ -119,56 +120,45 @@ class glob():
 
 
 def read_cookie():
-    if glob_dic.get_value('cookie', '') == '':
-        try:
-            with open(".sirarc", "r") as f:
-                content = f.read()
-                if content:
-                    data = json.loads(content)
-                    glob_dic.set_value('cookie',
-                                       data.get('credential').get('cookie'))
-                f.close()
-        except FileNotFoundError as err:
-            mylog.error(err)
-            raise Super401
-    return glob_dic.get_value('cookie')
+    return read_from_config().get("credential").get("cookie")
 
+def read_url():
+    return read_from_config().get("domain")
 
-def prepare(s, extend=None):
-    if s != 'login':
-        headers_book.get(s)['cookie'] = read_cookie()
+def prepare(action, extend=None):
+    if action != 'login':
+        headers_book.get(action)['cookie'] = read_cookie()
+    url = read_url() + address_book.get(action)
     if extend is not None:
-        return (address_book.get(s) + extend, headers_book.get(s))
-    return (address_book.get(s), headers_book.get(s))
+        return (url + extend, headers_book.get(action))
+    return (url, headers_book.get(action))
 
 
 glob_dic = glob({})
 
 # domain ='lnvusjira.lenovonet.lenovo.local'
 
-domain = 'lnvusjira.lenovonet.lenovo.local'
-protocol = 'https://'
 address_book = {
-    'login': protocol + domain + '/rest/auth/1/session',
-    'logout': protocol + domain + '/rest/auth/1/session',
-    'getProject': protocol + domain + '/rest/api/2/project',
-    'getBoard': protocol + domain + '/rest/agile/1.0/board',
-    'getStatus': protocol + domain + '/rest/api/2/status',
-    'getType': protocol + domain + '/rest/api/2/project/type',
-    'getIssuetype': protocol + domain + '/rest/api/2/issuetype',
-    'getAssignee': protocol + domain + '/rest/api/2/user/search',
-    'getPriority': protocol + domain + '/rest/api/2/priority',
-    'query': protocol + domain + '/rest/api/2/search',
-    'query_number': protocol + domain + '/rest/agile/1.0/issue',
-    'issue': protocol + domain + '/rest/api/2/issue',
-    'search': protocol + domain + '/rest/api/2/user',
-    'getVersion': protocol + domain + '/rest/api/2/project',
-    'getSprint': protocol + domain + '/rest/agile/1.0/sprint',
-    'assign_sprint': protocol + domain + '/rest/agile/1.0/sprint',
-    'createmeta': protocol + domain + '/rest/api/2/issue/createmeta',
-    'getField': protocol + domain + '/rest/api/2/field',
-    'getEstimation': protocol + domain + '/rest/agile/1.0/issue',
-    'mypermission': protocol + domain + '/rest/api/2/mypermissions'
+    'login': '/rest/auth/1/session',
+    'logout': '/rest/auth/1/session',
+    'getProject': '/rest/api/2/project',
+    'getBoard': '/rest/agile/1.0/board',
+    'getStatus': '/rest/api/2/status',
+    'getType': '/rest/api/2/project/type',
+    'getIssuetype': '/rest/api/2/issuetype',
+    'getAssignee': '/rest/api/2/user/search',
+    'getPriority': '/rest/api/2/priority',
+    'query': '/rest/api/2/search',
+    'query_number': '/rest/agile/1.0/issue',
+    'issue': '/rest/api/2/issue',
+    'search': '/rest/api/2/user',
+    'getVersion': '/rest/api/2/project',
+    'getSprint': '/rest/agile/1.0/sprint',
+    'assign_sprint': '/rest/agile/1.0/sprint',
+    'createmeta': '/rest/api/2/issue/createmeta',
+    'getField': '/rest/api/2/field',
+    'getEstimation': '/rest/agile/1.0/issue',
+    'mypermission': '/rest/api/2/mypermissions'
 }
 
 headers_book = {

@@ -300,7 +300,7 @@ def initUser():
     passWord=pwd_input()
     keyring.set_keyring(Windows.WinVaultKeyring())
     keyring.set_password("sira", userName, passWord)
-    jiraUrl=input("\nPlease input jira url:")
+    jiraUrl=input("\nPlease input Jira domain(including protocol):")
     func.write_to_config(["credential"],["username","jiraUrl"],[userName,jiraUrl])
 
 def main():
@@ -312,7 +312,6 @@ def main():
     init = getattr(namespace, "init")
     if init:
         initUser()
-        
         return 
     if verbose:
         print("[Verbose]: Finished Analyzing Command Arguments ...")

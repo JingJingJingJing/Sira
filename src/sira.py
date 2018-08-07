@@ -301,7 +301,7 @@ def initUser():
     keyring.set_keyring(Windows.WinVaultKeyring())
     keyring.set_password("sira", userName, passWord)
     jiraUrl=input("\nPlease input Jira domain(including protocol):")
-    func.write_to_config(["credential"],["username","jiraUrl"],[userName,jiraUrl])
+    func.write_to_config(["credential"],["username","jiraUrl","cookie"],[userName,jiraUrl,""])
 
 def main():
     parser = build_parser()

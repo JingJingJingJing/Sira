@@ -1,12 +1,13 @@
 import json
 import os
+import requests
+import keyring
 from enum import Enum
 from os import F_OK, access, mkdir
 from threading import Thread
 from config import read_from_config, write_to_config
 from utils import read_cookie
-import requests
-import keyring
+from keyring.backends import Windows
 
 from utils import Super401, glob_dic, mylog, prepare, func_log
 ''' ************ login logout ************* '''
@@ -179,6 +180,7 @@ def send_request(url, method, headers, params, data):
 
 def refreshcookie(url, method, headers, params, data):
     username = read_from_config().get("credential").get("username")
+    keyring.set_keyring(Windows.WinVaultKeyring())
     password = keyring.get_password("sira",username)
     if not password:
         mylog.error("401 Unauthorized, and no account info")
@@ -186,9 +188,12 @@ def refreshcookie(url, method, headers, params, data):
         return (False, "401 Unauthorized, please enter your account info")
     else:
         mylog.info("cookie expireded, re-login and fresh cookie")
-        login([username,password])
-        headers["cookie"] = read_cookie()
-        return send_request(url, method, headers, params, data)
+        status,msg = login([username,password])
+        if status:
+            headers["cookie"] = read_cookie()
+            return send_request(url, method, headers, params, data)
+        else:
+            return (False, "401 Unauthorized, please enter your account info")
 
 
 ''' ************** Queries ************** '''

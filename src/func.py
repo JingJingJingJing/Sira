@@ -97,6 +97,7 @@ def send_request(url, method, headers, params, data):
         return refreshcookie(url, method, headers, params, data)
     r = requests.Response()
     try:
+        requests.urllib3.disable_warnings()
         if method is method.Get:
             r = requests.get(
                 url,

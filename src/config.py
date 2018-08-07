@@ -50,9 +50,11 @@ def read_from_config():
     while cwd:
         filepath = cwd + "//.sirarc"
         if os.path.isfile(filepath):
-            config_path = filepath
-            config = json.loads(read_file(filepath))
-            return config
+            content = read_file(filepath)
+            if content:
+                config_path = filepath
+                config = json.loads(read_file(filepath))
+                return config
         dir = os.path.dirname(cwd)
         if cwd == dir:
             break
@@ -61,14 +63,15 @@ def read_from_config():
     userpath = os.path.expanduser('~')
     filepath = userpath + "//.sirarc"
     if os.path.isfile(filepath):
-        config_path = filepath
-        config = json.loads(read_file(filepath))
-        return config
+        content = read_file(filepath)
+        if content:
+            config_path = filepath
+            config = json.loads(read_file(filepath))
+            return config
     # bulit-in
-    else:
-        config_path = "bulit-in"
-        config = build_in_config
-        return build_in_config
+    config_path = "bulit-in"
+    config = build_in_config
+    return build_in_config
 
 def write_to_config(dic_path, field, info):
     global config

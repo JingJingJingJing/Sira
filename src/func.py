@@ -19,6 +19,7 @@ def login(lst):
     headers = {'Content-Type': 'application/json'}
     data = json.dumps({"username": un, "password": pw})
     try:
+        requests.urllib3.disable_warnings()
         r = requests.post(
             url,
             headers=headers,

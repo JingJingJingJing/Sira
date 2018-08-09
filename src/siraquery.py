@@ -10,7 +10,7 @@ issue_opts_list = ["assignee", "board", "creator", "id", "key", "label",
 user_opts = ["assignee", "creater", "reporter", "watcher"]
 
 jql_ignore = ["sub_command", "order", "limit", "constraint", "from_sira",
-              "board", "verbose", "verbose_new"]
+              "board", "verbose", "verbose_new", "auth"]
 
 
 def build_parser():
@@ -125,6 +125,15 @@ def build_parser():
             required=False,
             help="TODO",
             dest="order"
+        )
+        sub_command.add_argument(
+            "-u", "--auth",
+            action="store",
+            type=str,
+            default=None,
+            required=False,
+            help="TODO",
+            dest="auth"
         )
         sub_command.add_argument(
             "-v", "--verbose",

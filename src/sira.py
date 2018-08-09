@@ -146,13 +146,14 @@ def extract_values(namespace: Namespace, verbose: bool) -> None:
 
 def preprocess_args(args: list) -> list:
     i = 0
-    # can be optimized to one loop
+    #  can be optimized to one loop
     # truncate serial args (eg. ['-ab'] to ['-a', '-b'])
     while i < len(args):
         if args[i].startswith("-") and not args[i].startswith("--"):
             string = args[i]
             del args[i]
-            for j in range(len(string) - 1, 0, -1):
+            for j in range(len(
+                string) - 1, 0, -1):
                 args.insert(i, "-{}".format(string[j]))
         i += 1
     global_switches = ["-v", "--verbose", "-s", "--silent"]
@@ -301,13 +302,15 @@ def initUser():
     keyring.set_keyring(Windows.WinVaultKeyring())
     keyring.set_password("sira", userName, passWord)
     jiraUrl=input("\nPlease input Jira domain(including protocol):")
-    func.write_to_config(["credential"],["username","jiraUrl","cookie"],[userName,jiraUrl,""])
+    func.write_to_config(["credential"],["username","domain","cookie"],[userName,jiraUrl,""])
 
 def main():
     parser = build_parser()
     args = sys.argv[1:]
     preprocess_args(args)
+    print(args)
     namespace = parser.parse_args(args)
+    print(namespace)
     verbose = getattr(namespace, "verbose")
     init = getattr(namespace, "init")
     if init:
@@ -333,5 +336,4 @@ def main():
 
 
 if __name__ == '__main__':
-    func.login(["admin", "admin"])
     main()

@@ -123,7 +123,7 @@ def read_cookie():
     return read_from_config().get("credential").get("cookie")
 
 def read_url():
-    return read_from_config().get("domain")
+    return read_from_config().get("credential").get("domain")
 
 def prepare(action, extend=None):
     if action != 'login':

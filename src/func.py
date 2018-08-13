@@ -97,7 +97,6 @@ def send_request(url, method, headers, params, data, auth):
         lst = auth.split(":")
         auth = (lst[0],lst[1])
         headers['cookie'] = ''
-        print(auth)
     if not headers['cookie'] and not auth and not refreshcookie(headers):
         return (False, "Unauthorized, please enter your account info")
     r = requests.Response()

@@ -127,7 +127,7 @@ def build_parser():
             dest="order"
         )
         sub_command.add_argument(
-            "-u", "--auth",
+            "-u", "--user",
             action="store",
             type=str,
             default=None,

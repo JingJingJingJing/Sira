@@ -290,10 +290,10 @@ def query_issue(constraint, board=0, limit=0, order=None, verbose=None, auth=Non
 
     if board:
         url, headers = prepare('getBoard','/{}/issue'.format(board))
-        f, r = send_request(url, method.Get, headers, data, None, (auth))
+        f, r = send_request(url, method.Get, headers, data, None, auth)
     else:
         url, headers = prepare('query')
-        f, r = send_request(url, method.Post, headers, None, json.dumps(data), (auth))
+        f, r = send_request(url, method.Post, headers, None, json.dumps(data), auth)
     if not f:
         print_v("Request Failed !!!", verbose)
         return False, r
@@ -345,7 +345,7 @@ def query_project(limit=0, order=None, verbose=None, auth=None, **kwargs):
     param["expand"] = "lead"
     print_v("Sending the Request ...", verbose)
     url, headers = prepare('getProject')
-    f, r = send_request(url, method.Get, headers, param, None, (auth))
+    f, r = send_request(url, method.Get, headers, param, None, auth)
 
     if not f:
         print_v("Request Failed !!!", verbose)
@@ -366,8 +366,12 @@ def query_board(key=None, limit=None, order=None, verbose=None, auth=None, **kwa
         verbose = verbose.lower()=="true"
     print_v("Formating Input ...", verbose)
     url, headers = prepare('getBoard')
+    param = {}
+    print_v("Formating Input ...", verbose)
+    if limit:
+        param["maxResults"] = limit
     print_v("Sending the Request ...", verbose)
-    f, r = send_request(url, method.Get, headers, None, None, (auth))
+    f, r = send_request(url, method.Get, headers, param, None, auth)
     if not f:
         print_v("Request Failed !!!", verbose)
         return False, r

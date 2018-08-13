@@ -49,7 +49,7 @@ def build_parser() -> ArgumentParser:
         allow_abbrev=False
     )
     sira.add_argument(
-        "--init","-i",
+        "-i","--init",
         action = "store_true",
     )
     sira.add_argument(
@@ -89,6 +89,22 @@ def build_parser() -> ArgumentParser:
         help="TODO",
         dest="verbose",
         metavar="DUMMY"
+    )
+    sira.add_argument(
+        "-n","--username",
+        action = "store",
+        type = str,
+        default = None,
+        required = False,
+        help = "TODO"
+    )
+    sira.add_argument(
+        "-p","--password",
+        action = "store",
+        type = str,
+        default = None,
+        required = False,
+        help = "TODO"
     )
     sira.add_argument(
         "-q", "--query",
@@ -251,6 +267,12 @@ def process(namespace: Namespace, parser: ArgumentParser, verbose: bool) -> int:
         else:
             command.append(current_dic["str"])
             current_dic = element
+    if hasattr(namespace, "username") and hasattr(namespace, "password"):
+        username = getattr(namespace, "username")
+        password = getattr(namespace, "password")
+        if username != None and password != None:
+            command.append("-u")
+            command.append(username+":"+password)
     if hasattr(namespace, "limit"):
         if [s for s in command if "-l" in s]:
             if verbose:
@@ -308,9 +330,7 @@ def main():
     parser = build_parser()
     args = sys.argv[1:]
     preprocess_args(args)
-    print(args)
     namespace = parser.parse_args(args)
-    print(namespace)
     verbose = getattr(namespace, "verbose")
     init = getattr(namespace, "init")
     if init:

@@ -422,7 +422,7 @@ def issue_update_status(issue, info):
 
     def issue_get_tansition(issue, dic):
         url, headers = prepare('issue', '/{}/transitions'.format(issue))
-        f, r = send_request(url, method.Get, headers, None, None)
+        f, r = send_request(url, method.Get, headers, None, None, None)
         if not f:
             return None
         for msg in r.get('transitions'):
@@ -433,7 +433,7 @@ def issue_update_status(issue, info):
         return False, 'no transit is avaiable'
     transition = {"id": dic.get(status)}
     data = json.dumps({"transition": transition})
-    f, r = send_request(url, method.Post, headers, None, data)
+    f, r = send_request(url, method.Post, headers, None, data, None)
     if not f:
         return r
     return True, 'success'
@@ -448,7 +448,7 @@ def issue_update_labels(issue, labels, mode='add'):
         for l in labels:
             target.append({mode: l})
     data = json.dumps({"update": {"labels": target}})
-    f, r = send_request(url, method.Put, headers, None, data)
+    f, r = send_request(url, method.Put, headers, None, data, None)
     if not f:
         return False, str(r)
 
@@ -458,7 +458,7 @@ def issue_update_labels(issue, labels, mode='add'):
 def issue_get_comment(issue):
     url, headers = prepare('issue', '/{}{}'.format(issue, '/comment'))
 
-    f, r = send_request(url, method.Get, headers, None, None)
+    f, r = send_request(url, method.Get, headers, None, None, None)
     if not f:
         return False, str(r)
 
@@ -477,7 +477,7 @@ def issue_get_comment(issue):
 def issue_edit_comment(issue, cid, body):
     url, headers = prepare('issue', '/{}{}{}'.format(issue, '/comment/', cid))
     data = {"body": body}
-    f, r = send_request(url, method.Put, headers, None, data)
+    f, r = send_request(url, method.Put, headers, None, data, None)
     if not f:
         return r
     return True, 'Comment(ID: ' + r['id'] + ') modified'
@@ -494,7 +494,7 @@ def issue_add_comment(issue, body):
 
 def issue_del_comment(issue, cid):
     url, headers = prepare('issue', '/{}{}{}'.format(issue, '/comment/', cid))
-    f, r = send_request(url, method.Delete, headers, None, None)
+    f, r = send_request(url, method.Delete, headers, None, None, None)
     if not f:
         return False, r
     return True, 'Comment deleted'
@@ -505,12 +505,12 @@ def issue_watch(issue, user=None):
     if user is None:
         user = read_from_config().get('credential').get('username')
     print(url, headers)
-    return send_request(url, method.Post, headers, None, '"{}"'.format(user))
+    return send_request(url, method.Post, headers, None, '"{}"'.format(user), None)
 
 
 def issue_get_watcher(issue):
     url, headers = prepare('issue', '/{}/watchers'.format(issue))
-    f, r = send_request(url, method.Get, headers, None, None)
+    f, r = send_request(url, method.Get, headers, None, None, None)
     if not f:
         return r
     lst = r.get('watchers')
@@ -524,12 +524,12 @@ def issue_get_watcher(issue):
 
 def issue_del_watcher(issue, user):
     url, headers = prepare('issue', '/{}/watchers'.format(issue))
-    return send_request(url, method.Delete, headers, '"ysg"', None)
+    return send_request(url, method.Delete, headers, '"ysg"', None, None)
 
 
 def getPermission():
     url, headers = prepare('mypermission')
-    f, r = send_request(url, method.Get, headers, None, None)
+    f, r = send_request(url, method.Get, headers, None, None, None)
     if not f:
         return r
     for permission in r.get('permissions'):

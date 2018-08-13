@@ -172,13 +172,16 @@ def preprocess_args(args: list) -> list:
                 string) - 1, 0, -1):
                 args.insert(i, "-{}".format(string[j]))
         i += 1
-    global_switches = ["-v", "--verbose", "-s", "--silent"]
+    global_switches = ["-v", "--verbose", "-s", "--silent", "-n", "--username", "-p", "--password"]
     positional_switches = ["-q", "--query", "-u", "--update"]
     # move all global switches before last positional switches
     cache = list()
     for i in range(len(args) - 1, -1, -1):
         value = args[i]
         if value in global_switches:
+            if value == "-n" or value == "--username" or value == "-p" or value == "--password":
+                cache.append(args[i+1])
+                del args[i+1]
             cache.append(value)
             del args[i]
         elif value in positional_switches:

@@ -91,20 +91,13 @@ def build_parser() -> ArgumentParser:
         metavar="DUMMY"
     )
     sira.add_argument(
-        "-n","--username",
+        "-c","--credential",
         action = "store",
         type = str,
         default = None,
         required = False,
-        help = "TODO"
-    )
-    sira.add_argument(
-        "-p","--password",
-        action = "store",
-        type = str,
-        default = None,
-        required = False,
-        help = "TODO"
+        help = "TODO",
+        dest="credential"
     )
     sira.add_argument(
         "-q", "--query",
@@ -172,14 +165,14 @@ def preprocess_args(args: list) -> list:
                 string) - 1, 0, -1):
                 args.insert(i, "-{}".format(string[j]))
         i += 1
-    global_switches = ["-v", "--verbose", "-s", "--silent", "-n", "--username", "-p", "--password"]
+    global_switches = ["-v", "--verbose", "-s", "--silent", "-c", "--credential"]
     positional_switches = ["-q", "--query", "-u", "--update"]
     # move all global switches before last positional switches
     cache = list()
     for i in range(len(args) - 1, -1, -1):
         value = args[i]
         if value in global_switches:
-            if value == "-n" or value == "--username" or value == "-p" or value == "--password":
+            if value == "-c" or value == "--credential":
                 cache.append(args[i+1])
                 del args[i+1]
             cache.append(value)
@@ -270,12 +263,11 @@ def process(namespace: Namespace, parser: ArgumentParser, verbose: bool) -> int:
         else:
             command.append(current_dic["str"])
             current_dic = element
-    if hasattr(namespace, "username") and hasattr(namespace, "password"):
-        username = getattr(namespace, "username")
-        password = getattr(namespace, "password")
-        if username != None and password != None:
+    if hasattr(namespace, "credential"):
+        credential = getattr(namespace, "credential")
+        if credential != None:
             command.append("-u")
-            command.append(username+":"+password)
+            command.append(credential)
     if hasattr(namespace, "limit"):
         if [s for s in command if "-l" in s]:
             if verbose:

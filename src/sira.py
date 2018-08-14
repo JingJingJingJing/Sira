@@ -43,7 +43,7 @@ def Store_Const_and_Store_to(dest):
 def build_parser() -> ArgumentParser:
     sira = ArgumentParser(
         prog="sira",
-        description="sira is the command tool to get jira information.",
+        description="Sira is a command tool to get and update jira information.",
         add_help=False,
         allow_abbrev=False
     )
@@ -62,25 +62,19 @@ def build_parser() -> ArgumentParser:
     )
     sira.add_argument(
         "-v", "--verbose",
-        action=Store_Const_and_Ignore,
-        nargs="*",
+        action="store_true",
         default=None,
-        const=True,
         required=False,
         help="output more information with the command execution.",
-        dest="verbose",
-        metavar="DUMMY"
+        dest="verbose"
     )
     sira.add_argument(
         "-s", "--silent",
-        action=Store_Const_and_Ignore,
-        nargs="*",
+        action="store_false",
         default=None,
-        const=False,
         required=False,
         help="reduce unnecessary information output.",
-        dest="verbose",
-        metavar="DUMMY"
+        dest="verbose"
     )
     sira.add_argument(
         "-c","--credential",
@@ -88,20 +82,8 @@ def build_parser() -> ArgumentParser:
         type = str,
         default = None,
         required = False,
-<<<<<<< HEAD
-        help = "TODO",
-        dest="credential"
-=======
-        help = "jira username."
-    )
-    sira.add_argument(
-        "-p","--password",
-        action = "store",
-        type = str,
-        default = None,
-        required = False,
-        help = "jira password."
->>>>>>> d7f1e0e1b4c5569ccbe9f1bd87a17011c0c54831
+        help = "Jira credential (username:password).",
+        metavar="[account info]"
     )
     sira.add_argument(
         "-q", "--query",
@@ -111,8 +93,9 @@ def build_parser() -> ArgumentParser:
         const="query",
         type=str,
         required=False,
-        help="use this args to query your jira information.",
-        dest="action"
+        help="use this args to query Jira information.",
+        dest="action",
+        metavar="type mode limit order"
     )
     sira.add_argument(
         "-u", "--update",
@@ -122,8 +105,9 @@ def build_parser() -> ArgumentParser:
         const="update",
         type=str,
         required=False,
-        help="use this args to update your jira information.",
-        dest="action"
+        help="use this args to update Jira information(TODO).",
+        dest="action",
+        metavar="TODO"
     )
     return sira
 

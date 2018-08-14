@@ -16,15 +16,14 @@ jql_ignore = ["sub_command", "order", "limit", "constraint", "from_sira",
 def build_parser():
     query = ArgumentParser(
         prog="sira-query",
-        description="TODO",
-        epilog="TODO"
+        description="Querying issue/project/board information from JIRA"
     )
     query.add_argument(
         "-v", "--verbose",
         action="store_true",
         default=None,
         required=False,
-        help="TODO",
+        help="output more information with the command execution.",
         dest="verbose"
     )
     query.add_argument(
@@ -32,14 +31,14 @@ def build_parser():
         action="store_false",
         default=None,
         required=False,
-        help="TODO",
+        help="reduce unnecessary information output.",
         dest="verbose"
     )
     sub = query.add_subparsers(
-        title="TODO",
-        description="TODO",
+        title="issue, project, board are options to be queried",
+        description="",
         parser_class=ArgumentParser,
-        help="TODO",
+        help="[ -l ${num} for limit numbers of result | -o ${order} for order the result | -a mine for only showing your info ]",
         dest="sub_command"
     )
     issue = sub.add_parser(
@@ -140,7 +139,7 @@ def build_parser():
             action="store_true",
             default=None,
             required=False,
-            help="TODO",
+            help="output more information with the command execution.",
             dest="verbose_new"
         )
         sub_command.add_argument(
@@ -148,7 +147,7 @@ def build_parser():
             action="store_false",
             default=None,
             required=False,
-            help="TODO",
+            help="reduce unnecessary information output.",
             dest="verbose_new"
         )
     return query

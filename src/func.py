@@ -407,7 +407,7 @@ def query_board(key=None, limit=None, order=None, verbose=None, auth=None, **kwa
 def issue_update_assignee(issue, info):
     url, headers = prepare('issue', '/{}'.format(issue))
     data = {"fields": {"assignee": {"name": info}}}
-    f, r = send_request(url, method.Put, headers, None, json.dumps(data))
+    f, r = send_request(url, method.Put, headers, None, json.dumps(data), None)
     if not f:
         return False, r
     return True, 'success'
@@ -486,7 +486,7 @@ def issue_edit_comment(issue, cid, body):
 def issue_add_comment(issue, body):
     url, headers = prepare('issue', '/{}/{}'.format(issue, 'comment'))
     data = json.dumps({"body": body})
-    f, r = send_request(url, method.Post, headers, None, data)
+    f, r = send_request(url, method.Post, headers, None, data, None)
     if not f:
         return False, r
     return True, 'Comment(ID: ' + r['id'] + ') added'

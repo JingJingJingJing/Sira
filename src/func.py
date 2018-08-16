@@ -92,9 +92,13 @@ class method(Enum):
     Delete = 3
 
 
-def send_request(url, method, headers, params, data):
-    if not headers['cookie']:
-        return refreshcookie(url, method, headers, params, data)
+def send_request(url, method, headers, params, data, auth):
+    if auth:
+        lst = auth.split(":")
+        auth = (lst[0],lst[1])
+        headers['cookie'] = ''
+    if not headers['cookie'] and not auth and not refreshcookie(headers):
+        return (False, "Unauthorized, please enter your account info")
     r = requests.Response()
     try:
         requests.urllib3.disable_warnings()
@@ -104,34 +108,41 @@ def send_request(url, method, headers, params, data):
                 headers=headers,
                 params=params,
                 timeout=glob_dic.get_value('timeout'),
-                verify=False)
+                verify=False,
+                auth=auth)
         elif method is method.Put:
             r = requests.put(
                 url,
                 headers=headers,
                 data=data,
                 timeout=glob_dic.get_value('timeout'),
-                verify=False)
+                verify=False,
+                auth=auth)
         elif method is method.Delete:
             r = requests.delete(
                 url,
                 headers=headers,
                 data=data,
                 timeout=glob_dic.get_value('timeout'),
-                verify=False)
+                verify=False,
+                auth=auth)
         elif method is method.Post:
             r = requests.post(
                 url,
                 headers=headers,
                 data=data,
                 timeout=glob_dic.get_value('timeout'),
-                verify=False)
+                verify=False,
+                auth=auth)
         else:
             mylog.error('Wrong method that not suppord:' + str(method))
             return (False, 'Unknown internal error occured')
         if r.status_code == 401:
             mylog.info("401 Unauthorized, re-login to fresh cookie")
-            return refreshcookie(url, method, headers, params, data)
+            if not auth and refreshcookie(headers):
+                return send_request(url, method, headers, params, data, auth)
+            else:
+                return (False, "401 Unauthorized, please enter your account info")
         try:
             r.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -179,22 +190,22 @@ def send_request(url, method, headers, params, data):
             \tReconnecting to Wi-Fi\r\n
             \tRunning Network Diagnostics''')
 
-def refreshcookie(url, method, headers, params, data):
+def refreshcookie(headers):
     username = read_from_config().get("credential").get("username")
     keyring.set_keyring(Windows.WinVaultKeyring())
     password = keyring.get_password("sira",username)
     if not password:
         mylog.error("401 Unauthorized, and no account info")
         # TODO: ask for username and pwd
-        return (False, "401 Unauthorized, please enter your account info")
+        return False
     else:
         mylog.info("cookie expireded, re-login and fresh cookie")
         status,msg = login([username,password])
         if status:
             headers["cookie"] = read_cookie()
-            return send_request(url, method, headers, params, data)
+            return True
         else:
-            return (False, "401 Unauthorized, please enter your account info")
+            return False
 
 
 ''' ************** Queries ************** '''
@@ -256,7 +267,7 @@ def getResponse(lst):
 
 
 @func_log
-def query_issue(constraint, board=0, limit=0, order=None, verbose=None, **kwargs):
+def query_issue(constraint, board=0, limit=0, order=None, verbose=None, auth=None, **kwargs):
     if verbose is None:
         verbose = read_from_config().get("verbose")
         verbose = verbose.lower()=="true"
@@ -279,10 +290,10 @@ def query_issue(constraint, board=0, limit=0, order=None, verbose=None, **kwargs
 
     if board:
         url, headers = prepare('getBoard','/{}/issue'.format(board))
-        f, r = send_request(url, method.Get, headers, data, None)
+        f, r = send_request(url, method.Get, headers, data, None, auth)
     else:
         url, headers = prepare('query')
-        f, r = send_request(url, method.Post, headers, None, json.dumps(data))
+        f, r = send_request(url, method.Post, headers, None, json.dumps(data), auth)
     if not f:
         print_v("Request Failed !!!", verbose)
         return False, r
@@ -318,7 +329,7 @@ def getInfo(r, order):
 
 
 @func_log
-def query_project(limit=0, order=None, verbose=None, **kwargs):
+def query_project(limit=0, order=None, verbose=None, auth=None, **kwargs):
     if verbose is None:
         verbose = read_from_config().get("verbose")
         verbose = verbose.lower()=="true"
@@ -334,7 +345,7 @@ def query_project(limit=0, order=None, verbose=None, **kwargs):
     param["expand"] = "lead"
     print_v("Sending the Request ...", verbose)
     url, headers = prepare('getProject')
-    f, r = send_request(url, method.Get, headers, param, None)
+    f, r = send_request(url, method.Get, headers, param, None, auth)
 
     if not f:
         print_v("Request Failed !!!", verbose)
@@ -344,7 +355,7 @@ def query_project(limit=0, order=None, verbose=None, **kwargs):
 
 
 @func_log
-def query_board(key=None, limit=None, order=None, verbose=None, **kwargs):
+def query_board(key=None, limit=None, order=None, verbose=None, auth=None, **kwargs):
     '''
     This function return all boards and order the return value.
     The return value is a string of board id adn board name
@@ -355,8 +366,12 @@ def query_board(key=None, limit=None, order=None, verbose=None, **kwargs):
         verbose = verbose.lower()=="true"
     print_v("Formating Input ...", verbose)
     url, headers = prepare('getBoard')
+    param = {}
+    print_v("Formating Input ...", verbose)
+    if limit:
+        param["maxResults"] = limit
     print_v("Sending the Request ...", verbose)
-    f, r = send_request(url, method.Get, headers, None, None)
+    f, r = send_request(url, method.Get, headers, param, None, auth)
     if not f:
         print_v("Request Failed !!!", verbose)
         return False, r
@@ -392,7 +407,7 @@ def query_board(key=None, limit=None, order=None, verbose=None, **kwargs):
 def issue_update_assignee(issue, info):
     url, headers = prepare('issue', '/{}'.format(issue))
     data = {"fields": {"assignee": {"name": info}}}
-    f, r = send_request(url, method.Put, headers, None, json.dumps(data))
+    f, r = send_request(url, method.Put, headers, None, json.dumps(data), None)
     if not f:
         return False, r
     return True, 'success'
@@ -407,7 +422,7 @@ def issue_update_status(issue, info):
 
     def issue_get_tansition(issue, dic):
         url, headers = prepare('issue', '/{}/transitions'.format(issue))
-        f, r = send_request(url, method.Get, headers, None, None)
+        f, r = send_request(url, method.Get, headers, None, None, None)
         if not f:
             return None
         for msg in r.get('transitions'):
@@ -418,7 +433,7 @@ def issue_update_status(issue, info):
         return False, 'no transit is avaiable'
     transition = {"id": dic.get(status)}
     data = json.dumps({"transition": transition})
-    f, r = send_request(url, method.Post, headers, None, data)
+    f, r = send_request(url, method.Post, headers, None, data, None)
     if not f:
         return r
     return True, 'success'
@@ -433,7 +448,7 @@ def issue_update_labels(issue, labels, mode='add'):
         for l in labels:
             target.append({mode: l})
     data = json.dumps({"update": {"labels": target}})
-    f, r = send_request(url, method.Put, headers, None, data)
+    f, r = send_request(url, method.Put, headers, None, data, None)
     if not f:
         return False, str(r)
 
@@ -443,7 +458,7 @@ def issue_update_labels(issue, labels, mode='add'):
 def issue_get_comment(issue):
     url, headers = prepare('issue', '/{}{}'.format(issue, '/comment'))
 
-    f, r = send_request(url, method.Get, headers, None, None)
+    f, r = send_request(url, method.Get, headers, None, None, None)
     if not f:
         return False, str(r)
 
@@ -462,7 +477,7 @@ def issue_get_comment(issue):
 def issue_edit_comment(issue, cid, body):
     url, headers = prepare('issue', '/{}{}{}'.format(issue, '/comment/', cid))
     data = {"body": body}
-    f, r = send_request(url, method.Put, headers, None, data)
+    f, r = send_request(url, method.Put, headers, None, data, None)
     if not f:
         return r
     return True, 'Comment(ID: ' + r['id'] + ') modified'
@@ -471,7 +486,7 @@ def issue_edit_comment(issue, cid, body):
 def issue_add_comment(issue, body):
     url, headers = prepare('issue', '/{}/{}'.format(issue, 'comment'))
     data = json.dumps({"body": body})
-    f, r = send_request(url, method.Post, headers, None, data)
+    f, r = send_request(url, method.Post, headers, None, data, None)
     if not f:
         return False, r
     return True, 'Comment(ID: ' + r['id'] + ') added'
@@ -479,7 +494,7 @@ def issue_add_comment(issue, body):
 
 def issue_del_comment(issue, cid):
     url, headers = prepare('issue', '/{}{}{}'.format(issue, '/comment/', cid))
-    f, r = send_request(url, method.Delete, headers, None, None)
+    f, r = send_request(url, method.Delete, headers, None, None, None)
     if not f:
         return False, r
     return True, 'Comment deleted'
@@ -490,12 +505,12 @@ def issue_watch(issue, user=None):
     if user is None:
         user = read_from_config().get('credential').get('username')
     print(url, headers)
-    return send_request(url, method.Post, headers, None, '"{}"'.format(user))
+    return send_request(url, method.Post, headers, None, '"{}"'.format(user), None)
 
 
 def issue_get_watcher(issue):
     url, headers = prepare('issue', '/{}/watchers'.format(issue))
-    f, r = send_request(url, method.Get, headers, None, None)
+    f, r = send_request(url, method.Get, headers, None, None, None)
     if not f:
         return r
     lst = r.get('watchers')
@@ -509,12 +524,12 @@ def issue_get_watcher(issue):
 
 def issue_del_watcher(issue, user):
     url, headers = prepare('issue', '/{}/watchers'.format(issue))
-    return send_request(url, method.Delete, headers, '"ysg"', None)
+    return send_request(url, method.Delete, headers, '"ysg"', None, None)
 
 
 def getPermission():
     url, headers = prepare('mypermission')
-    f, r = send_request(url, method.Get, headers, None, None)
+    f, r = send_request(url, method.Get, headers, None, None, None)
     if not f:
         return r
     for permission in r.get('permissions'):

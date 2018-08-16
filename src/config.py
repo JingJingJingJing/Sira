@@ -4,9 +4,9 @@ import json
 config = {}
 config_path = ''
 build_in_config = {
-    "domain": "https://lnvusjira.lenovonet.lenovo.local",
     "verbose": "False",
     "credential": {
+        "domain":"https://lnvusjira.lenovonet.lenovo.local"
     },
     "query_field": {
         "issue_default": [
@@ -42,7 +42,7 @@ def read_from_config():
     if config:
         return config
     if config_path == "bulit-in":
-        return str(build_in_config)
+        return build_in_config
     if config_path and os.path.isfile(config_path):
         return read_file(config_path)
     # local

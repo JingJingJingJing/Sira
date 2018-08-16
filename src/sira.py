@@ -43,52 +43,47 @@ def Store_Const_and_Store_to(dest):
 def build_parser() -> ArgumentParser:
     sira = ArgumentParser(
         prog="sira",
-        description="TODO",
-        epilog="TODO",
+        description="Sira is a command tool to get and update jira information.",
         add_help=False,
         allow_abbrev=False
     )
     sira.add_argument(
-        "--init","-i",
+        "-i","--init",
         action = "store_true",
-    )
-    sira.add_argument(
-        "dummy",
-        action=Ignore,
-        nargs="*",
-        default=None,
-        help="TODO",
-        metavar="DUMMY"
+        help = "initial your username,your password and Jira domain."
     )
     sira.add_argument(
         "-h", "--help",
         action="store_true",
         default=False,
         required=False,
-        help="TODO",
+        help="make you use sira easily.",
         dest="help"
     )
     sira.add_argument(
         "-v", "--verbose",
-        action=Store_Const_and_Ignore,
-        nargs="*",
+        action="store_true",
         default=None,
-        const=True,
         required=False,
-        help="TODO",
-        dest="verbose",
-        metavar="DUMMY"
+        help="output more information with the command execution.",
+        dest="verbose"
     )
     sira.add_argument(
         "-s", "--silent",
-        action=Store_Const_and_Ignore,
-        nargs="*",
+        action="store_false",
         default=None,
-        const=False,
         required=False,
-        help="TODO",
-        dest="verbose",
-        metavar="DUMMY"
+        help="reduce unnecessary information output.",
+        dest="verbose"
+    )
+    sira.add_argument(
+        "-c","--credential",
+        action = "store",
+        type = str,
+        default = None,
+        required = False,
+        help = "Jira credential (username:password).",
+        metavar="[account info]"
     )
     sira.add_argument(
         "-q", "--query",
@@ -98,8 +93,9 @@ def build_parser() -> ArgumentParser:
         const="query",
         type=str,
         required=False,
-        help="TODO",
-        dest="action"
+        help="use this args to query Jira information.",
+        dest="action",
+        metavar="type mode limit order"
     )
     sira.add_argument(
         "-u", "--update",
@@ -109,8 +105,9 @@ def build_parser() -> ArgumentParser:
         const="update",
         type=str,
         required=False,
-        help="TODO",
-        dest="action"
+        help="use this args to update Jira information(TODO).",
+        dest="action",
+        metavar="TODO"
     )
     return sira
 
@@ -146,22 +143,26 @@ def extract_values(namespace: Namespace, verbose: bool) -> None:
 
 def preprocess_args(args: list) -> list:
     i = 0
-    # can be optimized to one loop
+    #  can be optimized to one loop
     # truncate serial args (eg. ['-ab'] to ['-a', '-b'])
     while i < len(args):
         if args[i].startswith("-") and not args[i].startswith("--"):
             string = args[i]
             del args[i]
-            for j in range(len(string) - 1, 0, -1):
+            for j in range(len(
+                string) - 1, 0, -1):
                 args.insert(i, "-{}".format(string[j]))
         i += 1
-    global_switches = ["-v", "--verbose", "-s", "--silent"]
+    global_switches = ["-v", "--verbose", "-s", "--silent", "-c", "--credential"]
     positional_switches = ["-q", "--query", "-u", "--update"]
     # move all global switches before last positional switches
     cache = list()
     for i in range(len(args) - 1, -1, -1):
         value = args[i]
         if value in global_switches:
+            if value == "-c" or value == "--credential":
+                cache.append(args[i+1])
+                del args[i+1]
             cache.append(value)
             del args[i]
         elif value in positional_switches:
@@ -250,6 +251,11 @@ def process(namespace: Namespace, parser: ArgumentParser, verbose: bool) -> int:
         else:
             command.append(current_dic["str"])
             current_dic = element
+    if hasattr(namespace, "credential"):
+        credential = getattr(namespace, "credential")
+        if credential != None:
+            command.append("-u")
+            command.append(credential)
     if hasattr(namespace, "limit"):
         if [s for s in command if "-l" in s]:
             if verbose:
@@ -301,7 +307,7 @@ def initUser():
     keyring.set_keyring(Windows.WinVaultKeyring())
     keyring.set_password("sira", userName, passWord)
     jiraUrl=input("\nPlease input Jira domain(including protocol):")
-    func.write_to_config(["credential"],["username","jiraUrl","cookie"],[userName,jiraUrl,""])
+    func.write_to_config(["credential"],["username","domain","cookie"],[userName,jiraUrl,""])
 
 def main():
     parser = build_parser()
@@ -333,5 +339,4 @@ def main():
 
 
 if __name__ == '__main__':
-    func.login(["admin", "admin"])
     main()

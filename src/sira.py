@@ -312,7 +312,7 @@ def initUser():
         print_err("initialization fail! Please check your username,password and jira domain!","red")
     else:
         print ("initialization success!")
-
+        
 def main():
     parser = build_parser()
     args = sys.argv[1:]

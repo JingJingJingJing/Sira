@@ -1,5 +1,6 @@
 import sys,keyring,msvcrt
 import func
+import getpass  
 from keyring.backends import Windows
 from argparse import Action, ArgumentParser, Namespace
 from subprocess import run
@@ -302,12 +303,15 @@ def pwd_input():
 
 def initUser():
     userName=input("Please input your username:")
-    print("Please input your password:")
-    passWord=pwd_input()
+    passWord = getpass.getpass("Please input your password:")    
     keyring.set_keyring(Windows.WinVaultKeyring())
     keyring.set_password("sira", userName, passWord)
-    jiraUrl=input("\nPlease input Jira domain(including protocol):")
+    jiraUrl=input("Please input Jira domain(including protocol):")
     func.write_to_config(["credential"],["username","domain","cookie"],[userName,jiraUrl,""])
+    if userName.strip() == "" or passWord.strip() == "" or jiraUrl.strip() == "":
+        print_err("initialization fail! Please check your username,password and jira domain!","red")
+    else:
+        print ("initialization success!")
 
 def main():
     parser = build_parser()

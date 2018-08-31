@@ -16,5 +16,7 @@ Here is the way to build sira 2.0:
       
       pip install pywin32
       
+      pip install keyring
+      
   4. Run build/build.sh in git bash
   5. Run build/setup.ps1 in powershell

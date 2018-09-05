@@ -308,11 +308,10 @@ def initUser():
     keyring.set_password("sira", userName, passWord)
     jiraUrl=input("Please input Jira domain(including protocol):")
     func.write_to_config(["credential"],["username","domain","cookie"],[userName,jiraUrl,""])
-    status,msg = func.login([userName,passWord])
-    if status:
-        print ("initialization success!")
+    if userName.strip() == "" or passWord.strip() == "" or jiraUrl.strip() == "":
+        print_err("initialization fail! Please check your username,password and jira domain!","red")
     else:
-        print ("initialization fail! Please check username,password and jira domain!")
+        print ("initialization success!")
         
 def main():
     parser = build_parser()

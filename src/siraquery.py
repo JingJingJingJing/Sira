@@ -1,7 +1,7 @@
 import sys
 from argparse import ArgumentParser
 
-from func import query_board, query_issue, query_project
+from func import query_board, query_issue, query_project, query_jql
 from utils import print_err, exit_prog
 
 issue_opts_list = ["assignee", "board", "creator", "id", "key", "label",
@@ -59,6 +59,12 @@ def build_parser():
         description="TODO",
         epilog="TODO"
     )
+    jql = sub.add_parser(
+        "jql",
+        prog="jql",
+        description="TODO",
+        epilog="TODO"
+    )
 
     # add options in issue
     issue_opts = dict()
@@ -96,8 +102,18 @@ def build_parser():
         dest="key"
     )
 
+    jql.add_argument(
+        "-q", "--query",
+        action="store",
+        default=None,
+        type=str,
+        required=False,
+        help="TODO",
+        dest="query"
+    )
+
     # add from-sira, limit, and order to each sub-command
-    for sub_command in [issue, project, board]:
+    for sub_command in [issue, project, board, jql]:
         sub_command.add_argument(
             "-f", "--from-sira",
             action="store_true",
@@ -193,6 +209,8 @@ def main():
         status, msg = query_project(**vars(namespace))
     elif sub_command == "board":
         status, msg = query_board(**vars(namespace))
+    elif sub_command == "jql":
+        status, msg = query_jql(**vars(namespace))
     if status:
         print(msg, end="")
     else:

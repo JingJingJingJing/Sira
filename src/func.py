@@ -400,6 +400,46 @@ def query_board(key=None, limit=None, order=None, verbose=None, auth=None, **kwa
             s += '\r\n'
     return True, s
 
+@func_log
+def query_jql(query="", limit=0, order=None, verbose=None, auth=None, **kwargs):
+    if verbose is None:
+        verbose = read_from_config().get("verbose")
+        verbose = verbose.lower()=="true"
+    print_v("Formating Input ...", verbose)
+    if order:
+        order = order.lower()
+        if order == 'asc':
+            query += ' order by key ASC'
+        elif order == 'desc':
+            query += ' order by key DESC'
+    else:
+        query += ' order by updated DESC'
+    data = {}
+    data["jql"] = query
+    data["startAt"] = 0
+
+    if limit:
+        data["maxResults"] = limit
+    print_v("Sending the Request ...", verbose)
+
+    url, headers = prepare('query')
+    f, r = send_request(url, method.Post, headers, None, json.dumps(data), auth)
+    if not f:
+        print_v("Request Failed !!!", verbose)
+        return False, r
+    print_v("Extracting the Results ...", verbose)
+    # analyze data
+    s = ''
+    lst = r.get("issues")
+    for i, issue in enumerate(lst):
+        fields = issue.get('fields')
+        s += str(getTarget(fields, 'issuetype')) + ' '
+        s += str(issue.get('key')) + ' '
+        s += str(getTarget(fields,'summary')) + ' '
+        if (i != len(lst) - 1):
+            s += '\r\n'
+    return True, s
+
 
 ''' ******************* Update ******************* '''
 

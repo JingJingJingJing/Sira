@@ -8,7 +8,7 @@ from subprocess import run
 from utils import print_err, exit_prog
 
 keyword_dict = {
-    "query": ["type", "mode", "limit", "order", "key"],
+    "query": ["type", "mode", "limit", "order", "key", "query"],
     "update": []
 }
 
@@ -121,13 +121,22 @@ def extract_values(namespace: Namespace, verbose: bool) -> None:
     if not action or not exprs:
         return
     for expression in exprs:
-        if "=" in expression and expression.count("=") == 1:
-            key, value = expression.split("=")
-            if key and key in keyword_dict[action]:
-                setattr(namespace, key, value)
-            elif verbose:
-                print('[Verbose]: Unrecognized Keyword "{}" ...'.format(key))
-                print('[Verbose]: Ignored Keyword "{}" ...'.format(key))
+        if "=" in expression:
+            if expression.count("=") == 1:
+                key, value = expression.split("=")
+                if key and key in keyword_dict[action]:
+                    setattr(namespace, key, value)
+                elif verbose:
+                    print('[Verbose]: Unrecognized Keyword "{}" ...'.format(key))
+                    print('[Verbose]: Ignored Keyword "{}" ...'.format(key))
+            elif expression.count("=") > 1:
+                key = expression[0:expression.index("=")]
+                value = "\"" + expression[expression.index("=")+1:len(expression)] + "\""
+                if key and key in keyword_dict[action]:
+                    setattr(namespace, key, value)
+                elif verbose:
+                    print('[Verbose]: Unrecognized Keyword "{}" ...'.format(key))
+                    print('[Verbose]: Ignored Keyword "{}" ...'.format(key))
 
     # convert limit and key to int
     int_values = ["limit", "key"]
@@ -162,8 +171,9 @@ def preprocess_args(args: list) -> list:
         value = args[i]
         if value in global_switches:
             if value == "-c" or value == "--credential":
-                cache.append(args[i+1])
-                del args[i+1]
+                if len(args) >= i+2 and ":" in args[i+1]:
+                    cache.append(args[i+1])
+                    del args[i+1]
             cache.append(value)
             del args[i]
         elif value in positional_switches:
@@ -210,6 +220,13 @@ expr_dict = {
             "entry": "mode",
             "all": "",
             "current": "-l 1",
+            "recent": "-o recent"
+        },
+        "jql": {
+            "default": None,
+            "str": "",
+            "entry": "query",
+            "any": "-q %(query)s",
             "recent": "-o recent"
         }
     }

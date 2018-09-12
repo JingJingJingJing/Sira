@@ -1,10 +1,12 @@
 import unittest
 import sys
+import keyring
 from subprocess import run
-
 src_path = "src/"
 sys.path.insert(0, src_path)
-from sira import build_parser, extract_values, preprocess_args, process
+from sira import build_parser, extract_values, preprocess_args, process, initUser
+#from cofig import read_from_config
+
 #########################################
 
 # sira.exe CLI Test Cases
@@ -1691,6 +1693,81 @@ class Test_22(unittest.TestCase):
         verbose = getattr(namespace, "verbose")
         extract_values(namespace, verbose)
         kwargs = vars(namespace)
+
+# class Test_23(unittest.TestCase):
+#     def setUp(self):
+#         #self.parser = build_parser()
+#         subprocess.run('-i',shell=True)
+#     def test_100(self):
+#         userName='mayh11'
+#         passWord='Ma940871651='
+#         jiraUrl='https://lnvusconf.lenovonet.lenovo.local'
+#      #  subprocess.run('-i',shell=True)
+#         subprocess.run(userName,shell=True)
+#         subprocess.run(passWord,shell=True)
+#         subprocess.run(jiraUrl,shell=True)
+#         UserName = read_from_config().get("credential").get("username")
+#         PassWord=keyring.get_password("sira",userName)
+#         JiraUrl = read_from_config.get("cradential").get("domain")
+#         self.assertMultiLineEqual(userName,UserName)
+#         self.assertMultiLineEqual(passWord,PassWord)
+#         self.assertMultiLineEqual(jiraUrl,JiraUrl)
+
+class Test_24(unittest.TestCase):
+    def setUp(self):
+        self.parser = build_parser()
+    def test_101(self):
+        args = ['-q', 'type=jql', "query=assignee='kidd liu' and issuetype=bug"]
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
+        kwargs = vars(namespace)
+        command = process(namespace, self.parser, verbose)
+        self.assertEqual("sira-query jql -q \"assignee='kidd liu' and issuetype=bug\" -f", command)
+
+    def test_102(self):
+        args = ['-q', 'type=jql', "query=assignee='kidd liu'"]
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
+        kwargs = vars(namespace)
+        command = process(namespace, self.parser, verbose)
+        self.assertEqual("sira-query jql -q \"assignee='kidd liu'\" -f", command)
+
+    def test_103(self):
+        args = ['-q', 'type=jql', "query=assignee='kidd liu'",'limit=10', 'order=asc']
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
+        kwargs = vars(namespace)
+        command = process(namespace, self.parser, verbose)
+        self.assertEqual("sira-query jql -q \"assignee='kidd liu'\" -l 10 -o asc -f", command)
+
+class Test_25(unittest.TestCase):
+    def setUp(self):
+        self.parser = build_parser()
+    def test_104(self):
+        args = ['-q', 'type=jql', "query=assignee='kidd liu'",'limit=10', 'order=asc','-c', 'mayh11:Ma940871651=']
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
+        kwargs = vars(namespace)
+        command = process(namespace, self.parser, verbose)
+        self.assertEqual("sira-query jql -q \"assignee='kidd liu'\" -l 10 -o asc -u mayh11:Ma940871651= -f", command)
+    
+    def test_105(self):
+        args = ['-q','-c', 'mayh11:Ma940871651=', 'type=jql', "query=assignee='kidd liu'"]
+        preprocess_args(args)
+        namespace = self.parser.parse_args(args)
+        verbose = getattr(namespace, "verbose")
+        extract_values(namespace, verbose)
+        kwargs = vars(namespace)
+        command = process(namespace, self.parser, verbose)
+        self.assertEqual("sira-query -u mayh11:Ma940871651= jql -q  \"assignee='kidd liu'\" -f", command)
 
 
 def main():

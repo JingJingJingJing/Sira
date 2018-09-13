@@ -73,12 +73,12 @@ def read_from_config():
     config = build_in_config
     return build_in_config
 
-def write_to_config(dic_path, field, info):
+def write_to_config(dic_path, field, info, init=False):
     global config
     global config_path
-    if not config_path:
+    if not config_path and not init:
         read_from_config()
-    if config_path == "bulit-in":
+    if config_path == "bulit-in" or init:
         config_path = os.getcwd() + "//.sirarc"
         data = build_in_config
     else:

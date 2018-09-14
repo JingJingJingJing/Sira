@@ -1699,11 +1699,8 @@ class Test_23(unittest.TestCase):
     def setUp(self):
         self.parser = build_parser()
     def test_100(self):
-        args = ['-i']
-        preprocess_args(args)
-        namespace = self.parser.parse_args(args)
         userName='mayh11'
-        passWord='Ma940871651='
+        passWord='thisisapwd'
         jiraUrl='https://lnvusconf.lenovonet.lenovo.local'
         initUser(userName,passWord,jiraUrl)
         UserName =read_from_config().get("credential").get("username")

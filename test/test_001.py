@@ -1701,7 +1701,7 @@ class Test_23(unittest.TestCase):
     def test_100(self):
         userName='mayh11'
         passWord='thisisapwd'
-        jiraUrl='https://lnvusconf.lenovonet.lenovo.local'
+        jiraUrl='https://testurl.com'
         initUser(userName,passWord,jiraUrl)
         UserName =read_from_config().get("credential").get("username")
         PassWord=keyring.get_password("sira",userName)

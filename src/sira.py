@@ -318,13 +318,13 @@ def pwd_input():
             msvcrt.putch('*'.encode(encoding='utf-8')) 
     return (''.join(chars) ) 
 
-def initUser():
-    userName=input("Please input your username:")
-    passWord = getpass.getpass("Please input your password:")    
+def initUser(userName,passWord,jiraUrl):
+    # userName=input("Please input your username:")
+    # passWord = getpass.getpass("Please input your password:")    
     keyring.set_keyring(Windows.WinVaultKeyring())
     keyring.set_password("sira", userName, passWord)
-    jiraUrl=input("Please input Jira domain(including protocol):")
-    func.write_to_config(["credential"],["username","domain","cookie"],[userName,jiraUrl,""])
+    # jiraUrl=input("Please input Jira domain(including protocol):")
+    func.write_to_config(["credential"],["username","domain","cookie"],[userName,jiraUrl,""],True)
     if userName.strip() == "" or passWord.strip() == "" or jiraUrl.strip() == "":
         print_err("initialization fail! Please check your username,password and jira domain!","red")
     else:
@@ -338,7 +338,7 @@ def main():
     verbose = getattr(namespace, "verbose")
     init = getattr(namespace, "init")
     if init:
-        initUser()
+        initUser(input("Please input your username:"),getpass.getpass("Please input your password:"),input("Please input Jira domain(including protocol):"))
         return 
     if verbose:
         print("[Verbose]: Finished Analyzing Command Arguments ...")
